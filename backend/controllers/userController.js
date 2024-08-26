@@ -1,9 +1,9 @@
 import User from '../models/userModel.js'
 import asyncHandler from 'express-async-handler'
-import jwt from 'jsonwebtoken'
 import generateCookie from '../utils/generateCookie.js'
 import generateToken from '../utils/generateToken.js'
 
+import firebaseApp from '../config/firebaseApp.js'
 // -----
 //------
 const userSignUp = asyncHandler(async (req, res, next) => {
@@ -25,6 +25,7 @@ const userSignUp = asyncHandler(async (req, res, next) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       accessToken
     })
   }
@@ -53,4 +54,59 @@ const userlogin = asyncHandler(async (req, res, next) => {
   return next(error)
 })
 
-export { userSignUp, userlogin }
+const googleAuth = asyncHandler(async (req, res, next) => {
+  const { idToken } = req.body
+
+  if (!idToken || typeof idToken !== 'string') {
+    console.error('Invalid ID token:', idToken)
+    return res.status(400).send({ message: 'Invalid ID token' })
+  }
+  const decodedToken = await firebaseApp.auth().verifyIdToken(idToken)
+  const displayName = decodedToken.name
+  const uid = decodedToken.uid
+  const email = decodedToken.email
+  console.log(uid, email, displayName)
+  let user = await User.findOne({ email })
+  let updatedUser = null
+  let newUser = null
+  if (user) {
+    updatedUser = await User.findOneAndUpdate(
+      { email },
+      { username: displayName, email, firebaseUid: uid }
+    )
+  } else {
+    newUser = await User.create({
+      username: displayName,
+      email,
+      firebaseUid: uid
+    })
+  }
+
+  if (updatedUser || newUser) {
+    const user = updatedUser || newUser
+    const id = user._id.toString(user._d)
+
+    console.log(id)
+    if (!user) {
+      // Handle case where neither user is available
+      return res.status(404).json({ message: 'User not found' })
+    }
+    console.log('id ehrer' + id)
+    generateCookie(res, id)
+
+    const accessToken = generateToken(id)
+    console.log(accessToken)
+    return res.status(201).json({
+      message: 'user create',
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      accessToken
+    })
+  }
+  const error = new Error('Please Retry Login')
+  error.statusCode = 400
+  return next(error)
+})
+export { userSignUp, userlogin, googleAuth }

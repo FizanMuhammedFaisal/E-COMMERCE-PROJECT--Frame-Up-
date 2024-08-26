@@ -1,13 +1,26 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom'
-import UserLoginPage from '../pages/userSide/UserLoginPage'
-import UserSignUpPage from '../pages/userSide/UserSignUpPage'
-import HomePage from '../pages/userSide/HomePage'
+import UserLoginPage from '../pages/UserSide/UserLoginPage'
+import UserSignUpPage from '../pages/UserSide/UserSignUpPage'
+import HomePage from '../pages/UserSide/HomePage'
+import GoogleAuthLoadingPage from '../pages/UserSide/GoogleAuthLoadingPage'
+import AuthenticationRouter from '../utils/AuthenticationRouter'
 
 const UserRoutes = [
-  { path: '/login', element: <UserLoginPage /> },
-  { path: '/signUp', element: <UserSignUpPage /> },
-  { path: '/home', element: <HomePage /> }
+  {
+    path: '/login',
+    element: <AuthenticationRouter element={<UserLoginPage />} />
+  },
+  {
+    path: '/test',
+    element: <GoogleAuthLoadingPage />
+  },
+  {
+    path: '/signUp',
+    element: <AuthenticationRouter element={<UserSignUpPage />} />
+  },
+  {
+    path: '/home',
+    element: <HomePage />
+  }
 ]
 
 export default UserRoutes

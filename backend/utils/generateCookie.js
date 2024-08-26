@@ -12,7 +12,8 @@ const generateCookie = (res, userId) => {
       maxAge: 30 * 24 * 60 * 60 * 1000
     })
   } catch (error) {
-    return error
+    console.error('Error generating cookie:', error)
+    throw new Error('Error generating cookie')
   }
 }
 export default generateCookie
