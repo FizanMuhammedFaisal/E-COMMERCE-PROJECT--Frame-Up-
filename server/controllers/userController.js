@@ -222,6 +222,28 @@ const userCreate = asyncHandler(async (req, res, next) => {
   return next(error)
 })
 
+//dec-- for making new acces token
+const makeAccess = (req, res) => {
+  const user = req.user
+  console.log(user)
+  const id = user._id
+  // Generate a new access token
+  const token = jwt.sign({ id }, process.env.JWT_SECRET_ACCESS, {
+    expiresIn: '15m'
+    // expiresIn: '5s'
+  })
+
+  res.json({ token })
+}
+
 //
 //
-export { checkUser, userlogin, googleAuth, sendOTP, userCreate, verifyOTP }
+export {
+  checkUser,
+  userlogin,
+  googleAuth,
+  sendOTP,
+  userCreate,
+  verifyOTP,
+  makeAccess
+}

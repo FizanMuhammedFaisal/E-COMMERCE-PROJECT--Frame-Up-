@@ -27,26 +27,25 @@ apiClient.interceptors.response.use(
     console.log('some error on response')
     // Check if the error is an authentication error
     if (error.response.status === 401) {
-      const refreshToken = localStorage.getItem('refreshToken')
-      console.log(refreshToken)
-      if (refreshToken) {
-        try {
-          const res = await apiClient.post('/api/users/access', {
-            token: refreshToken
-          })
-          const accessToken = res.data.token
+      try {
+        const res = await apiClient.post(
+          '/api/users/access',
+          {},
+          { withCredentials: true }
+        )
+        const accessToken = res.data.token
 
-          if (accessToken) {
-            // Save the new access token in localStorage and retry original request
-            // localStorage.setItem('accessToken', accessToken)
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`
-            return apiClient(originalRequest)
-          }
-        } catch (refreshError) {
-          console.error('Refresh token error:', refreshError)
+        if (accessToken) {
+          // Save the new access token in localStorage and retry original request
+          localStorage.setItem('accessToken', accessToken)
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`
+          return apiClient(originalRequest)
         }
-      } else {
-        console.error('refresh token is not present or expired', refreshToken)
+      } catch (refreshError) {
+        console.error('Refresh token error:', refreshError)
+        // Dispatch sessionTimeout event when refresh token fails
+        localStorage.removeItem('accessToken')
+        window.dispatchEvent(new Event('sessionTimeout'))
       }
     }
     return Promise.reject(error)

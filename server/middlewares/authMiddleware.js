@@ -4,6 +4,7 @@ import User from '../models/userModel.js'
 
 const protect = asyncHandler(async (req, res, next) => {
   let token
+  console.log(token)
 
   // Check if the Authorization header exists and starts with "Bearer"
   if (
@@ -26,13 +27,11 @@ const protect = asyncHandler(async (req, res, next) => {
       next()
     } catch (error) {
       // If verification fails, return 401 Unauthorized
-      res.status(401)
-      throw new Error('Not authorized, invalid token')
+      res.status(401).json({ message: "'Not authorized, invalid token'" })
     }
   } else {
     // If the token is missing, return 401 Unauthorized
-    res.status(401)
-    throw new Error('Not authorized, no token')
+    res.status(401).json({ message: "'Not authorized, no token'" })
   }
 })
 
