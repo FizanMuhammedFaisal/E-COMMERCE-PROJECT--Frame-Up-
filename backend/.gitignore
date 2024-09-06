@@ -1,5 +1,0 @@
-
-node_modules
-.env
-#ignore firebase service account
-./config/Frame Up Service Account.json'
