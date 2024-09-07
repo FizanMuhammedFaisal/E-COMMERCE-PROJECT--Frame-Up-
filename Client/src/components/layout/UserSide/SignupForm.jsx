@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
-import { validateRegisterForm } from '../../../utils/FormValidation'
+import { validateRegisterForm } from '../../../utils/validation/FormValidation'
 import api from '../../../services/api/api'
 import { setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'

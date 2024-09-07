@@ -5,3 +5,4 @@ node_modules
 ./config/Frame Up Service Account.json'
 launch.json
 Frame Up Service Account.json
+.vscode

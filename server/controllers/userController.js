@@ -124,7 +124,7 @@ const userlogin = asyncHandler(async (req, res, next) => {
   if (user && (await user.matchPassword(password))) {
     const rToken = generateCookie(res, user._id)
     const accessToken = generateToken(user._id)
-    res.status(200).json({
+    return res.status(200).json({
       message: 'user validated',
       _id: user._id,
       name: user.name,

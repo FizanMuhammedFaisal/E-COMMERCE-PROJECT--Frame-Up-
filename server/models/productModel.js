@@ -22,7 +22,7 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   thumbnailImage: {
-    type: String
+    type: [String]
   },
   weight: {
     type: Number // Weight in kg

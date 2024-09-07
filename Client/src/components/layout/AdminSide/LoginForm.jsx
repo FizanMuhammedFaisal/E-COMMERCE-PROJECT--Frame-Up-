@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import api from '../../../services/api/api'
-import { validateLoginForm } from '../../../utils/FormValidation'
+import { validateLoginForm } from '../../../utils/validation/FormValidation'
 import { useNavigate } from 'react-router-dom'
 import { setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
