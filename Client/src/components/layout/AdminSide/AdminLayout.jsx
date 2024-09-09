@@ -4,7 +4,7 @@ import Sidebar from '../../modals/DashBoardSidebar'
 
 function AdminLayout() {
   return (
-    <div className='admin-layout'>
+    <div className='admin-layout dark:text-slate-50'>
       <Outlet /> {/* Renders the matched child route component */}
     </div>
   )

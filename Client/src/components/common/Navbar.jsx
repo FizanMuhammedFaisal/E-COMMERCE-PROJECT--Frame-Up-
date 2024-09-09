@@ -46,7 +46,7 @@ const products = [
   }
 ]
 
-export default function Example() {
+export default function Navbar() {
   const [isPopupOpen, setPopupOpen] = useState(false)
 
   const openPopup = () => setPopupOpen(true)

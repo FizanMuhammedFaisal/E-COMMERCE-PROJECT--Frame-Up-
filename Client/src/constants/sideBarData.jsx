@@ -8,37 +8,44 @@ import { IoBarChartSharp } from 'react-icons/io5'
 export const sideBarData = [
   {
     title: 'Dashboard',
-    link: '/admin/Dashboard',
-    icon: <IoHome />
+    link: '/dashboard',
+    icon: <IoHome />,
+    pathname: '/dashboard'
   },
   {
     title: 'Users',
-    link: '/admin/Users',
-    icon: <FaUserAlt />
+    link: '/users',
+    icon: <FaUserAlt />,
+    pathname: '/users'
   },
   {
     title: 'Products',
-    link: '/admin/Products',
-    icon: <FaBoxOpen />
+    link: '/products',
+    icon: <FaBoxOpen />,
+    pathname: '/products'
   },
   {
     title: 'Add Products',
-    link: '/admin/Add-Products',
-    icon: <FaPlusSquare />
+    link: '/add-products',
+    icon: <FaPlusSquare />,
+    pathname: '/add-products'
   },
   {
     title: 'Orders',
-    link: '/admin/orders',
-    icon: <FaShoppingCart />
+    link: '/orders',
+    icon: <FaShoppingCart />,
+    pathname: '/orders'
   },
   {
     title: 'Category',
-    link: '/admin/category',
-    icon: <MdCategory />
+    link: '/category',
+    icon: <MdCategory />,
+    pathname: '/category'
   },
   {
     title: 'Sales Report',
-    link: '/admin/sales-report',
-    icon: <IoBarChartSharp />
+    link: '/sales-report',
+    icon: <IoBarChartSharp />,
+    pathname: '/sales-report'
   }
 ]

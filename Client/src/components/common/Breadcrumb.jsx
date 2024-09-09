@@ -6,8 +6,11 @@ const Breadcrumb = ({ showHome = true }) => {
   const pathnames = location.pathname.split('/').filter(x => x)
 
   return (
-    <nav className='bg-gray-100 p-3 rounded-md w-full' aria-label='breadcrumb'>
-      <ol className='list-reset flex items-center'>
+    <nav
+      className='dark:bg-customP2BackgroundD_300 bg-customP2BackgroundW_400 py-2 rounded-2xl w-full'
+      aria-label='breadcrumb'
+    >
+      <ol className='list-reset ms-3 flex items-center'>
         {/* Conditionally render Home link */}
         {showHome && (
           <li>
@@ -23,13 +26,13 @@ const Breadcrumb = ({ showHome = true }) => {
           const isLast = index === pathnames.length - 1
 
           return isLast ? (
-            <li key={index} className='text-gray-500'>
-              <span className='mx-2'>/</span>
+            <li key={index} className='dark:text-gray-300 text-gray-700'>
+              <span className='mx-2 text-white font-bold'>/</span>
               {value.charAt(0).toUpperCase() + value.slice(1)}
             </li>
           ) : (
             <li key={index}>
-              <span className='mx-2'>/</span>
+              <span className='mx-2 text-white font-bold'>/</span>
               <Link to={routeTo} className='text-blue-600 hover:text-blue-700'>
                 {value.charAt(0).toUpperCase() + value.slice(1)}
               </Link>

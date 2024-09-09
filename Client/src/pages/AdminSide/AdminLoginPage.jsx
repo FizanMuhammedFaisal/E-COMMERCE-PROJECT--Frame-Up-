@@ -1,5 +1,5 @@
 import React from 'react'
-import LoginForm from '../../components/layout/AdminSide/LoginForm'
+import LoginForm from '../../components/layout/AdminSide/Login/LoginForm'
 function AdminLoginPage() {
   return (
     <>

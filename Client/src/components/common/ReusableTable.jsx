@@ -10,8 +10,6 @@ import {
 } from '@mui/material'
 
 const ReusableTable = ({ columns, data }) => {
-  console.log('Data in ReusableTable:', data)
-
   return (
     <TableContainer
       component={Paper}

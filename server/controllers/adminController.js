@@ -1,4 +1,5 @@
 import User from '../models/userModel.js'
+import Category from '../models/categoryModel.js'
 import asyncHandler from 'express-async-handler'
 import generateCookie from '../utils/generateCookie.js'
 import generateToken from '../utils/generateToken.js'
@@ -161,6 +162,57 @@ const updateStatus = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'status updated sucessfully' })
   }, 100)
 })
+//@ discp   to add new category
+//route      api/admin/add-category
+//@access    private
+const addCategory = asyncHandler(async (req, res, next) => {
+  const { name, type, description } = req.body
+  console.log(req.body)
+  if (!name || !type || !description) {
+    const error = new Error('All fields are required')
+    error.statusCode = 400
+    return next(error)
+  }
+  const categoryExists = await Category.findOne({ name, type })
+  if (categoryExists) {
+    const error = new Error('Category Already Exists with this name and type')
+    error.statusCode = 400
+    return next(error)
+  }
+  const category = await Category.create({ name, type, description })
+  if (category) {
+    return res.send(201).json({ message: 'category created' })
+  } else {
+    const error = new Error('Failed to create category')
+    error.statusCode = 400
+    return next(error)
+  }
+})
+//@ discp   to fetch theme
+//route      api/admin/get-category-themes
+//@access    private
+const fetchThemes = asyncHandler(async (req, res) => {
+  const result = await Category.find({ type: 'Theme' })
+  console.log(result)
+
+  res.json({ result })
+})
+//@ discp   to fetch style
+//route      api/admin/get-category-themes
+//@access    private
+const fetchStyles = asyncHandler(async (req, res) => {
+  const result = await Category.find({ type: 'Style' })
+  console.log(result)
+  res.json({ result })
+})
+//@ discp   to fetch Techniques
+//route      api/admin/get-category-themes
+//@access    private
+const fetchTechniques = asyncHandler(async (req, res) => {
+  const result = await Category.find({ type: 'Technique' })
+  console.log(result)
+  return res.json({ result })
+})
 
 // end
 export {
@@ -170,5 +222,9 @@ export {
   addUser,
   deleteUser,
   updateUser,
-  updateStatus
+  updateStatus,
+  addCategory,
+  fetchThemes,
+  fetchStyles,
+  fetchTechniques
 }

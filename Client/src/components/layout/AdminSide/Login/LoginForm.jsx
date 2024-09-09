@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 
-import api from '../../../services/api/api'
-import { validateLoginForm } from '../../../utils/validation/FormValidation'
-import { useNavigate } from 'react-router-dom'
-import { setUser } from '../../../redux/slices/authSlice'
+import api from '../../../../services/api/api'
+import { validateLoginForm } from '../../../../utils/validation/FormValidation'
+
+import { setUser } from '../../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
-  const navigate = useNavigate()
+
   const dispatch = useDispatch()
 
   //------handle login

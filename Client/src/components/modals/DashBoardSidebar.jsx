@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import ThemeToggler from '../common/ThemeToggler'
+import { Link, useLocation } from 'react-router-dom'
+
 import { sideBarData } from '../../constants/sideBarData'
+
 import { FaCaretSquareRight } from 'react-icons/fa'
+import { motion } from 'framer-motion'
+import AdminNavbar from '../layout/AdminSide/AdminNavbar'
+
 const Sidebar = ({ setData }) => {
+  const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
   const [isCompact, setIsCompact] = useState(false) // State for compact mode
+  const [active, setActive] = useState(location.pathname)
 
+  useEffect(() => {
+    setActive(location.pathname)
+  }, [location.pathname])
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
   }
@@ -49,7 +58,16 @@ const Sidebar = ({ setData }) => {
         } md:translate-x-0 md:block`}
       >
         <nav>
-          <ul className='pt-16'>
+          <motion.div
+            className='text-center mt-2 overflow-hidden '
+            animate={{ x: isCompact ? '100%' : 0 }}
+            transition={{ type: 'spring', stiffness: 1000, damping: 45 }}
+          >
+            <motion.span className=' font-bold justify-center font-secondary whitespace-nowrap dark:text-slate-50 text-3xl   '>
+              {isCompact ? '' : 'Frame Up'}
+            </motion.span>
+          </motion.div>
+          <ul className='pt-11'>
             {sideBarData.map((item, index) => {
               return (
                 <li
@@ -58,19 +76,26 @@ const Sidebar = ({ setData }) => {
                     isCompact ? 'flex justify-center' : ''
                   } items-center ${
                     isCompact
-                      ? 'bg-customP2BackgroundW_500 px-7 rounded-xl mx-1 my-3 m-0 '
-                      : 'bg-customP2BackgroundW_600 rounded-3xl mx-5 hover:bg-customP2BackgroundW_500 border-customP2ForeGroundw_200'
-                  } duration-300 font-primary text-lg font-bold`}
+                      ? '    rounded-xl mx-1 my-3 m-0 '
+                      : 'rounded-3xl mx-5 hover:bg-customP2BackgroundW_500 border-customP2ForeGroundw_200'
+                  } ${
+                    active === item.pathname
+                      ? 'text-customP2BackgroundD_500 bg-customP2BackgroundW_700  dark:bg-customP2ForegroundD_600 dark:text-customP2ForeGroundW_500'
+                      : ''
+                  } font-primary text-lg font-bold hover:text-customP2BackgroundD_500 bg-customP2BackgroundW_400 hover:bg-customP2BackgroundW_700 dark:bg-customP2ForegroundD_300 hover:dark:bg-customP2ForegroundD_600 duration-300  hover:dark:text-customP2ForeGroundW_500 dark:text-slate-50 `}
                 >
                   <Link
                     to={item.link}
+                    onClick={() => {
+                      console.log(active, location.pathname)
+                    }}
                     className={`flex items-center justify-center w-full h-full p-4${
                       isCompact ? '' : ''
                     }`}
                   >
                     {isCompact ? (
-                      <div className='flex flex-col justify-center items-center '>
-                        <span className='material-icons-outlined text-2xl'>
+                      <div className='flex flex-col justify-center items-center  '>
+                        <span className='material-icons-outlined text-lg'>
                           {item.icon}
                         </span>
                         <span className='text-xs text-center pt-1 '>
@@ -78,12 +103,10 @@ const Sidebar = ({ setData }) => {
                         </span>
                       </div>
                     ) : (
-                      <div className='flex justify-start w-full items-center overflow-hidden'>
+                      <div className='flex justify-start w-full items-center overflow-hidden whitespace-nowrap'>
                         <span className='ml-3'>{item.icon}</span>
 
-                        <div className=' pl-5  transition-all duration-500'>
-                          {item.title}
-                        </div>
+                        <div className=' pl-5 '>{item.title}</div>
                       </div>
                     )}
                   </Link>
@@ -106,32 +129,19 @@ const Sidebar = ({ setData }) => {
               <FaCaretSquareRight className='mx-3 my-3' />
             </span>
           ) : (
-            <span className='mx-3 my-3 w-full'>Shrink</span>
+            <div className='flex flex-1'>
+              <span className='mx-3 my-3 w-full'>Shrink</span>
+            </div>
           )}
         </button>
       </aside>
 
-      {/* Main Content */}
-      <div
-        className={`flex-1 p-4 bg-customP2BackgroundW_500 dark:bg-customP2BackgroundD_500 dark:text-slate-50 text-slate-900 justify-between items-center transition-all duration-500 ease-in-out ${
-          isCompact ? (isOpen ? 'md:ml-24' : 'ml-0') : 'md:ml-80'
-        } flex`}
-      >
-        {/* Navbar content */}
-        <div className='flex justify-between items-center flex-1'>
-          <span className='text-lg font-bold justify-center'>Logo</span>
-          <div>hey man</div>
-          <div>hey man</div>
-          <ThemeToggler />
-        </div>
-        <button
-          onClick={toggleSidebar}
-          className='focus:outline-none md:hidden'
-        >
-          <span className='material-icons-outlined text-2xl'>menu</span>
-        </button>
-      </div>
-
+      {/* Main Content --- top barrr */}
+      <AdminNavbar
+        isCompact={isCompact}
+        isOpen={isOpen}
+        toggleSidebar={toggleSidebar}
+      />
       {/* Overlay */}
       {isOpen && (
         <div

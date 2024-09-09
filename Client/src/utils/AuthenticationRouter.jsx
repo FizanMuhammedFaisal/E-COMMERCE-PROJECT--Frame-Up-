@@ -7,9 +7,9 @@ function AuthenticationRouter({ element }) {
   console.log(isAuthenticated, role)
   if (isAuthenticated) {
     if (role === 'admin') {
-      return <Navigate to='/admin/dashboard' />
+      return <Navigate to='/dashboard' />
     } else {
-      return <Navigate to='/' />
+      return <Navigate to='/admin/login' />
     }
   } else {
     return element

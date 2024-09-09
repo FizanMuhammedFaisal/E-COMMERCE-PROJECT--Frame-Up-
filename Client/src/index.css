@@ -8,3 +8,6 @@
 body {
   box-sizing: border-box;
 }
+.dark {
+  @apply bg-customP2BackgroundD_darkest;
+}

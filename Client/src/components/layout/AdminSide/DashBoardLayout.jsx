@@ -14,7 +14,7 @@ const DashboardLayout = data => {
       <Sidebar setData={handleset} />
       {/* Main content area */}
       <div
-        className={`flex-1 p-6 transition-all duration-700 ease-in-out ${
+        className={`flex-1 p-6 transition-all duration-700 ease-in-out mt-16 ${
           isCompact ? 'md:ml-24' : 'md:ml-80'
         } `}
       >

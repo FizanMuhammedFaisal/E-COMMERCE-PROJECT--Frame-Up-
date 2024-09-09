@@ -40,7 +40,8 @@ const AdminUsers = () => {
         updateUserStatus({ id: currentUserId, status: newStatus })
       ).unwrap()
       toast.success('User status updated successfully!', {
-        className: 'bg-white dark:bg-customP2BackgroundW_700 dark:text-black '
+        className:
+          'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white '
       })
       setIsOpen(false)
     } catch (error) {
