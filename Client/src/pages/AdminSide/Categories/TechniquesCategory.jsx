@@ -6,7 +6,7 @@ function TechniquesCategory() {
   const status = techniques.status
   const error = techniques.error
 
-  if (status === 'loading' || !techniques.data || !techniques.data.result)
+  if (status === 'loading' || !techniques.data)
     return (
       <div className='text-center dark:bg-gray-800'>
         <CircularProgress color={'inherit'} size={25} />
@@ -18,7 +18,7 @@ function TechniquesCategory() {
     <div>
       <h2 className='text-2xl text-center font-bold'>Techniques</h2>
       <div className='mt-6'>
-        <CategoriesTable data={techniques.data.result} />
+        <CategoriesTable data={techniques.data} />
       </div>
     </div>
   )

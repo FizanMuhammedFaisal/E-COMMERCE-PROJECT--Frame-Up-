@@ -14,7 +14,7 @@ const validateProductForm = formData => {
   }
 
   // Validate product category
-  if (!formData.productCategory.trim()) {
+  if (!formData.productCategory.length < 0) {
     errors.productCategory = 'Product category is required'
   }
 

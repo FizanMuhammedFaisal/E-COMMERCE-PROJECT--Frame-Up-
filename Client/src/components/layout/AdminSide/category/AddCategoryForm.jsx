@@ -79,7 +79,7 @@ function AddCategoryForm() {
             value={categoryName}
             onChange={e => setCategoryName(e.target.value)}
             placeholder='Enter category name'
-            className='mt-1 block w-full px-4 py-2 border dark:bg-customP2ForegroundD_100  dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm'
+            className='mt-1 block w-full px-4 py-2  border dark:bg-customP2ForegroundD_100  dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm'
           />
         </div>
 

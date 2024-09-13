@@ -7,8 +7,8 @@ export const fetchThemes = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-category-themes')
-      console.log(response.data)
-      return response.data
+
+      return response.data.result
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
     }
@@ -20,7 +20,7 @@ export const fetchStyles = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-category-styles')
-      return response.data
+      return response.data.result
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
     }
@@ -32,7 +32,7 @@ export const fetchTechniques = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-category-techniques')
-      return response.data
+      return response.data.result
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
     }
@@ -95,6 +95,7 @@ const categoriesSlice = createSlice({
       })
       .addCase(fetchTechniques.fulfilled, (state, action) => {
         state.techniques.status = 'succeeded'
+
         state.techniques.data = action.payload
       })
       .addCase(fetchTechniques.rejected, (state, action) => {

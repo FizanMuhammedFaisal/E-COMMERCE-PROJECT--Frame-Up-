@@ -13,7 +13,7 @@ function ThemeCategory() {
   const status = themes.status
   const error = themes.error
 
-  if (status === 'loading' || !themes.data || !themes.data.result)
+  if (status === 'loading' || !themes.data)
     return (
       <div className='text-center dark:bg-gray-800'>
         <CircularProgress color={'inherit'} size={25} />
@@ -26,7 +26,7 @@ function ThemeCategory() {
       <h2 className='text-2xl text-center font-bold'>Themes</h2>
 
       <div className='mt-6'>
-        <CategoriesTable data={themes.data.result} />
+        <CategoriesTable data={themes.data} />
       </div>
     </div>
   )

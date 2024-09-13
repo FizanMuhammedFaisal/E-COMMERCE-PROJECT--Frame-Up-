@@ -17,6 +17,7 @@ export const uploadImagesToCloudinary = async (files, id, callback) => {
         }
       })
     )
+    console.log(uploadedImages)
     callback(uploadedImages)
   } catch (error) {
     console.log('All images cannot be uploaded!' + error)
@@ -24,7 +25,7 @@ export const uploadImagesToCloudinary = async (files, id, callback) => {
 }
 
 // Function to upload a single image (e.g., thumbnail)
-export const uploadSingleImageToCloudinary = async (file, id, setFormData) => {
+export const uploadSingleImageToCloudinary = async (file, id, callback) => {
   let uploadedImage = {}
   const formData = new FormData()
   formData.append('file', file)
@@ -36,11 +37,9 @@ export const uploadSingleImageToCloudinary = async (file, id, setFormData) => {
       url: res.data.secure_url,
       publicId: res.data.public_id
     }
+    console.log(uploadedImage)
+    callback(uploadedImage)
   } catch (err) {
     console.error('Error uploading image:', err)
   }
-  setFormData(prev => ({
-    ...prev,
-    [id]: uploadedImage
-  }))
 }
