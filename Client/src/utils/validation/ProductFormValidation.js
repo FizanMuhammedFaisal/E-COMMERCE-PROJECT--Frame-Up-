@@ -1,6 +1,9 @@
-// utils/validation/ProductFormValidation.js
-
-const validateProductForm = formData => {
+const validateProductForm = (
+  formData,
+  DBError,
+  productImages,
+  thumbnailImage
+) => {
   const errors = {}
 
   // Validate product name
@@ -14,7 +17,7 @@ const validateProductForm = formData => {
   }
 
   // Validate product category
-  if (!formData.productCategory.length < 0) {
+  if (formData.productCategory.length === 0) {
     errors.productCategory = 'Product category is required'
   }
 
@@ -27,13 +30,24 @@ const validateProductForm = formData => {
   }
 
   // Validate product images
-  if (!formData.productImages || formData.productImages.length === 0) {
-    errors.productImages = 'At least one product image is required'
-  }
+  if (!DBError) {
+    if (!formData.productImages || formData.productImages.length === 0) {
+      errors.productImages = 'At least one product image is required'
+    }
 
-  // Validate thumbnail image
-  if (!formData.thumbnailImage || formData.thumbnailImage.length === 0) {
-    errors.thumbnailImage = 'Thumbnail image is required'
+    // Validate thumbnail image
+    if (!formData.thumbnailImage || formData.thumbnailImage.length === 0) {
+      errors.thumbnailImage = 'Thumbnail image is required'
+    }
+  } else {
+    if (!productImages || productImages.length === 0) {
+      errors.productImages = 'At least one product image is required'
+    }
+
+    // Validate thumbnail image
+    if (!thumbnailImage || thumbnailImage.length === 0) {
+      errors.thumbnailImage = 'Thumbnail image is required'
+    }
   }
 
   // Validate weight (optional, but can check for proper value)
@@ -42,7 +56,7 @@ const validateProductForm = formData => {
   }
 
   // Validate dimensions (optional, but should match a specific format, e.g., "10x20x30")
-  const dimensionsRegex = /^\d+x\d+x\d+$/
+  const dimensionsRegex = /^\d+\s*x\s*\d+\s*x\s*\d+$/
   if (formData.dimensions && !dimensionsRegex.test(formData.dimensions)) {
     errors.dimensions =
       'Dimensions should be in format: width x height x depth (e.g., 10x20x30)'

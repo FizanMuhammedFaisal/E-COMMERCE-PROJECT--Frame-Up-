@@ -2,30 +2,53 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { getImageFromDB } from '../../utils/indexedDB/adminImageDB'
 
-const ImageCarousel = ({ imageIds, onDelete, onEdit, type }) => {
+const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [images, setImages] = useState([])
-  const [loading, setLoading] = useState(true) // Optional: to handle loading state
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
+    console.log('useEffect triggered. DBError:', DBError, 'imageIds:', imageIds)
+
     const fetchImages = async () => {
-      try {
-        const imagePromises = imageIds.map(async id => {
-          const file = await getImageFromDB(id)
-          const url = URL.createObjectURL(file)
-          return { id, url }
-        })
-        console.log(imagePromises)
-        const images = await Promise.all(imagePromises)
-        setImages(images)
-      } catch (error) {
-        console.error('Error fetching images:', error)
-      } finally {
+      if (!DBError) {
+        // If no DBError, imageIds contains IDs, fetch from IndexedDB
+        try {
+          console.log(imageIds)
+          const imagePromises = imageIds.map(async id => {
+            const file = await getImageFromDB(id)
+            const url = URL.createObjectURL(file)
+            return { id, url }
+          })
+
+          const fetchedImages = await Promise.all(imagePromises)
+          setImages(fetchedImages)
+        } catch (error) {
+          console.error('Error fetching images from DB:', error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        // If DBError is true, imageIds contains the actual image files
+        console.log('imageIds:', imageIds)
+        const fileUrls = imageIds
+          .map((file, index) => {
+            if (!file) {
+              console.error('File is undefined or invalid:', file)
+              return null // Skip invalid files
+            }
+            const url = URL.createObjectURL(file)
+            return { id: index, url }
+          })
+          .filter(Boolean) // Filter out null values
+        setImages(fileUrls)
         setLoading(false)
       }
     }
-
+    console.log(images)
     fetchImages()
-  }, [imageIds])
+  }, [imageIds, DBError])
+
   const handleNext = useCallback(() => {
     setCurrentIndex(prevIndex => (prevIndex + 1) % images.length)
   }, [images.length])
@@ -42,10 +65,14 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type }) => {
 
   useEffect(() => {
     if (images.length > 0) {
-      const timer = setInterval(handleNext, 7000) // Auto-advance every 6 seconds
+      const timer = setInterval(handleNext, 7000) // Auto-advance every 7 seconds
       return () => clearInterval(timer)
     }
   }, [handleNext, images.length])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className='relative w-full max-w-4xl mx-auto overflow-hidden'>
@@ -68,15 +95,17 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type }) => {
       {/* Delete and Edit Buttons positioned at the bottom ends */}
       <button
         type='button'
-        className='absolute bottom-4 left-4  backdrop-blur-md hover:opacity-80  text-red-400 rounded-md px-4 py-2 z-20'
+        className='absolute bottom-4 left-4 backdrop-blur-md duration-300 hover:opacity-80 text-red-400 rounded-md px-4 py-2 z-20'
         onClick={() => onDelete(images[currentIndex], type)}
       >
         Delete
       </button>
       <button
         type='button'
-        className='absolute bottom-4 right-4 backdrop-blur-md hover:opacity-80 text-blue-400 rounded-md px-4 py-2 z-20'
-        onClick={() => onEdit(images[currentIndex], type)}
+        className='absolute bottom-4 right-4 backdrop-blur-md hover:opacity-80 duration-300 text-blue-400 rounded-md px-4 py-2 z-20'
+        onClick={() =>
+          onEdit(images[currentIndex], type, currentIndex, DBError)
+        }
       >
         Edit
       </button>

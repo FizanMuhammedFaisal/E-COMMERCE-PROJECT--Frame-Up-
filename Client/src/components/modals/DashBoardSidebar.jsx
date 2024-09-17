@@ -86,9 +86,6 @@ const Sidebar = ({ setData }) => {
                 >
                   <Link
                     to={item.link}
-                    onClick={() => {
-                      console.log(active, location.pathname)
-                    }}
                     className={`flex items-center justify-center w-full h-full p-4${
                       isCompact ? '' : ''
                     }`}

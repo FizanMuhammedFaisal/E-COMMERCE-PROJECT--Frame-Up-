@@ -77,6 +77,23 @@ export const getImageFromDB = async id => {
     throw new Error('Error retrieving image from IndexedDB')
   }
 }
+// Delete an image from the database by its id
+export const DeleteImageFromDB = async id => {
+  try {
+    const db = await initDB() // Open the database
+    const transaction = db.transaction(OBJECT_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(OBJECT_STORE_NAME)
+
+    await store.delete(id) // Delete the image by its id
+    await transaction.done // Wait for the transaction to complete
+
+    console.log(`Image with id ${id} has been deleted from IndexedDB.`)
+    return true // Indicate that deletion was successful
+  } catch (error) {
+    console.error('Error deleting image from IndexedDB:', error)
+    throw new Error('Error deleting image from IndexedDB')
+  }
+}
 export const clearAllFilesInDB = async () => {
   try {
     const db = await initDB() // Open the database

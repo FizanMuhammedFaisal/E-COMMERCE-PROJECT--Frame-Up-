@@ -11,7 +11,11 @@ function Form({
   loadingThumbnail,
   handleDeleteImage,
   handleCategoryChange,
-  handleImageEdit
+  handleImageEdit,
+  productImages,
+  thumbnailImage,
+  DBError,
+  loading
 }) {
   return (
     <div>
@@ -198,15 +202,15 @@ function Form({
 
             {/* Display uploaded product images */}
             <div className='flex gap-4 flex-wrap justify-center mt-4'>
-              {Array.isArray(formData.productImages) &&
-                formData.productImages.length > 0 && (
-                  <ImageCarousel
-                    imageIds={formData.productImages}
-                    onDelete={handleDeleteImage}
-                    onEdit={handleImageEdit}
-                    type={'productImages'}
-                  />
-                )}
+              {Array.isArray(productImages) && productImages.length > 0 && (
+                <ImageCarousel
+                  imageIds={productImages}
+                  onDelete={handleDeleteImage}
+                  onEdit={handleImageEdit}
+                  type={'productImages'}
+                  DBError={DBError}
+                />
+              )}
             </div>
           </div>
 
@@ -233,7 +237,7 @@ function Form({
                   document.getElementById('thumbnailImage').click()
                 }
               >
-                {formData.thumbnailImage
+                {thumbnailImage && thumbnailImage.length > 0
                   ? 'Change Thumbnail Image'
                   : 'Upload Thumbnail Image'}
               </button>
@@ -256,15 +260,15 @@ function Form({
 
             {/* Display uploaded thumbnail image */}
             <div className='flex gap-4 justify-center mt-4'>
-              {Array.isArray(formData.thumbnailImage) &&
-                formData.thumbnailImage.length > 0 && (
-                  <ImageCarousel
-                    imageIds={formData.thumbnailImage}
-                    onDelete={handleDeleteImage}
-                    onEdit={handleImageEdit}
-                    type={'thumbnailImage'}
-                  />
-                )}
+              {Array.isArray(thumbnailImage) && thumbnailImage.length > 0 && (
+                <ImageCarousel
+                  imageIds={thumbnailImage}
+                  onDelete={handleDeleteImage}
+                  onEdit={handleImageEdit}
+                  type={'thumbnailImage'}
+                  DBError={DBError}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -324,10 +328,13 @@ function Form({
         <div className='mt-8 text-center'>
           <button
             type='submit'
-            className={`${'bg-customP2Primary  hover:bg-customP2BackgroundD_600'} text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
-            disabled={loadingImages || loadingThumbnail}
+            className={`${'bg-customP2Primary  hover:bg-customP2BackgroundD_600'} text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-95 disabled:cursor-not-allowed`}
+            disabled={loadingImages || loadingThumbnail || loading}
           >
-            Add Product
+            <div className='flex gap-2'>
+              {loading ? <CircularProgress size={20} color='inherit' /> : ''}
+              Add Product
+            </div>
           </button>
         </div>
         <div>

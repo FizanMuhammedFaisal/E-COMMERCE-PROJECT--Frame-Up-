@@ -7,26 +7,54 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
   const [aspectRatio, setAspectRatio] = useState(null)
   const [rotation, setRotation] = useState(0)
   const image = initialImage || null
+  function base64ToFile(base64String, filename) {
+    const [header, data] = base64String.split(',')
+    const mimeString = header.split(':')[1].split(';')[0]
+
+    const binaryString = atob(data)
+    const arrayBuffer = new ArrayBuffer(binaryString.length)
+    const uint8Array = new Uint8Array(arrayBuffer)
+
+    for (let i = 0; i < binaryString.length; i++) {
+      uint8Array[i] = binaryString.charCodeAt(i)
+    }
+
+    const blob = new Blob([uint8Array], { type: mimeString })
+    return new File([blob], filename, { type: mimeString })
+  }
 
   useEffect(() => {
-    if (image) {
+    if (image && image.url) {
       const img = new Image()
       img.onload = () => {
         setAspectRatio(img.width / img.height)
       }
-      img.src = image
+      img.src = image.url
     }
   }, [image])
 
   const handleCrop = () => {
     if (cropperRef.current) {
-      const croppedImage = cropperRef.current.cropper
+      // Get cropped canvas
+      const croppedCanvas = cropperRef.current.cropper.getCroppedCanvas()
+
+      // Convert canvas to JPEG format with specified quality
+      const croppedImageBase64 = cropperRef.current.cropper
         .getCroppedCanvas()
-        .toDataURL()
+        .toDataURL('image/jpeg', 0.9)
+
+      const fileName = `cropped-image-${Date.now()}.jpeg`
+      const file = base64ToFile(croppedImageBase64, fileName)
 
       // Pass the cropped image to the parent component via callback
       if (onCropComplete) {
-        onCropComplete(croppedImage)
+        onCropComplete({
+          image: file,
+          type: image.type,
+          index: image.currentIndex,
+          DBError: image.DBError,
+          id: image.id
+        })
       }
 
       onClose() // Close the modal after cropping
@@ -50,11 +78,11 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
   if (!open) return null
 
   return (
-    <div className='fixed inset-0 z-50 bg-gray-900 bg-opacity-50 flex items-center justify-center'>
-      <div className='bg-white p-6 rounded-lg w-full max-w-3xl md:max-w-2xl sm:max-w-full'>
+    <div className='fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center'>
+      <div className='bg-white dark:bg-customP2ForegroundD_200 dark:text-slate-50 p-6 rounded-lg w-full max-w-3xl md:max-w-2xl sm:max-w-full'>
         {image && (
           <Cropper
-            src={image}
+            src={image.url}
             style={{ height: '400px', width: '100%' }}
             aspectRatio={aspectRatio}
             guides={false}
@@ -71,7 +99,7 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
           onClick={() => {
             console.log(initialImage)
           }}
-          className=' text-black'
+          className='text-black'
         >
           fasf
         </button>
@@ -126,7 +154,7 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
           </button>
           <button
             onClick={handleCrop}
-            className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600'
+            className='px-4 py-2 bg-customP2Primary text-white rounded-md duration-300 hover:bg-customP2BackgroundD_500'
           >
             Crop Image
           </button>
