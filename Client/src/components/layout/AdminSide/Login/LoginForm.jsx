@@ -103,14 +103,6 @@ function LoginForm() {
                 >
                   Password
                 </label>
-                <div className='text-sm'>
-                  <a
-                    href='#'
-                    className='font-semibold text-textPrimary hover:underline'
-                  >
-                    {/* Forgot password? */}
-                  </a>
-                </div>
               </div>
               <div className='mt-2'>
                 <input

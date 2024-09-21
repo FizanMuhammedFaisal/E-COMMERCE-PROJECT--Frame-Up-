@@ -41,7 +41,7 @@ const AdminCategory = () => {
       <div className='flex justify-end'>
         <motion.button
           onClick={() => {
-            navigate('/category/add-categories')
+            navigate('/dashboard/category/add-categories')
           }}
           whileTap={{ scale: 0.9 }}
           className='p-2 rounded-sm px-4 me-2 bg-customP2Primary text-white font-semibold hover:bg-customP2Button hover:text-black  text-sm   transition-colors duration-300'

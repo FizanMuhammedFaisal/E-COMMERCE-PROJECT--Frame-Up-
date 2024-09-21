@@ -14,38 +14,38 @@ export const sideBarData = [
   },
   {
     title: 'Users',
-    link: '/users',
+    link: '/dashboard/users',
     icon: <FaUserAlt />,
-    pathname: '/users'
+    pathname: '/dashboard/users'
   },
   {
     title: 'Products',
-    link: '/products',
+    link: '/dashboard/products',
     icon: <FaBoxOpen />,
-    pathname: '/products'
+    pathname: '/dashboard/products'
   },
   {
     title: 'Add Products',
-    link: '/add-products',
+    link: '/dashboard/add-products',
     icon: <FaPlusSquare />,
-    pathname: '/add-products'
+    pathname: '/dashboard/add-products'
   },
   {
     title: 'Orders',
-    link: '/orders',
+    link: '/dashboard/orders',
     icon: <FaShoppingCart />,
-    pathname: '/orders'
+    pathname: '/dashboard/orders'
   },
   {
     title: 'Category',
-    link: '/category',
+    link: '/dashboard/category',
     icon: <MdCategory />,
-    pathname: '/category'
+    pathname: '/dashboard/category'
   },
   {
     title: 'Sales Report',
-    link: '/sales-report',
+    link: '/dashboard/sales-report',
     icon: <IoBarChartSharp />,
-    pathname: '/sales-report'
+    pathname: '/dashboard/sales-report'
   }
 ]

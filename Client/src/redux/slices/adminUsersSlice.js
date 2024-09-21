@@ -21,7 +21,7 @@ export const updateUserStatus = createAsyncThunk(
 )
 
 //// ________________________________________________________///////
-const adminActionsSlice = createSlice({
+const adminUsersSlice = createSlice({
   name: 'adminActionsSlice',
   initialState: {
     data: [],
@@ -68,5 +68,5 @@ const adminActionsSlice = createSlice({
       })
   }
 })
-export default adminActionsSlice.reducer
-export const { setPage } = adminActionsSlice.actions
+export default adminUsersSlice.reducer
+export const { setPage } = adminUsersSlice.actions

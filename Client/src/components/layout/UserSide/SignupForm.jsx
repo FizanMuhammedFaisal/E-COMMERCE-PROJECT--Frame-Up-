@@ -6,7 +6,7 @@ import { setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 import { provider, auth } from '../../../services/firebase/firebase'
 import { signInWithPopup } from 'firebase/auth'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 function SignupForm() {
   const [form, setForm] = useState({
     username: '',
@@ -32,7 +32,11 @@ function SignupForm() {
       const res = await api.post('/users/google/auth', { idToken })
       const accessToken = res.data.accessToken
       localStorage.setItem('accessToken', accessToken)
-      const data = { user: res.data._id, role: res.data.role }
+      const data = {
+        user: res.data._id,
+        role: res.data.role,
+        status: res.data.status
+      }
 
       dispatch(setUser(data))
     } catch (error) {
@@ -44,7 +48,7 @@ function SignupForm() {
     }
   }
 
-  /// handle submit (signup)
+  /// handle submit
   const handleSubmit = async e => {
     e.preventDefault()
     const errors = validateRegisterForm(form)
@@ -53,16 +57,14 @@ function SignupForm() {
       return setError(errors)
     }
     try {
+      console.log(form)
       const res = await api.post('/users/checkuser', form)
       console.log(res)
 
       const item = sessionStorage.setItem('x-timer', res.data.token)
       console.log(item)
-      // const accessToken = res.data.accessToken
-      // localStorage.setItem('accessToken', accessToken)
-      // const data = { user: res.data._id, role: res.data.role }
+
       navigate('/send-otp', { replace: true })
-      // dispatch(setUser(data))
     } catch (error) {
       const responseError = error?.response?.data?.message || error
       setError({ ...errors, responseError })
@@ -85,12 +87,12 @@ function SignupForm() {
         <div className=' mt-5 sm:mx-auto sm:w-full sm:max-w-sm'>
           <p className='mb-14  text-center text-sm text-gray-500'>
             Already have an Account?{' '}
-            <a
-              href='#'
+            <Link
+              to={'/login'}
               className='font-semibold leading-6 text-textPrimary hover:underline'
             >
               Login Here
-            </a>
+            </Link>
           </p>
           <div
             className={`text-center font-primary font-semibold py-2 ${

@@ -63,12 +63,16 @@ const CategorySelect = ({
     value: item._id,
     label: item.name
   }))
+  const formattedValue = value.map(item => ({
+    value: item._id || item.value,
+    label: item.name || item.label
+  }))
 
   return (
     <Select
       isMulti
       options={formattedData}
-      value={value}
+      value={formattedValue}
       onChange={onChange}
       placeholder={placeholder}
       className='w-full' // Apply normal Tailwind classes

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { BsCart2 } from 'react-icons/bs'
 import { FaRegUser } from 'react-icons/fa'
 import { LuSearch } from 'react-icons/lu'
-import Logo from '../../../public/assets/logo.png'
 import SearchPopup from '../common/SearchPopup'
 import {
   Dialog,
@@ -78,13 +77,13 @@ export default function Navbar() {
             </PopoverButton>
             <PopoverPanel
               transition
-              className='absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden bg-customColorSecondary shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-500 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in'
+              className='absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden bg-customColorSecondary shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in'
             >
               <div className='p-4'>
                 {products.map(item => (
                   <div
                     key={item.name}
-                    className='group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-white duration-500'
+                    className='group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-white duration-300'
                   >
                     <div className='flex-auto'>
                       <a
@@ -173,7 +172,7 @@ export default function Navbar() {
         className='lg:hidden'
       >
         <div className='fixed inset-0 z-10' />
-        <DialogPanel className=' transition-all duration-700 fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-customColorSecondary px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10'>
+        <DialogPanel className=' transition-all duration-300 fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-customColorSecondary px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10'>
           <div className='flex items-center justify-between'>
             <a href='#' className='-m-1.5 p-1.5'>
               <span className='sr-only'>Your Company</span>
@@ -193,7 +192,7 @@ export default function Navbar() {
             <div className='-my-6 divide-y divide-gray-500/10'>
               <div className='space-y-2 py-6 '>
                 <Disclosure as='div' className='-mx-3 '>
-                  <DisclosureButton className='group flex w-full items-center duration-500 justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'>
+                  <DisclosureButton className='group flex w-full items-center duration-300 justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'>
                     Product
                     <ChevronDownIcon
                       aria-hidden='true'
@@ -206,7 +205,7 @@ export default function Navbar() {
                         key={item.name}
                         as='a'
                         href={item.href}
-                        className='block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 bg-customColorSecondary duration-500 text-gray-900 hover:bg-slate-200 '
+                        className='block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 bg-customColorSecondary duration-300 text-gray-900 hover:bg-slate-200 '
                       >
                         {item.name}
                       </DisclosureButton>

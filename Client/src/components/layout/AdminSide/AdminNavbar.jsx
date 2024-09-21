@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 function AdminNavbar({ isCompact, isOpen, toggleSidebar }) {
   return (
     <div
-      className={`fixed top-0 right-0 left-0 z-50 h-16 p-4 bg-customP2BackgroundW_500 dark:bg-customP2BackgroundD_500 dark:text-slate-50 text-slate-900 justify-between items-center transition-all duration-500 ease-in-out ${
+      className={`fixed top-0 right-0 left-0 z-50 h-16 p-4 bg-customP2BackgroundW_500 dark:bg-customP2BackgroundD dark:text-slate-50 text-slate-900 justify-between items-center transition-all duration-500 ease-in-out ${
         isCompact ? (isOpen ? 'md:ml-24' : 'ml-0') : 'md:ml-80'
       } flex`}
     >

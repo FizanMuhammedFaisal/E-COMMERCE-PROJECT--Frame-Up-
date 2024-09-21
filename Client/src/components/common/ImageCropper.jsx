@@ -57,7 +57,7 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
         })
       }
 
-      onClose() // Close the modal after cropping
+      onClose()
     }
   }
 

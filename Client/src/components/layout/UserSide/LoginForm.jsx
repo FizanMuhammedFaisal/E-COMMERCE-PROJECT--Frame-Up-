@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import api from '../../../services/api/api'
 import { validateLoginForm } from '../../../utils/validation/FormValidation'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 import { provider, auth } from '../../../services/firebase/firebase'
@@ -24,7 +24,11 @@ function LoginForm() {
       const res = await api.post('/users/google/auth', { idToken })
       const accessToken = res.data.accessToken
       localStorage.setItem('accessToken', accessToken)
-      const data = { user: res.data._id, role: res.data.role }
+      const data = {
+        user: res.data._id,
+        role: res.data.role,
+        status: res.data.status
+      }
       dispatch(setUser(data))
     } catch (error) {
       // Handle Errors here.
@@ -39,15 +43,20 @@ function LoginForm() {
     e.preventDefault()
     const formData = { email, password }
     const errors = validateLoginForm(formData)
-    if (errors) {
-      setErrors(errors)
+    console.log(errors)
+    if (Object.keys(errors).length > 0) {
+      return setErrors(errors)
     }
 
     try {
       const res = await api.post('/users/login', formData)
       const accessToken = res.data.accessToken
       localStorage.setItem('accessToken', accessToken)
-      const data = { user: res.data._id, role: res.data.role }
+      const data = {
+        user: res.data._id,
+        role: res.data.role,
+        status: res.data.status
+      }
       dispatch(setUser(data))
       console.log(res)
     } catch (error) {
@@ -115,7 +124,6 @@ function LoginForm() {
                   onChange={e => {
                     setEmail(e.target.value)
                   }}
-                  required
                   autoComplete='email'
                   className='block w-full  border-0 py-1.5 text-textPrimary shadow-sm ring-1 ring-inset ring-neutral-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-slate-400 sm:text-sm sm:leading-6'
                 />
@@ -138,12 +146,12 @@ function LoginForm() {
                   Password
                 </label>
                 <div className='text-sm'>
-                  <a
-                    href='#'
+                  <Link
                     className='font-semibold text-textPrimary hover:underline'
+                    to={'/login/forgot-password'}
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div className='mt-2'>
@@ -152,7 +160,6 @@ function LoginForm() {
                   name='password'
                   type='password'
                   value={password}
-                  required
                   onChange={e => {
                     setPassword(e.target.value)
                   }}

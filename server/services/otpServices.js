@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export const generateOTP = () => {
   const otp = crypto.randomInt(100000, 999999).toString() // Generate a 6-digit OTP
-  const otpExpiresAt = new Date(Date.now() + 1 * 60 * 1000) // OTP expires in 1 minutes
+  const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000) // OTP expires in 1 minutes
   return { otp, otpExpiresAt }
 }
 
@@ -35,8 +35,8 @@ export const sendOTPEmail = async (email, otp) => {
   }
 }
 
-export const updateUserWithOTP = async (user, otp, otpExpiresAt) => {
-  user.otp = otp
-  user.otpExpiresAt = otpExpiresAt
-  await user.save()
+export const updateModalWithOTP = async (modal, otp, otpExpiresAt) => {
+  modal.otp = otp
+  modal.otpExpiresAt = otpExpiresAt
+  await modal.save()
 }

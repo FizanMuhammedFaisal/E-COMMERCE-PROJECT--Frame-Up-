@@ -53,7 +53,11 @@ const AlertDialogDemo = ({
                   thickness={5}
                 />
               ) : button2 ? (
-                button2
+                button2 === 'Active' ? (
+                  'Activate'
+                ) : (
+                  'Block'
+                )
               ) : (
                 'Delete'
               )}

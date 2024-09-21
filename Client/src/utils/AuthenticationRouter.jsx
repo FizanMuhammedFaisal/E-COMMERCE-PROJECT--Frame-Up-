@@ -9,7 +9,7 @@ function AuthenticationRouter({ element }) {
     if (role === 'admin') {
       return <Navigate to='/dashboard' />
     } else {
-      return <Navigate to='/admin/login' />
+      return <Navigate to='/' />
     }
   } else {
     return element

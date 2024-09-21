@@ -11,13 +11,13 @@ import {
   fetchUsers,
   setPage,
   updateUserStatus
-} from '../../redux/slices/adminActionsSlice'
+} from '../../redux/slices/adminUsersSlice'
 const AdminUsers = () => {
   const dispatch = useDispatch()
-  const users = useSelector(state => state.adminActions.data)
-  const loading = useSelector(state => state.adminActions.loading)
-  const page = useSelector(state => state.adminActions.page)
-  const hasMore = useSelector(state => state.adminActions.hasMore)
+  const users = useSelector(state => state.adminUsers.data)
+  const loading = useSelector(state => state.adminUsers.loading)
+  const page = useSelector(state => state.adminUsers.page)
+  const hasMore = useSelector(state => state.adminUsers.hasMore)
 
   const [isOpen, setIsOpen] = useState(false)
   const [currentUserId, setCurrentUserId] = useState(null)
@@ -89,14 +89,14 @@ const AdminUsers = () => {
   const data = useMemo(
     () =>
       users.map((user, index) => ({
-        serialNo: index + 1,
+        serialNo: <p className='ms-5'>{index + 1}</p>,
         username: (
-          <div className='p-2 text-lg font-tertiary'>
+          <div className='p-1 text-lg font-tertiary'>
             {user.username || 'Name not available'}
           </div>
         ),
         email: (
-          <div className='p-2 text-lg font-tertiary'>
+          <div className='p-1 text-lg font-tertiary'>
             {user.email || 'Email not available'}
           </div>
         ),
@@ -108,11 +108,11 @@ const AdminUsers = () => {
             onChange={e => {
               handleStatusChange(user._id, e.target.value)
             }}
-            className={` w-40 py-2 px-3 border border-gray-300  rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm 
+            className={` sm:w-24 lg:w-28 py-1 px-2 border border-gray-300  rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm 
          dark:bg-gray-800  text-gray-900 ${
            user.status === 'Blocked'
-             ? 'bg-red-400  text-slate-900   dark:text-slate-50 dark:bg-red-600 '
-             : 'bg-green-400 dark:bg-green-700 dark:text-slate-50'
+             ? 'bg-red-400  text-slate-900   dark:text-red-200 dark:bg-red-900 dark:border-red-900 '
+             : 'bg-green-400 dark:bg-green-900 dark:text-green-200 dark:border-green-900'
          }
         `}
           >
@@ -145,7 +145,9 @@ const AdminUsers = () => {
           Scroll to load more...
         </div>
       )}
-      {!hasMore && <div className='text-center'>No more users to load.</div>}
+      {!hasMore && !loading && (
+        <div className='text-center'>No more users to load.</div>
+      )}
       <AlertDialog
         isOpen={isOpen}
         onCancel={() => {

@@ -87,7 +87,6 @@ export const DeleteImageFromDB = async id => {
     await store.delete(id) // Delete the image by its id
     await transaction.done // Wait for the transaction to complete
 
-    console.log(`Image with id ${id} has been deleted from IndexedDB.`)
     return true // Indicate that deletion was successful
   } catch (error) {
     console.error('Error deleting image from IndexedDB:', error)

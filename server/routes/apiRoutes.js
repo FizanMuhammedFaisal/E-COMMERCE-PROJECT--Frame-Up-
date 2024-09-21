@@ -6,5 +6,5 @@ const app = express.Router()
 
 app.use('/admin', adminRoutes)
 app.use('/users', userRoutes)
-app.use('/product', productRoutes)
+app.use('/products', productRoutes)
 export default app

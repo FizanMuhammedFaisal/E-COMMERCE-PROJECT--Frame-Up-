@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import api from '../../services/api/api'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import CircularProgress from '@mui/material/CircularProgress'
+import { setUser } from '../../redux/slices/authSlice'
+import { useDispatch } from 'react-redux'
 
 function UserOTPPage() {
+  const location = useLocation()
+  const query = new URLSearchParams(location.search)
+  const to = query.get('to') || 'signup'
   const navigate = useNavigate()
   const [otpSent, setOtpSent] = useState(false)
   const [otp, setOtp] = useState('')
   const [timer, setTimer] = useState(60)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
+  const dispatch = useDispatch()
   const handleSendOTP = async () => {
     if (loading) return
     setError('')
@@ -28,16 +33,25 @@ function UserOTPPage() {
     }
 
     try {
-      const response = await api.post(
-        '/users/send-otp',
-        {},
-        {
-          headers: { 'x-session-token': token }
-        }
-      )
-      console.log(response.data.message)
+      if (to === 'signup') {
+        const response = await api.post(
+          '/users/send-otp',
+          {},
+          {
+            headers: { 'x-session-token': token }
+          }
+        )
+      } else {
+        const response = await api.post(
+          '/users/send-reset-otp',
+          {},
+          {
+            headers: { 'x-session-token': token }
+          }
+        )
+      }
       setOtpSent(true)
-      setTimer(60) // Reset timer to 60
+      setTimer(60)
     } catch (error) {
       const responseError = error?.response?.data?.message || error.message
       if (error?.response?.status === 401) {
@@ -56,31 +70,68 @@ function UserOTPPage() {
   const handleOTPChange = e => setOtp(e.target.value)
 
   const handleVerifyOTP = async () => {
-    if (!/^\d{6}$/.test(otp)) {
+    const trimmedOtp = otp.trim()
+
+    if (!/^\d{6}$/.test(trimmedOtp)) {
       setError('OTP must be a 6-digit number')
       return
     }
     setLoading(true)
     try {
       const token = sessionStorage.getItem('x-timer')
-      const res = await api.post(
-        '/users/verify-otp',
-        { otp },
-        {
-          headers: { 'x-session-token': token }
+      if (!token) {
+        toast.error('No session Token,Try again')
+        setTimeout(() => {
+          navigate('/signup', { replace: true })
+        }, 2000)
+        return
+      }
+      if (to === 'signup') {
+        const res = await api.post(
+          '/users/verify-otp',
+          { otp },
+          {
+            headers: { 'x-session-token': token }
+          }
+        )
+        if (res.status === 201) {
+          const accessToken = res.data.accessToken
+          localStorage.setItem('accessToken', accessToken)
+          const data = {
+            user: res.data._id,
+            role: res.data.role,
+            status: res.data.status
+          }
+          navigate('/', { replace: true })
+          dispatch(setUser(data))
         }
-      )
-      if (res.status === 201) {
-        navigate('/', { replace: true })
+      } else {
+        const res = await api.post(
+          '/users/verify-reset-otp',
+          { otp },
+          {
+            headers: { 'x-session-token': token }
+          }
+        )
+        if (res.status === 200) {
+          navigate('/reset-password')
+        }
       }
     } catch (error) {
       const responseError = error?.response?.data?.message || error.message
       setError(responseError)
       if (error?.response?.status === 401) {
-        toast.error('Timeout, Try Signing in again')
-        setTimeout(() => {
-          navigate('/signup', { replace: true })
-        }, 2000)
+        if (to === 'signup') {
+          toast.error('Timeout, Try Signing in again')
+          setTimeout(() => {
+            navigate('/signup', { replace: true })
+          }, 2000)
+        } else {
+          toast.error('Timeout, Try again')
+          setTimeout(() => {
+            navigate('/forgot-password', { replace: true })
+          }, 2000)
+        }
       }
     } finally {
       setLoading(false)

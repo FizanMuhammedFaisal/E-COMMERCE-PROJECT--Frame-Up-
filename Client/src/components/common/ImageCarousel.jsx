@@ -8,13 +8,10 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log('useEffect triggered. DBError:', DBError, 'imageIds:', imageIds)
-
     const fetchImages = async () => {
       if (!DBError) {
         // If no DBError, imageIds contains IDs, fetch from IndexedDB
         try {
-          console.log(imageIds)
           const imagePromises = imageIds.map(async id => {
             const file = await getImageFromDB(id)
             const url = URL.createObjectURL(file)
@@ -24,17 +21,15 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
           const fetchedImages = await Promise.all(imagePromises)
           setImages(fetchedImages)
         } catch (error) {
-          console.error('Error fetching images from DB:', error)
         } finally {
           setLoading(false)
         }
       } else {
         // If DBError is true, imageIds contains the actual image files
-        console.log('imageIds:', imageIds)
+
         const fileUrls = imageIds
           .map((file, index) => {
             if (!file) {
-              console.error('File is undefined or invalid:', file)
               return null // Skip invalid files
             }
             const url = URL.createObjectURL(file)
@@ -45,7 +40,7 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
         setLoading(false)
       }
     }
-    console.log(images)
+
     fetchImages()
   }, [imageIds, DBError])
 

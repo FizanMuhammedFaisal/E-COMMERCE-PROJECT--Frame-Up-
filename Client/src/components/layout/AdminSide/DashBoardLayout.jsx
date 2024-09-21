@@ -7,7 +7,6 @@ const DashboardLayout = data => {
   const [isCompact, setIsCompact] = useState(false)
   const handleset = data => {
     setIsCompact(data)
-    console.log(data)
   }
   return (
     <div className='dark:bg-customP2BackgroundD_darkest '>
@@ -19,7 +18,7 @@ const DashboardLayout = data => {
         } `}
       >
         {/* This will render the matching child route */}
-        <Breadcrumb showHome={false} />
+        <Breadcrumb showHome={false} type='admin' />
 
         <Outlet />
       </div>

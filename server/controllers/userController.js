@@ -6,10 +6,12 @@ import generateToken from '../utils/generateToken.js'
 import firebaseApp from '../config/firebaseApp.js'
 import {
   generateOTP,
-  updateUserWithOTP,
+  updateModalWithOTP,
   sendOTPEmail
 } from '../services/otpServices.js'
 import jwt from 'jsonwebtoken'
+import ResetToken from '../models/resetTokenModel.js'
+
 // -----
 
 // for sending otp
@@ -21,7 +23,7 @@ const sendOTP = asyncHandler(async (req, res, next) => {
   // generate timer and expiration time
   const { otp, otpExpiresAt } = generateOTP()
   // updating the fields of TempUser
-  await updateUserWithOTP(user, otp, otpExpiresAt)
+  await updateModalWithOTP(user, otp, otpExpiresAt)
   //send the otp
   // Send OTP email
   try {
@@ -36,7 +38,7 @@ const sendOTP = asyncHandler(async (req, res, next) => {
 const verifyOTP = asyncHandler(async (req, res, next) => {
   const { otp } = req.body
   const email = req.user.email
-
+  console.log(req.body)
   if (!otp) {
     return res.status(400).json({ message: 'OTP is required' })
   }
@@ -45,7 +47,7 @@ const verifyOTP = asyncHandler(async (req, res, next) => {
   if (!user) {
     return res.status(404).json({ message: 'User not found' })
   }
-
+  console.log(user)
   if (user.otp !== otp || new Date() > user.otpExpiresAt) {
     return res.status(400).json({ message: 'Invalid or expired OTP' })
   }
@@ -62,7 +64,7 @@ const verifyOTP = asyncHandler(async (req, res, next) => {
       status: 'Active'
     })
 
-    const rToken = generateCookie(res, newUser._id)
+    generateCookie(res, newUser._id)
     const accessToken = generateToken(newUser._id)
 
     return res.status(201).json({
@@ -71,6 +73,7 @@ const verifyOTP = asyncHandler(async (req, res, next) => {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
+      status: newUser.status,
       accessToken
     })
   } catch (error) {
@@ -80,7 +83,7 @@ const verifyOTP = asyncHandler(async (req, res, next) => {
 })
 //------
 const checkUser = asyncHandler(async (req, res, next) => {
-  const { username, email, phoneNumber, password, cp } = req.body
+  const { username, email, phone, password, cp } = req.body
   console.log(req.body)
   const userExists = await User.findOne({ email })
   if (userExists) {
@@ -88,15 +91,16 @@ const checkUser = asyncHandler(async (req, res, next) => {
     error.statusCode = 400
     return next(error)
   }
+  console.log(req.body)
   const tempUser = await TempUser.create({
     username,
     email,
-    phoneNumber,
+    phoneNumber: phone,
     password,
     otp: '', // Placeholder value
     otpExpiresAt: Date.now() + 15 * 60 * 1000 // 15 minutes expiration time
   })
-
+  console.log(tempUser)
   if (tempUser) {
     // Generate a session token
     const id = tempUser._id
@@ -122,13 +126,15 @@ const userlogin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
   if (user && (await user.matchPassword(password))) {
-    const rToken = generateCookie(res, user._id)
+    //refresh cookie
+    generateCookie(res, user._id)
     const accessToken = generateToken(user._id)
     return res.status(200).json({
       message: 'user validated',
       _id: user._id,
       name: user.name,
       role: user.role,
+      status: user.status,
       accessToken
     })
   }
@@ -170,24 +176,23 @@ const googleAuth = asyncHandler(async (req, res, next) => {
 
   if (updatedUser || newUser) {
     const user = updatedUser || newUser
-    const id = user._id.toString(user._d)
+    const id = user._id.toString(user._id)
 
     console.log(id)
     if (!user) {
       // Handle case where neither user is available
       return res.status(404).json({ message: 'User not found' })
     }
-    console.log('id ehrer' + id)
     generateCookie(res, id)
 
     const accessToken = generateToken(id)
-    console.log(accessToken)
     return res.status(201).json({
       message: 'user create',
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      status: user.status,
       accessToken
     })
   }
@@ -235,8 +240,150 @@ const makeAccess = (req, res) => {
 
   res.json({ token })
 }
+//
+const verifyResetOTP = asyncHandler(async (req, res, next) => {
+  const { otp } = req.body
+  const email = req.user.email
+  console.log(req.body)
+  console.log('asdfa')
+  if (!otp) {
+    return res.status(400).json({ message: 'OTP is required' })
+  }
+
+  const user = await ResetToken.findOne({ email })
+  console.log(user.otp === otp, user.otpExpiresAt)
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' })
+  }
+  // Verify OTP and check if it's expired
+  if (user.otp !== otp || new Date() > user.otpExpiresAt) {
+    return res.status(400).json({ message: 'Invalid or expired OTP' })
+  }
+
+  // OTP is valid, generate a new token for reset password access
+  try {
+    const token = jwt.sign(
+      { email },
+      process.env.JWT_RESET_TOKEN,
+      { expiresIn: '30m' } // Token valid for 30 min
+    )
+
+    res.cookie('jwtResetToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      maxAge: 30 * 60 * 1000
+    })
+
+    res.status(200).json({ message: 'OTP verified, proceed to reset password' })
+  } catch (error) {
+    console.error('Error generating cookie:', error)
+    throw new Error('Error generating cookie')
+  }
+})
 
 //
+const sendForgotPasswordOTP = asyncHandler(async (req, res, next) => {
+  const user = req.user
+  console.log(user)
+  const userExists = await User.findOne({ email: user.email })
+  if (!userExists) {
+    const error = new Error('email already exist')
+    error.statusCode = 400
+    return next(error)
+  }
+  // generate timer and expiration time
+  const { otp, otpExpiresAt } = generateOTP()
+  const modal = await ResetToken.findOne({ email: user.email })
+  await updateModalWithOTP(modal, otp, otpExpiresAt)
+  //send the otp
+  // Send OTP email
+  try {
+    await sendOTPEmail(user.email, otp)
+    res.status(200).json({ message: 'OTP sent successfully' })
+  } catch (error) {
+    next(error)
+  }
+})
+//
+const sendToken = asyncHandler(async (req, res, next) => {
+  const { email } = req.body
+  console.log(req.body)
+  const userExists = await User.findOne({ email })
+  if (!userExists) {
+    const error = new Error("This email doesn't exist")
+    error.statusCode = 400
+    return next(error)
+  }
+  const resetToken = await ResetToken.create({
+    email,
+    otp: '', // Placeholder value
+    otpExpiresAt: Date.now() + 15 * 60 * 1000 // 15 minutes expiration time
+  })
+  console.log(resetToken)
+  if (resetToken) {
+    // Generate a session token
+    const id = resetToken._id
+    const token = jwt.sign({ id }, process.env.JWT_TOKEN, {
+      expiresIn: '10m'
+    })
+    return res.status(201).json({
+      message: 'Token created',
+      _id: resetToken._id,
+      token
+    })
+  }
+
+  console.log(resetToken)
+  const error = new Error('Cannot create Token')
+  error.statusCode = 400
+  return next(error)
+})
+//
+const checkResetTokenCookie = asyncHandler(async (req, res, next) => {
+  const token = req.cookies.jwtResetToken
+
+  if (!token) {
+    const error = new Error('Token Not Found')
+    error.statusCode = 403
+    return next(error)
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_RESET_TOKEN)
+    if (decoded) {
+      res.status(200).json({ message: 'token validated', isValid: true })
+    }
+  } catch (err) {
+    const error = new Error('Invalid Refresh Token')
+    error.statusCode = 403
+    return next(error)
+  }
+})
+//
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body
+  const token = req.cookies.jwtResetToken
+  if (!token) {
+    const error = new Error('No Token Found')
+    error.statusCode = 403
+    return next(error)
+  }
+  let email = ''
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_RESET_TOKEN)
+    email = decoded.email
+  } catch (er) {
+    const error = new Error('Not authorized Token')
+    error.statusCode = 403
+    return next(error)
+  }
+
+  const user = User.findOneAndUpdate({ email }, { password })
+  if (user) {
+    res.clearCookie('jwtResetToken')
+    res.json({ success: 'Password Resetted' })
+  }
+})
 //
 export {
   checkUser,
@@ -245,5 +392,10 @@ export {
   sendOTP,
   userCreate,
   verifyOTP,
-  makeAccess
+  makeAccess,
+  verifyResetOTP,
+  sendForgotPasswordOTP,
+  sendToken,
+  checkResetTokenCookie,
+  resetPassword
 }

@@ -30,14 +30,15 @@ export const validateRegisterForm = input => {
     errors.email = 'Email is required*'
   } else if (!emailRegex.test(input.email)) {
     errors.email = 'Invalid email format'
+  } else if (input.email !== input.email.toLowerCase()) {
+    errors.email = 'Email must be in all lowercase'
   }
 
   if (!input.password) {
     errors.password = 'Password is required*'
+    // For development purpose
     // } else if (!passwordRegex.test(input.password)) {
-    //   errors.password =
-    //     'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a digit, and a special character'
-    /// for devleopment purpose disabled
+    //   errors.password = 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a digit, and a special character'
   }
 
   if (!input.cPassword) {

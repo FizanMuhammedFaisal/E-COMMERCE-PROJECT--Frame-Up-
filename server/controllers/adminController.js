@@ -39,13 +39,14 @@ const getUsers = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit
 
   console.log('Page:', page, 'Limit:', limit, 'Skip:', skip)
+  const userst = await User.find({}).countDocuments()
+  console.log(userst)
   const users = await User.find({ role: 'user' }).skip(skip).limit(limit)
-
+  console.log(users)
   if (users) {
     setTimeout(() => {
       res.status(200).json(users)
     }, 1000)
-    console.log('finded users  :')
   } else {
     const error = new Error('error finding user')
     error.statusCode = 400
@@ -167,27 +168,39 @@ const updateStatus = asyncHandler(async (req, res) => {
 //@access    private
 const addCategory = asyncHandler(async (req, res, next) => {
   const { name, type, description } = req.body
-  console.log(req.body)
+
+  // Ensure all required fields are provided
   if (!name || !type || !description) {
     const error = new Error('All fields are required')
     error.statusCode = 400
     return next(error)
   }
-  const categoryExists = await Category.findOne({ name, type })
+
+  const categoryExists = await Category.findOne({
+    name: { $regex: new RegExp(`^${name}$`, 'i') }, // Case-insensitive match for name
+    type // Exact match for type
+  })
+
   if (categoryExists) {
-    const error = new Error('Category Already Exists with this name and type')
+    const error = new Error(
+      'Category already exists with this name in the given type'
+    )
     error.statusCode = 400
     return next(error)
   }
+
+  // Create the new category
   const category = await Category.create({ name, type, description })
+
   if (category) {
-    return res.send(201).json({ message: 'category created' })
+    return res.status(201).json({ message: 'Category created successfully' })
   } else {
     const error = new Error('Failed to create category')
-    error.statusCode = 400
+    error.statusCode = 500
     return next(error)
   }
 })
+
 //@ discp   to fetch theme
 //route      api/admin/get-category-themes
 //@access    private

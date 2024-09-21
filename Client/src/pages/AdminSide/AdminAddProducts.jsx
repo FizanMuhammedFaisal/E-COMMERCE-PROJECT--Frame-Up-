@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import validateProductForm from '../../utils/validation/ProductFormValidation'
+import { useState } from 'react'
 import Form from '../../components/layout/AdminSide/addProducts/Form'
 import api from '../../services/api/api'
 import validataImages from '../../utils/validation/ImageValidation'
 import { uploadImagesToCloudinary } from '../../services/Cloudinary/UploadImages'
 import { useDispatch, useSelector } from 'react-redux'
+import { ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import {
   addDeletedImageUrl,
   deleteImage,
@@ -19,6 +20,7 @@ import {
   DeleteImageFromDB,
   getImageFromDB
 } from '../../utils/indexedDB/adminImageDB'
+import validateProductForm from '../../utils/validation/ProductFormValidation'
 const AdminAddProducts = () => {
   const [imageForCrop, setImageForCrop] = useState('')
   const [productImages, setProductImages] = useState([])
@@ -67,7 +69,6 @@ const AdminAddProducts = () => {
       if (e.target.multiple) {
         setLoadingImages(true)
         try {
-          console.log(validFiles)
           const ids = await addImagesToDB(validFiles)
 
           const images = [...formData.productImages, ...ids]
@@ -87,19 +88,17 @@ const AdminAddProducts = () => {
         setLoadingThumbnail(true)
 
         try {
-          console.log(validFiles)
           const idi = await addImageToDB(validFiles[0])
-          console.log(idi)
+
           dispatch(
             setFormData({
               id: 'thumbnailImage',
               value: [idi]
             })
           )
-          console.log(formData.thumbnailImage)
         } catch (error) {
           setDBError(true)
-          console.log(validFiles)
+
           setThumbnailImage(validFiles)
         } finally {
           setLoadingThumbnail(false)
@@ -118,11 +117,12 @@ const AdminAddProducts = () => {
       formData,
       DBError,
       productImages,
-      thumbnailImage
+      thumbnailImage,
+      dispatch
     )
-    console.log('Validation errors:', validationErrors)
+
     if (Object.keys(validationErrors).length > 0) {
-      return setErrorMessages(prev => ({ ...prev, ...validationErrors }))
+      return setErrorMessages(validationErrors)
     }
     setErrorMessages({})
 
@@ -140,10 +140,7 @@ const AdminAddProducts = () => {
         fetchedThumbnailImages = [file]
 
         fetchedProductImages = await Promise.all(imageProductPromises)
-
-        console.log(fetchedProductImages, fetchedThumbnailImages)
       } catch (error) {
-        console.error('Error fetching images from DB:', error)
         setLoading(false)
       }
     } else {
@@ -153,26 +150,28 @@ const AdminAddProducts = () => {
 
     try {
       // Upload images to Cloudinary in parallel
-      console.log(fetchedProductImages, fetchedThumbnailImages)
+
       const [uploadedProductImages, uploadedThumbnailImages] =
         await Promise.all([
           uploadImagesToCloudinary(fetchedProductImages),
           uploadImagesToCloudinary(fetchedThumbnailImages)
         ])
 
-      console.log(uploadedProductImages, uploadedThumbnailImages)
       const data = {
         ...formData,
         productImages: uploadedProductImages,
         thumbnailImage: uploadedThumbnailImages
       }
-      console.log(data)
 
       try {
-        const res = await api.post('/product/add', data)
-        console.log(res)
+        const res = await api.post('/products/add', data)
+        toast.success('Product added', {
+          className:
+            'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white '
+        })
       } catch (error) {
         setLoading(false)
+        toast.error("Couldn't add product")
         console.error('Error sending data to backend:', error)
       }
     } catch (error) {
@@ -180,14 +179,12 @@ const AdminAddProducts = () => {
       console.error('Error uploading images:', error)
     }
     setLoading(false)
-    // Optionally reset form
-    // resetForm()
+
+    resetForm()
   }
 
   // Function to delete image from productImages array
   const handleDeleteImage = (image, type) => {
-    console.log(image)
-
     if (!DBError) {
       dispatch(deleteImage({ imageid: image.id, type }))
     } else {
@@ -223,16 +220,14 @@ const AdminAddProducts = () => {
     setCropperOpen(false)
   }
   const updateReduxState = async croppedimage => {
-    console.log('asdfa')
     dispatch(deleteImage({ imageid: croppedimage.id, type: croppedimage.type }))
     await DeleteImageFromDB(croppedimage.id)
-    console.log(croppedimage.image)
+
     const id = await addImageToDB(croppedimage.image)
-    console.log(id)
+
     dispatch(updateFormData({ id: croppedimage.type, value: [id] }))
   }
   const handleCroppedImage = async croppedimage => {
-    console.log('fasdfa')
     if (croppedimage.type === 'productImages') {
       if (croppedimage.DBError) {
         const updatedImages = [...productImages]
@@ -250,7 +245,6 @@ const AdminAddProducts = () => {
         updateReduxState(croppedimage)
       }
     }
-    console.log(croppedimage)
   }
   return (
     <div className='max-w-5xl mx-auto p-1 font-primary  dark:text-slate-50'>
@@ -276,6 +270,17 @@ const AdminAddProducts = () => {
         onClose={handleCropperClose}
         initialImage={imageForCrop}
         onCropComplete={handleCroppedImage}
+      />
+      <ToastContainer
+        position='top-right'
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
     </div>
   )

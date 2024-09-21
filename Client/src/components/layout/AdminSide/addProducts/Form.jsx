@@ -75,6 +75,52 @@ function Form({
               )}
             </div>
           </div>
+          <div className='flex flex-col'>
+            <label
+              htmlFor='productYear'
+              className='dark:text-slate-200 text-slate-900 mb-2 font-medium'
+            >
+              Product Year
+            </label>
+            <input
+              type='number'
+              id='productYear'
+              value={formData.productYear}
+              onChange={handleChange}
+              className='p-2 border border-gray-300 rounded-lg dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm dark:text-slate-50'
+              placeholder='Enter product price'
+            />
+            <div className='pt-2 font-tertiary'>
+              {errorMessages && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {errorMessages.productYear}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className='flex flex-col'>
+            <label
+              htmlFor='productStock'
+              className='dark:text-slate-200 text-slate-900 mb-2 font-medium'
+            >
+              Product Stock
+            </label>
+            <input
+              type='number'
+              id='productStock'
+              value={formData.productStock}
+              onChange={handleChange}
+              className='p-2 border border-gray-300 rounded-lg dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm dark:text-slate-50'
+              placeholder='Enter product price'
+            />
+            <div className='pt-2 font-tertiary'>
+              {errorMessages && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {errorMessages.productStock}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Product Category */}
           <div className='flex flex-col'>
@@ -148,6 +194,22 @@ function Form({
               </p>
             )}
           </div>
+        </div>
+        <div className='bg-white p-6 rounded-lg  space-y-4 dark:bg-customP2BackgroundD_darkest dark:text-white'>
+          <h2 className='text-2xl  font-semibold'>About this artwork</h2>
+          <textarea
+            id='productInformation'
+            value={formData.productInformation}
+            onChange={handleChange}
+            rows='5'
+            className='p-2 border border-gray-300 rounded-lg w-full  dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm dark:text-slate-50'
+            placeholder='About the Art'
+          ></textarea>
+          {errorMessages && (
+            <p className='text-red-500 hover:text-red-300'>
+              {errorMessages.productInformation}
+            </p>
+          )}
         </div>
 
         <div className='bg-white p-8 rounded-lg  space-y-6 dark:bg-customP2BackgroundD_darkest dark:text-white'>
@@ -305,6 +367,10 @@ function Form({
               className='dark:text-slate-200 text-slate-900 mb-2 font-medium'
             >
               Dimensions (cm)
+              <p className='dark:text-slate-300 text-slate-800 font-light'>
+                {' '}
+                format: width x height x depth (e.g., 10x20x30)
+              </p>
             </label>
             <input
               type='text'
