@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import UsersTable from '../../components/common/ReusableTable'
+import UsersTable from '../../../components/common/ReusableTable'
 import { ToastContainer } from 'react-toastify'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Select } from '@headlessui/react'
-import AlertDialog from '../../components/common/AlertDialog'
+import AlertDialog from '../../../components/common/AlertDialog'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchUsers,
   setPage,
   updateUserStatus
-} from '../../redux/slices/adminUsersSlice'
+} from '../../../redux/slices/adminUsersSlice'
 const AdminUsers = () => {
   const dispatch = useDispatch()
   const users = useSelector(state => state.adminUsers.data)

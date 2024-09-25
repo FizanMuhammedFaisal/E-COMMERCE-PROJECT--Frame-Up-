@@ -19,6 +19,12 @@ export const sideBarData = [
     pathname: '/dashboard/users'
   },
   {
+    title: 'Artists',
+    link: '/dashboard/artists',
+    icon: <FaUserAlt />,
+    pathname: '/dashboard/artists'
+  },
+  {
     title: 'Products',
     link: '/dashboard/products',
     icon: <FaBoxOpen />,

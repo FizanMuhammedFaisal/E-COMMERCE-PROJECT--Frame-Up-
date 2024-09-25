@@ -5,14 +5,15 @@ import GoogleAuthLoadingPage from '../pages/UserSide/GoogleAuthLoadingPage'
 import AuthenticationRouter from '../utils/AuthenticationRouter'
 import UserOTPPage from '../pages/UserSide/UserOTPPage'
 import BrowsePage from '../pages/UserSide/BrowsePage'
-import ProductDetailPage from '../pages/UserSide/ProductDetailPage'
 import UserLayout from '../components/layout/UserSide/UserLayout'
 import BlockedPage from '../pages/UserSide/BlockedUser/BlockedPage'
 import ProtectedRoute from '../utils/ProtectedRoute'
 import OtpProtectedRoute from '../utils/OtpProtectedRoute.jsx'
 import ForgotPasswordPage from '../pages/UserSide/Login/ForgotPasswordPage'
 import PasswordResetPage from '../pages/UserSide/Login/PasswordResetPage.jsx'
-import PaintingListingPage from '../pages/UserSide/PaintingListingPage.jsx'
+import ProductBrowsePage from '../pages/UserSide/ProductsBrowse/ProductBrowsePage.jsx'
+import ProductDetailPage from '../pages/UserSide/ProductsBrowse/ProductDetailPage.jsx'
+import CartPage from '../pages/UserSide/Cart/CartPage.jsx'
 
 const UserRoutes = [
   {
@@ -48,16 +49,20 @@ const UserRoutes = [
     element: <UserLayout />,
     children: [
       {
-        path: '', // Empty path means this is the index route for "/"
+        path: '',
         element: <HomePage />
       },
       {
         path: 'all',
-        element: <PaintingListingPage />
+        element: <ProductBrowsePage />
       },
       {
         path: 'products/:productId',
         element: <ProductDetailPage />
+      },
+      {
+        path: 'cart',
+        element: <CartPage />
       }
     ]
   }

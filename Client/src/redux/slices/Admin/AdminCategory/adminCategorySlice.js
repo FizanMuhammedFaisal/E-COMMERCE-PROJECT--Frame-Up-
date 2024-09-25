@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import apiClient from '../../../services/api/apiClient'
+import apiClient from '../../../../services/api/apiClient'
 
 // Async action to post category data
 export const addCategory = createAsyncThunk(

@@ -7,7 +7,6 @@ const cloudinaryURL = import.meta.env.VITE_CLOUDINARY_URL
 // Function to upload an array of images to Cloudinary and return their URLs
 export const uploadImagesToCloudinary = async files => {
   try {
-    // Upload the images
     const uploadedImages = await Promise.all(
       files.map(async file => {
         const formData = new FormData()

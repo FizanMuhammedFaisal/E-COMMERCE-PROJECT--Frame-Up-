@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { addCategory } from '../../../../redux/slices/AdminCategory/adminCategorySlice'
+import { addCategory } from '../../../../redux/slices/Admin/AdminCategory/adminCategorySlice'
 import { toast, ToastContainer } from 'react-toastify'
 function AddCategoryForm() {
   // State for the form inputs

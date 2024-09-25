@@ -7,7 +7,7 @@ import {
   fetchProducts,
   setPage,
   updateProductStatus
-} from '../../../redux/slices/AdminProducts/adminProductsSlice'
+} from '../../../redux/slices/Admin/AdminProducts/adminProductsSlice'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
@@ -20,6 +20,7 @@ const AdminProducts = () => {
   const dispatch = useDispatch()
   const products = useSelector(state => state.adminProducts.data)
   const loading = useSelector(state => state.adminProducts.loading)
+  const error = useSelector(state => state.adminProducts.error)
   const page = useSelector(state => state.adminProducts.page)
   const hasMore = useSelector(state => state.adminProducts.hasMore)
   const lastProductRef = useRef()
@@ -85,7 +86,7 @@ const AdminProducts = () => {
     { label: 'Thumbnail', field: 'thumbnail' },
     { label: 'Name', field: 'productName' },
     { label: 'Price', field: 'price' },
-    { label: 'Category', field: 'category' },
+    // { label: 'Category', field: 'category' },
     { label: 'Action', field: 'action' },
     { label: 'Edit', field: 'edit' }
   ]
@@ -104,21 +105,21 @@ const AdminProducts = () => {
         ),
         productName: <div className='p-1 text-lg'>{product.productName}</div>,
         price: <div className='p-1 text-lg'>{product.productPrice}</div>,
-        category: (
-          <div className='p-1 text-lg'>
-            <li> {'name'}</li>
-            {/* {product.productCategories &&
-            product.productCategories.length > 0 ? (
-              <ul>
-                {product.productCategories.map((category, index) => (
-                  <li key={category._id || index}>{category.name}</li>
-                ))}
-              </ul>
-            ) : (
-              <div>No categories available</div>
-            )} */}
-          </div>
-        ),
+        // category: (
+        //   <div className='p-1 text-lg'>
+        //     <li> {'name'}</li>
+        //     {/* {product.productCategories &&
+        //     product.productCategories.length > 0 ? (
+        //       <ul>
+        //         {product.productCategories.map((category, index) => (
+        //           <li key={category._id || index}>{category.name}</li>
+        //         ))}
+        //       </ul>
+        //     ) : (
+        //       <div>No categories available</div>
+        //     )} */}
+        //   </div>
+        // ),
         action: (
           <Select
             name='status'
@@ -178,7 +179,7 @@ const AdminProducts = () => {
         </div>
       )}
       {!hasMore && !loading && (
-        <div className='text-center'>No more users to load.</div>
+        <div className='text-center'>No more Products to load.</div>
       )}
       <AlertDialog
         isOpen={isOpen}

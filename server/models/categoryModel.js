@@ -14,7 +14,7 @@ const categorySchema = new mongoose.Schema({
     type: String // Optional
   }
 })
-
+categorySchema.index({ name: 'text' })
 const Category = mongoose.model('Category', categorySchema)
 
 export default Category

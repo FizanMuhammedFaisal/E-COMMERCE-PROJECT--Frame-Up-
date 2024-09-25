@@ -1,48 +1,65 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { FiHeart } from 'react-icons/fi'
 
-function ProductCard({ product }) {
-  console.log('inside product card')
+function ProductCard({ product, viewMode }) {
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
-      {product.map((product, id) => (
-        <Link key={id} to={`/products/${product._id}`}>
-          <div className='group'>
-            <div className='relative overflow-hidden  h-64 rounded-lg'>
-              <img
-                src={product.thumbnailImage}
-                alt={product.productName}
-                className='w-auto h-full mx-auto transform transition-transform duration-300 group-hover:scale-110'
-              />
-              {/* <div className='absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center'>
-          <button className='bg-white text-gray-800 px-6 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors duration-200'>
-            View Details
-          </button>
-        </div> */}
-            </div>
-            <div className='mt-4'>
-              <h3 className='font-semibold text-xl text-gray-800'>
-                {product.productName}
-              </h3>
-              <p className='text-gray-600 mb-2'>{product.artist}</p>
-              <p className='text-gray-800 font-bold text-lg'>
-                ${product.productPrice}
-              </p>
-              <div className='mt-2 flex flex-wrap gap-2'>
-                {product.productCategories.map((curr, i) => (
-                  <span
-                    key={i}
-                    className='bg-gray-200 px-3 py-1 rounded-full text-sm text-gray-700'
-                  >
-                    {curr.name}
-                  </span>
-                ))}
-              </div>
-            </div>
+    <Link
+      to={`/products/${product._id}`}
+      className={`block ${viewMode === 'list' ? 'w-full' : 'flex-grow'} `}
+    >
+      <motion.div
+        className={`bg-white shadow-md overflow-hidden ${
+          viewMode === 'list' ? 'flex w-full' : 'flex flex-col h-full'
+        }`}
+        transition={{ duration: 0.2 }}
+      >
+        <div
+          className={`relative h-64 bg-gray-200 ${
+            viewMode === 'list' ? 'w-1/3' : 'w-full'
+          } flex items-center justify-center`}
+        >
+          <img
+            src={product.thumbnailImage}
+            alt={product.productName}
+            className='max-w-full max-h-full object-contain  transition-transform duration-300 hover:scale-105'
+          />
+          <motion.button
+            className='absolute top-2 right-2 p-2 z-10 bg-white rounded-full shadow-md text-gray-600 hover:text-red-500'
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FiHeart size={20} />
+          </motion.button>
+        </div>
+
+        <div
+          className={`p-4 ${
+            viewMode === 'list' ? 'w-2/3' : 'w-full flex-grow'
+          }`}
+        >
+          <h3 className='font-semibold text-xl text-gray-800 mb-2'>
+            {product.productName}
+          </h3>
+
+          <p className='text-gray-600 mb-2'>{product.artist}</p>
+          <p className='text-gray-800 font-bold text-lg mb-2'>
+            ${product.productPrice.toFixed(2)}
+          </p>
+          <div className='mb-4 flex flex-wrap gap-2'>
+            {product.productCategories.map((category, index) => (
+              <span
+                key={index}
+                className='bg-gray-200 px-3 py-1 rounded-full text-sm text-gray-700'
+              >
+                {category.name}
+              </span>
+            ))}
           </div>
-        </Link>
-      ))}
-    </div>
+        </div>
+      </motion.div>
+    </Link>
   )
 }
 

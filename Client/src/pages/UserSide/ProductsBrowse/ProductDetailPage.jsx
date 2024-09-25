@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import apiClient from '../../services/api/apiClient'
-import ProductDetails from '../../components/layout/UserSide/Products/ProductDetails'
+import apiClient from '../../../services/api/apiClient'
+import ProductDetails from '../../../components/layout/UserSide/Products/ProductDetails'
 
 function ProductDetailPage() {
   const { productId } = useParams()

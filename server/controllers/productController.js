@@ -1,3 +1,5 @@
+import mongoose from 'mongoose'
+import Category from '../models/categoryModel.js'
 import Product from '../models/productModel.js'
 import asyncHandler from 'express-async-handler'
 
@@ -63,50 +65,161 @@ const getProducts = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const limit = parseInt(req.query.limit) || 10
   const skip = (page - 1) * limit
-
+  const {
+    sortBy,
+    themes,
+    styles,
+    techniques,
+    priceRange,
+    aA_zZ,
+    zZ_aA,
+    includeCategories
+  } = req.query
+  console.log(aA_zZ, zZ_aA, priceRange)
   const filter = {}
+  const priceFilter = {}
+  // Category filters
+  const categoryNames = [
+    ...(themes ? themes.split(',') : []),
+    ...(styles ? styles.split(',') : []),
+    ...(techniques ? techniques.split(',') : [])
+  ]
 
-  if (themes) {
-    filter.Themes = { $in: themes.split(',') } // Assumes Themes field is an array in the database
-  }
-  if (styles) {
-    filter.Styles = { $in: styles.split(',') } // Assumes Styles field is an array in the database
-  }
-  if (techniques) {
-    filter.Techniques = { $in: techniques.split(',') } // Assumes Techniques field is an array in the database
+  if (categoryNames.length) {
+    const categories = await Category.find({ name: { $in: categoryNames } })
+    const categoryIds = categories.map(cat => cat._id)
+    if (categoryIds.length) {
+      filter.productCategories = { $in: categoryIds }
+    }
   }
 
   // Filtering by price range
   if (priceRange) {
     const [minPrice, maxPrice] = priceRange.split(',').map(Number)
     filter.productPrice = { $gte: minPrice, $lte: maxPrice }
+    priceFilter.productPrice = { $gte: minPrice, $lte: maxPrice }
   }
+
+  let sortOption = {}
+  if (sortBy === 'priceLowToHigh') {
+    sortOption.productPrice = 1 // Ascending
+  } else if (sortBy === 'priceHighToLow') {
+    sortOption.productPrice = -1 // Descending
+  }
+  if (aA_zZ === 'true') {
+    sortOption.productName = 1 // Ascending
+  } else if (zZ_aA === 'true') {
+    sortOption.productName = -1 // Descending
+  }
+
   try {
-    const products = await Product.find(filter)
+    // Fetch filtered, paginated, and sorted products
+    const productsQuery = Product.find(filter)
       .skip(skip)
       .limit(limit)
+      .sort(sortOption)
+      .collation({ locale: 'en', strength: 2 })
       .populate('productCategories')
-    const totalItems = await Product.countDocuments()
 
-    res.json({ products, totalItems })
+    // Total number of items after applying filters (for pagination purposes)
+    const countQuery = Product.countDocuments(filter)
+
+    let categoriesQuery
+    if (includeCategories === 'true') {
+      categoriesQuery = Product.aggregate([
+        { $match: priceFilter },
+        { $unwind: '$productCategories' },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'productCategories',
+            foreignField: '_id',
+            as: 'categoryDetails'
+          }
+        },
+        { $unwind: '$categoryDetails' },
+        {
+          $group: {
+            _id: {
+              categoryId: '$categoryDetails._id',
+              categoryName: '$categoryDetails.name',
+              categoryType: '$categoryDetails.type'
+            },
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            categoryId: '$_id.categoryId',
+            categoryName: '$_id.categoryName',
+            categoryType: '$_id.categoryType',
+            count: 1,
+            _id: 0
+          }
+        },
+        { $sort: { categoryType: 1, categoryName: 1 } }
+      ])
+    }
+
+    // Execute all queries concurrently
+    const [products, totalItems, categoryCounts] = await Promise.all([
+      productsQuery,
+      countQuery,
+      categoriesQuery
+    ])
+
+    const availableCategories = {
+      Themes: [],
+      Styles: [],
+      Techniques: []
+    }
+
+    if (categoryCounts) {
+      categoryCounts.forEach(category => {
+        const { categoryType } = category
+        if (categoryType === 'Theme') {
+          availableCategories.Themes.push(category)
+        } else if (categoryType === 'Style') {
+          availableCategories.Styles.push(category)
+        } else if (categoryType === 'Technique') {
+          availableCategories.Techniques.push(category)
+        }
+      })
+    }
+    console.log(Math.ceil(totalItems / limit))
+
+    res.json({
+      products,
+      totalItems,
+      availableCategories,
+      currentPage: page,
+      totalPages: Math.ceil(totalItems / limit)
+    })
   } catch (error) {
+    console.error('Error fetching products:', error)
     res.status(500).json({ message: 'Error fetching products' })
   }
 })
+
 // @dec for listing products
 const getProductById = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params
 
+    // Check if the id is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid product ID' })
+    }
+
     const product = await Product.findById(id)
-      .populate('productCategories') // Populate category details
+      .populate('productCategories')
       .exec()
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })
     }
-    console.log(product)
-    res.json(product) // Return the product data
+
+    res.json(product)
   } catch (error) {
     console.error('Error fetching product:', error)
     res.status(500).json({ message: 'Server error' })
@@ -187,17 +300,14 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const limit = parseInt(req.query.limit) || 10
   const skip = (page - 1) * limit
-  const includeBlocked = req.query.includeBlocked === 'true'
 
   // Create the filter based on the user's request
-  const filter = includeBlocked ? {} : { status: { $ne: 'Blocked' } }
   try {
-    const products = await Product.find(filter)
+    const products = await Product.find({})
       .skip(skip)
       .limit(limit)
       .populate('productCategories')
     const totalItems = await Product.countDocuments()
-
     res.json({ products, totalItems })
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products' })
@@ -205,11 +315,43 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
 })
 
 //
+//
+
+const getSearched = asyncHandler(async (req, res) => {
+  const query = req.query.q
+  try {
+    if (!query) {
+      return res.status(400).json({ message: 'No search query provided.' })
+    }
+    const regex = new RegExp(query, 'i')
+    const [products, categories] = await Promise.all([
+      Product.find(
+        {
+          $or: [
+            { productName: { $regex: regex } },
+            { description: { $regex: regex } }
+          ]
+        },
+        { productName: 1, thumbnailImage: 1, productPrice: 1, _id: 1 }
+      ).limit(5),
+      Category.find({ name: { $regex: regex } }, { name: 1, _id: 1 }).limit(5)
+    ])
+    console.log(products, categories)
+    return res.json({ products, categories })
+  } catch (error) {
+    console.error('Error searching for products:', error)
+    return res
+      .status(500)
+      .json({ message: 'Server error. Please try again later.' })
+  }
+})
+
 export {
   addProducts,
   getProducts,
   getProductById,
   updateProduct,
   updateProductStatus,
-  getProductsAdmin
+  getProductsAdmin,
+  getSearched
 }

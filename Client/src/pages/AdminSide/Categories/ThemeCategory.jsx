@@ -4,7 +4,7 @@ import {
   fetchStyles,
   fetchTechniques,
   fetchThemes
-} from '../../../redux/slices/AdminCategory/categoriesFetchSlice'
+} from '../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
 import CategoriesTable from '../../../components/layout/AdminSide/category/CategoryTable'
 import { CircularProgress } from '@mui/material'
 

@@ -1,13 +1,13 @@
 // src/redux/slices/productSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import apiClient from '../../../services/api/apiClient'
+import apiClient from '../../../../services/api/apiClient'
 
 // Fetch products action
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async page => {
     const response = await apiClient.get(
-      `/api/products-admin/get-products?page=${page}&includeBlocked=true`
+      `/api/products/get-products-admin?page=1`
     )
     return response.data
   }
@@ -36,6 +36,9 @@ const adminProductsSlice = createSlice({
   reducers: {
     setPage: (state, action) => {
       state.page = action.payload || state.page + 1
+    },
+    deleteData: (state, action) => {
+      state.data = []
     }
   },
   extraReducers: builder => {
@@ -71,5 +74,5 @@ const adminProductsSlice = createSlice({
   }
 })
 
-export const { setPage } = adminProductsSlice.actions
+export const { setPage, deleteData } = adminProductsSlice.actions
 export default adminProductsSlice.reducer

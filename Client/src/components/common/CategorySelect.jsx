@@ -6,7 +6,7 @@ import {
   fetchStyles,
   fetchTechniques,
   fetchThemes
-} from '../../redux/slices/AdminCategory/categoriesFetchSlice'
+} from '../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
 
 const CategorySelect = ({
   value = [],

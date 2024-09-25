@@ -13,7 +13,7 @@ function SearchPopup({ isOpen, onClose }) {
     <>
       {/* Backdrop */}
       <div
-        className='fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 '
+        className='fixed inset-0 bg-black pl-12  bg-opacity-65 backdrop-blur-sm z-40 '
         onClick={handleBackdropClick}
       >
         {/* Modal */}

@@ -1,248 +1,288 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { BsCart2 } from 'react-icons/bs'
 import { FaRegUser } from 'react-icons/fa'
-import { LuSearch } from 'react-icons/lu'
-import SearchPopup from '../common/SearchPopup'
 import {
-  Dialog,
-  DialogPanel,
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Popover,
-  PopoverButton,
-  PopoverGroup,
-  PopoverPanel
-} from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
-
+  Bars3Icon,
+  XMarkIcon,
+  ChevronDownIcon
+} from '@heroicons/react/24/outline'
+import { Link, useNavigate } from 'react-router-dom'
+import SearchBar from './SearchBar'
 const products = [
   {
     name: 'Shop',
     description: 'Get a better understanding of your traffic',
-    href: '#'
+    href: '/shop'
   },
   {
     name: 'Engagement',
     description: 'Speak directly to your customers',
-    href: '#'
+    href: '/engagement'
   },
   {
     name: 'Security',
-    description: 'Your customers’ data will be safe and secure',
-    href: '#'
+    description: 'Your customers data will be safe and secure',
+    href: '/security'
   },
   {
     name: 'Integrations',
     description: 'Connect with third-party tools',
-    href: '#'
+    href: '/integrations'
   },
   {
     name: 'Automations',
     description: 'Build strategic funnels that will convert',
-    href: '#'
+    href: '/automations'
   }
 ]
 
-export default function Navbar() {
-  const [isPopupOpen, setPopupOpen] = useState(false)
+const navbarData = [
+  { name: 'Collections', href: '/collections' },
+  { name: 'Home', href: '/' },
+  { name: 'About Us', href: '/about-us' }
+]
 
-  const openPopup = () => setPopupOpen(true)
-  const closePopup = () => setPopupOpen(false)
+export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [activeDropdown, setActiveDropdown] = useState(null)
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleMouseEnter = name => {
+    setActiveDropdown(name)
+  }
+
+  const handleMouseLeave = () => {
+    setActiveDropdown(null)
+  }
+
+  const toggleDropdown = name => {
+    setActiveDropdown(prevState => (prevState === name ? null : name))
+  }
+
+  const sidebarVariants = {
+    closed: { x: '100%', opacity: 0 },
+    open: {
+      x: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
+    }
+  }
+
+  const itemVariants = {
+    closed: { x: 20, opacity: 0 },
+    open: { x: 0, opacity: 1 }
+  }
 
   return (
-    <header className='bg-customColorPrimary '>
-      <nav
-        aria-label='Global'
-        className='mx-auto flex max-w-7xl  h-7 items-center justify-between p-6 lg:px-8'
-      >
+    <header
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-customColorPrimary shadow-md' : 'bg-transparent'
+      }`}
+    >
+      <nav className='mx-auto flex max-w-7xl items-center justify-between p-3 lg:px-8'>
         <div className='flex lg:flex-1'>
-          <a href='#' className='-m-1.5 p-1.5'>
+          <motion.a
+            href='/'
+            className='-m-1.5 p-1.5'
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <span className='sr-only'>Your Company</span>
-            {/* <img alt='' src={Logo} className='h-8 w-auto' /> */}
-            <h1 className='font-secondary font-bold text-2xl'>Frame Up</h1>
-          </a>
+            <h1 className='font-secondary font-bold text-2xl text-textPrimary'>
+              Frame Up
+            </h1>
+          </motion.a>
         </div>
 
-        <PopoverGroup className='hidden lg:flex lg:gap-x-11 mr-11'>
-          <Popover className='relative'>
-            <PopoverButton className='flex items-center gap-x-1 text-base font-primary leading-6 text-textPrimary font-normal'>
+        <div className='hidden lg:flex lg:gap-x-11 mr-11'>
+          <div className='relative group'>
+            <button
+              className='flex items-center pb-1 gap-x-1 text-base font-primary leading-6 text-textPrimary font-normal group-hover:text-gray-600'
+              onMouseEnter={() => handleMouseEnter('shop')}
+              onMouseLeave={handleMouseLeave}
+            >
               Shop
               <ChevronDownIcon
-                aria-hidden='true'
-                className='h-5 w-5 flex-none text-gray-400'
+                className={`h-5 w-5 flex-none text-gray-400 transition-transform duration-200 ${
+                  activeDropdown === 'shop' ? 'rotate-180' : ''
+                }`}
               />
-            </PopoverButton>
-            <PopoverPanel
-              transition
-              className='absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden bg-customColorSecondary shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in'
-            >
-              <div className='p-4'>
-                {products.map(item => (
-                  <div
-                    key={item.name}
-                    className='group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-white duration-300'
-                  >
-                    <div className='flex-auto'>
-                      <a
-                        href={item.href}
-                        className='block font-semibold  text-slate-600 hover:text-slate-950'
-                      >
-                        {item.name}
-                        <span className='absolute inset-0' />
-                      </a>
+            </button>
+            {activeDropdown === 'shop' && (
+              <div
+                onMouseEnter={() => handleMouseEnter('shop')}
+                onMouseLeave={handleMouseLeave}
+                className='absolute left-0 w-screen max-w-md bg-customColorSecondary shadow-lg ring-1 ring-gray-900/5 z-10'
+              >
+                <div className='p-4'>
+                  {products.map(item => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className='block rounded-lg p-3 hover:bg-gray-50'
+                    >
+                      <p className='font-semibold text-gray-900'>{item.name}</p>
                       <p className='mt-1 text-gray-600'>{item.description}</p>
-                    </div>
-                  </div>
-                ))}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </PopoverPanel>
-          </Popover>
+            )}
+          </div>
 
-          <a
-            href='#'
-            className='flex items-center gap-x-1 text-base font-primary leading-6 text-textPrimary font-normal'
-          >
-            Collections
-          </a>
-          <a
-            href='#'
-            className='flex items-center gap-x-1 text-base font-primary leading-6 text-textPrimary font-normal'
-          >
-            Home
-          </a>
-          <a
-            href='#'
-            className='flex items-center gap-x-1 text-base font-primary leading-6 text-textPrimary font-normal'
-          >
-            Abut Us
-          </a>
-        </PopoverGroup>
-        {/* for search option */}
-        <div className='flex lg:hidden '>
-          <button
-            className='px-4 py-2 lg:ms-20 '
-            onClick={() => {
-              openPopup()
-            }}
-          >
-            <LuSearch className='text-2xl' />
-          </button>
-          <SearchPopup isOpen={isPopupOpen} onClose={closePopup} />
+          {navbarData.map(item => (
+            <Link
+              key={item.name}
+              to={item.href}
+              className='text-base font-primary leading-6 text-textPrimary font-normal hover:text-textPrimary duration-150 hover:border-b-2 border-black'
+            >
+              {item.name}
+            </Link>
+          ))}
+        </div>
+
+        <div className='flex lg:hidden'>
+          <div className='mt-2'>
+            <SearchBar
+              setIsSearchFocused={setIsSearchFocused}
+              isSearchFocused={isSearchFocused}
+            />
+          </div>
           <button
             type='button'
             onClick={() => setMobileMenuOpen(true)}
-            className='-m-2.5 inline-flex items-center justify-center   rounded-md p-2.5 text-gray-700'
+            className='ml-2 inline-flex items-center justify-center rounded-md p-2.5 text-textPrimary'
           >
             <span className='sr-only'>Open main menu</span>
-            <Bars3Icon aria-hidden='true' className='h-6 w-6' />
+            <Bars3Icon className='h-6 w-6' aria-hidden='true' />
           </button>
         </div>
+
         <div className='hidden lg:flex lg:flex-1 lg:justify-end'>
           <div className='flex items-center space-x-4 ml-auto'>
-            <div>
-              <button
-                className='px-4 py-2 lg:ms-20 '
-                onClick={() => {
-                  openPopup()
-                }}
-              >
-                <LuSearch className='text-2xl' />
-              </button>
-              <SearchPopup isOpen={isPopupOpen} onClose={closePopup} />
-            </div>
-            <button className='text-xl'>
+            <SearchBar
+              setIsSearchFocused={setIsSearchFocused}
+              isSearchFocused={isSearchFocused}
+            />
+            <motion.button
+              className='text-xl text-textPrimary'
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
               <FaRegUser />
-            </button>
-            <button className='text-2xl'>
+            </motion.button>
+            <motion.button
+              className='text-2xl text-textPrimary'
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigate('/cart')}
+            >
               <BsCart2 />
-            </button>
-            {/* <a href='#' className='text-lg font-light hover:text-gray-500'>
-              Log in
-            </a> */}
+            </motion.button>
           </div>
         </div>
       </nav>
-      {/* for mobile */}
-      <Dialog
-        open={mobileMenuOpen}
-        onClose={setMobileMenuOpen}
-        className='lg:hidden'
-      >
-        <div className='fixed inset-0 z-10' />
-        <DialogPanel className=' transition-all duration-300 fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-customColorSecondary px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10'>
-          <div className='flex items-center justify-between'>
-            <a href='#' className='-m-1.5 p-1.5'>
-              <span className='sr-only'>Your Company</span>
-              <h1>FrameUp</h1>
-            </a>
 
-            <button
-              type='button'
-              onClick={() => setMobileMenuOpen(false)}
-              className='-m-2.5 rounded-md p-2.5 text-gray-700'
-            >
-              <span className='sr-only'>Close menu</span>
-              <XMarkIcon aria-hidden='true' className='h-6 w-6' />
-            </button>
-          </div>
-          <div className='mt-6 flow-root'>
-            <div className='-my-6 divide-y divide-gray-500/10'>
-              <div className='space-y-2 py-6 '>
-                <Disclosure as='div' className='-mx-3 '>
-                  <DisclosureButton className='group flex w-full items-center duration-300 justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'>
-                    Product
-                    <ChevronDownIcon
-                      aria-hidden='true'
-                      className='h-5 w-5 flex-none group-data-[open]:rotate-180'
-                    />
-                  </DisclosureButton>
-                  <DisclosurePanel className='mt-2   space-y-2'>
-                    {[...products].map(item => (
-                      <DisclosureButton
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            className='lg:hidden fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-customColorSecondary sm:max-w-sm sm:ring-1 sm:ring-gray-900/10'
+            initial='closed'
+            animate='open'
+            exit='closed'
+            variants={sidebarVariants}
+          >
+            <div className='px-6 py-6'>
+              <div className='flex items-center justify-between'>
+                <Link to='/' className='-m-1.5 p-1.5'>
+                  <span className='sr-only'>Your Company</span>
+                  <h1 className='font-secondary font-bold text-2xl text-textPrimary'>
+                    Frame Up
+                  </h1>
+                </Link>
+                <button
+                  type='button'
+                  className='-m-2.5 rounded-md p-2.5 text-textPrimary'
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className='sr-only'>Close menu</span>
+                  <XMarkIcon className='h-6 w-6' aria-hidden='true' />
+                </button>
+              </div>
+              <div className='mt-6 flow-root'>
+                <div className='-my-6 divide-y divide-gray-500/10'>
+                  <div className='space-y-2 py-6'>
+                    <motion.div
+                      className='-mx-3'
+                      variants={itemVariants}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <button
+                        className='flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-primary leading-7 text-gray-900 hover:bg-gray-400'
+                        onClick={() => toggleDropdown('shop')}
+                      >
+                        Shop
+                        <ChevronDownIcon
+                          className={`h-5 w-5 flex-none text-gray-400 transition-transform duration-200 ${
+                            activeDropdown === 'shop' ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      {activeDropdown === 'shop' && (
+                        <motion.div className='mt-1 space-y-1' layout>
+                          {products.map(item => (
+                            <Link
+                              key={item.name}
+                              to={item.href}
+                              className='block rounded-lg p-3 hover:bg-gray-50'
+                            >
+                              <p className='font-semibold text-gray-900'>
+                                {item.name}
+                              </p>
+                              <p className='mt-1 text-gray-600'>
+                                {item.description}
+                              </p>
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </motion.div>
+
+                    {navbarData.map(item => (
+                      <Link
                         key={item.name}
-                        as='a'
-                        href={item.href}
-                        className='block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 bg-customColorSecondary duration-300 text-gray-900 hover:bg-slate-200 '
+                        to={item.href}
+                        className='block rounded-lg py-2 pl-3 pr-3.5 text-base font-primary leading-7 text-gray-900 hover:bg-gray-50'
                       >
                         {item.name}
-                      </DisclosureButton>
+                      </Link>
                     ))}
-                  </DisclosurePanel>
-                </Disclosure>
-                <a
-                  href='#'
-                  className='-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'
-                >
-                  Features
-                </a>
-                <a
-                  href='#'
-                  className='-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'
-                >
-                  Marketplace
-                </a>
-                <a
-                  href='#'
-                  className='-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'
-                >
-                  Company
-                </a>
-              </div>
-              <div className='py-6'>
-                <a
-                  href='#'
-                  className='-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'
-                >
-                  heyyy
-                </a>
+                  </div>
+                  <div className='py-6'>
+                    <Link
+                      to='/login'
+                      className='block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50'
+                    >
+                      Log in
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </DialogPanel>
-      </Dialog>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

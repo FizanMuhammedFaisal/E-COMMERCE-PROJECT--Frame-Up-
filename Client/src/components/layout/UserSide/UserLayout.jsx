@@ -9,8 +9,14 @@ const UserLayout = () => {
 
   return (
     <>
-      <Navbar />
-      <Breadcrumb />
+      <div className='pb-3'>
+        <Navbar />
+      </div>
+
+      <div className='mt-10'>
+        <Breadcrumb />
+      </div>
+
       <Outlet />
     </>
   )

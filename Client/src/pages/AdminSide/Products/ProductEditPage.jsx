@@ -5,6 +5,8 @@ import { CheckCircle, AlertCircle } from 'lucide-react'
 import apiClient from '../../../services/api/apiClient'
 import CategorySelect from '../../../components/common/CategorySelect'
 import { CircularProgress } from '@mui/material'
+import { deleteData } from '../../../redux/slices/Admin/AdminProducts/adminProductsSlice'
+import { useDispatch } from 'react-redux'
 
 export default function ProductEditPage() {
   const { productId } = useParams()
@@ -12,6 +14,7 @@ export default function ProductEditPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('details')
   const [error, setError] = useState(null)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -79,6 +82,7 @@ export default function ProductEditPage() {
       const res = await apiClient.put(`/api/products/${productId}`, product)
 
       if (res.status === 200) {
+        dispatch(deleteData())
         setActiveTab('details')
       } else {
         throw new Error('Unexpected response status')
@@ -163,7 +167,7 @@ export default function ProductEditPage() {
                           <img
                             src={product.thumbnailImage[0]}
                             alt={product.productName}
-                            className='w-full h-auto rounded-lg shadow-md'
+                            className='w-full max-w-96 h-auto rounded-lg shadow-md'
                           />
                         </motion.div>
                         <div>

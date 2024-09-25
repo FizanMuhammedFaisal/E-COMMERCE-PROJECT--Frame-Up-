@@ -1,8 +1,10 @@
 import User from '../models/userModel.js'
 import Category from '../models/categoryModel.js'
+import Artist from '../models/artistModel.js'
 import asyncHandler from 'express-async-handler'
 import generateCookie from '../utils/generateCookie.js'
 import generateToken from '../utils/generateToken.js'
+
 //@ discp   login route
 //route      api/admin/login
 //@access    public
@@ -35,7 +37,7 @@ const login = asyncHandler(async (req, res, next) => {
 
 const getUsers = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1
-  const limit = 10
+  const limit = parseInt(req.query.limit) || 10
   const skip = (page - 1) * limit
 
   console.log('Page:', page, 'Limit:', limit, 'Skip:', skip)
@@ -44,9 +46,7 @@ const getUsers = asyncHandler(async (req, res) => {
   const users = await User.find({ role: 'user' }).skip(skip).limit(limit)
   console.log(users)
   if (users) {
-    setTimeout(() => {
-      res.status(200).json(users)
-    }, 1000)
+    res.status(200).json(users)
   } else {
     const error = new Error('error finding user')
     error.statusCode = 400
@@ -177,8 +177,8 @@ const addCategory = asyncHandler(async (req, res, next) => {
   }
 
   const categoryExists = await Category.findOne({
-    name: { $regex: new RegExp(`^${name}$`, 'i') }, // Case-insensitive match for name
-    type // Exact match for type
+    name: { $regex: new RegExp(`^${name}$`, 'i') },
+    type
   })
 
   if (categoryExists) {

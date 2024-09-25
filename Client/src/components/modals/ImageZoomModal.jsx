@@ -42,8 +42,8 @@ function ImageZoomModal({
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       contentLabel='Image Modal'
-      className='fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black bg-opacity-50'
-      overlayClassName='fixed inset-0'
+      className='fixed inset-0 flex items-center  justify-center backdrop-blur-sm bg-black bg-opacity-50'
+      overlayClassName='fixed z-50 inset-0'
     >
       <div className='relative w-full h-full flex items-center justify-center'>
         <button

@@ -2,8 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import apiClient from '../../services/api/apiClient'
 // for fetching userdata on users page on dashboard
 export const fetchUsers = createAsyncThunk('users/fetchUsers', async page => {
-  const response = await apiClient.get(`/api/admin/getusers?page=${page}`)
-  console.log(response.data)
+  const response = await apiClient.get(
+    `/api/admin/getusers?page=${page}&limit=15`
+  )
   return response.data
 })
 
@@ -15,7 +16,6 @@ export const updateUserStatus = createAsyncThunk(
     const response = await apiClient.put(`/api/admin/users/${id}/status`, {
       status
     })
-    console.log(response.data)
     return { id, status }
   }
 )
@@ -50,7 +50,6 @@ const adminUsersSlice = createSlice({
         )
         state.data = [...state.data, ...newUsers]
         state.hasMore = action.payload.length >= 10
-        console.log(state.hasMore)
       })
 
       .addCase(fetchUsers.rejected, (state, action) => {

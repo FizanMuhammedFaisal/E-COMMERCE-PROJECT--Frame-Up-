@@ -1,5 +1,5 @@
 import { EraserIcon } from 'lucide-react'
-import { setFormData } from '../../redux/slices/AdminProducts/productSlice'
+import { setFormData } from '../../redux/slices/Admin/AdminProducts/productSlice'
 
 const validateProductForm = (
   formData,

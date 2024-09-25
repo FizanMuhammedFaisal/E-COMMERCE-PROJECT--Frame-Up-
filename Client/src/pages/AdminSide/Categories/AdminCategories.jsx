@@ -9,8 +9,8 @@ import {
   fetchStyles,
   fetchTechniques,
   fetchThemes
-} from '../../../redux/slices/AdminCategory/categoriesFetchSlice'
-
+} from '../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
+fetchStyles
 const AdminCategory = () => {
   const dispatch = useDispatch()
   const { themes } = useSelector(state => state.categoryFetch)
@@ -44,7 +44,8 @@ const AdminCategory = () => {
             navigate('/dashboard/category/add-categories')
           }}
           whileTap={{ scale: 0.9 }}
-          className='p-2 rounded-sm px-4 me-2 bg-customP2Primary text-white font-semibold hover:bg-customP2Button hover:text-black  text-sm   transition-colors duration-300'
+          whileHover={{ scale: 1.1 }}
+          className='p-2 rounded-sm px-4 me-2 bg-customP2Primary text-white font-semibold  hover:bg-opacity-75  text-sm   transition-colors duration-300'
         >
           Add New Category
         </motion.button>

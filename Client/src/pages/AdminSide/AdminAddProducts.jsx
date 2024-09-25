@@ -12,7 +12,7 @@ import {
   resetFormData,
   setFormData,
   updateFormData
-} from '../../redux/slices/AdminProducts/productSlice'
+} from '../../redux/slices/Admin/AdminProducts/productSlice'
 import ImageCropper from '../../components/common/ImageCropper'
 import {
   addImageToDB,
@@ -21,6 +21,7 @@ import {
   getImageFromDB
 } from '../../utils/indexedDB/adminImageDB'
 import validateProductForm from '../../utils/validation/ProductFormValidation'
+import { useNavigate } from 'react-router-dom'
 const AdminAddProducts = () => {
   const [imageForCrop, setImageForCrop] = useState('')
   const [productImages, setProductImages] = useState([])
@@ -29,6 +30,7 @@ const AdminAddProducts = () => {
   const formData = useSelector(state => state.product)
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const resetForm = () => {
     dispatch(resetFormData())
     setErrorMessages({})
@@ -178,6 +180,7 @@ const AdminAddProducts = () => {
       setLoading(false)
       console.error('Error uploading images:', error)
     }
+    navigate('/dashboard/products')
     setLoading(false)
 
     resetForm()

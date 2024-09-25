@@ -34,7 +34,7 @@ function HomePage() {
                 </p>
                 <button
                   onClick={handleBrowse}
-                  className='bg-primary text-primary-foreground hover:bg-primary/90'
+                  className='bg-customColorTertiary px-3 py-2 text-white hover:opacity-90 duration-300 rounded-md  '
                 >
                   Shop Now
                 </button>
@@ -88,7 +88,14 @@ function HomePage() {
               Explore our curated collection and find the perfect piece for your
               home or office.
             </p>
-            <button>View All Artworks</button>
+            <button
+              className='bg-customColorTertiary px-3 py-2 text-white hover:opacity-90 duration-300 rounded-md  '
+              onClick={() => {
+                navigate('/all')
+              }}
+            >
+              View All Artworks
+            </button>
           </div>
         </section>
       </div>
