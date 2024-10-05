@@ -4,6 +4,7 @@ import Artist from '../models/artistModel.js'
 import asyncHandler from 'express-async-handler'
 import generateCookie from '../utils/generateCookie.js'
 import generateToken from '../utils/generateToken.js'
+import Order from '../models/orderModel.js'
 
 //@ discp   login route
 //route      api/admin/login
@@ -226,7 +227,87 @@ const fetchTechniques = asyncHandler(async (req, res) => {
   console.log(result)
   return res.json({ result })
 })
+//
+//
+const getOrders = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1
+  const limit = parseInt(req.query.limit) || 10
 
+  const skip = (page - 1) * limit
+
+  try {
+    const orders = await Order.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+
+    const totalOrders = await Order.countDocuments()
+    const totalPages = Math.ceil(totalOrders / limit)
+    let hasMore = true
+    if (page > totalPages) {
+      hasMore = false
+    }
+    res.status(200).json({
+      orders,
+      currentPage: page,
+      totalPages,
+      totalOrders,
+      hasMore
+    })
+  } catch (err) {
+    const error = new Error('error fetching orders')
+    error.statusCode = 400
+    return next(error)
+  }
+})
+//
+//
+const updateOrderStatus = asyncHandler(async (req, res, next) => {
+  const { orderId, newStatus } = req.body
+  console.log(orderId, newStatus)
+
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { orderStatus: newStatus },
+      { new: true }
+    )
+    console.log(updatedOrder)
+    if (!updatedOrder) {
+      const error = new Error('order not found')
+      error.statusCode = 404
+      return next(error)
+    }
+
+    res.status(200).json({
+      message: 'Order status updated successfully',
+      order: updatedOrder
+    })
+  } catch (er) {
+    const error = new Error('failed to update user status')
+    error.statusCode = 500
+    return next(error)
+  }
+})
+//
+const updateArtistStatus = asyncHandler(async (req, res, next) => {
+  const artistId = req.params.id
+  const { status } = req.body
+  console.log(status, artistId)
+
+  const user = await Artist.findByIdAndUpdate(
+    { _id: artistId },
+    { status },
+    { new: true }
+  )
+  if (!user) {
+    return res.status(400).json({ message: 'artist not found' })
+  }
+
+  setTimeout(() => {
+    return res.status(200).json({ message: 'status updated sucessfully' })
+  }, 100)
+})
 // end
 export {
   login,
@@ -239,5 +320,8 @@ export {
   addCategory,
   fetchThemes,
   fetchStyles,
-  fetchTechniques
+  fetchTechniques,
+  getOrders,
+  updateOrderStatus,
+  updateArtistStatus
 }

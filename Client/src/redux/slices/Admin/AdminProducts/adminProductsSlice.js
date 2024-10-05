@@ -7,7 +7,7 @@ export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async page => {
     const response = await apiClient.get(
-      `/api/products/get-products-admin?page=1`
+      `/api/products/get-products-admin?page=${page}`
     )
     return response.data
   }
@@ -27,7 +27,7 @@ const adminProductsSlice = createSlice({
   name: 'products',
   initialState: {
     data: [],
-    status: 'idle', // can be idle, succeeded, or failed
+    status: 'idle',
     loading: false,
     error: null,
     page: 1,
@@ -39,6 +39,7 @@ const adminProductsSlice = createSlice({
     },
     deleteData: (state, action) => {
       state.data = []
+      state.page = 1
     }
   },
   extraReducers: builder => {
@@ -56,7 +57,8 @@ const adminProductsSlice = createSlice({
             )
         )
         state.data = [...state.data, ...newProducts]
-        state.hasMore = action.payload.length >= 10 // Assuming 10 items per page
+
+        state.hasMore = action.payload.products.length >= 10
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed'

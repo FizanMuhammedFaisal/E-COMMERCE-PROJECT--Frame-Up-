@@ -11,7 +11,7 @@ import {
 } from '../services/otpServices.js'
 import jwt from 'jsonwebtoken'
 import ResetToken from '../models/resetTokenModel.js'
-
+import Address from '../models/addressModel.js'
 // -----
 
 // for sending otp
@@ -24,8 +24,7 @@ const sendOTP = asyncHandler(async (req, res, next) => {
   const { otp, otpExpiresAt } = generateOTP()
   // updating the fields of TempUser
   await updateModalWithOTP(user, otp, otpExpiresAt)
-  //send the otp
-  // Send OTP email
+
   try {
     await sendOTPEmail(user.email, otp)
     res.status(200).json({ message: 'OTP sent successfully' })
@@ -97,8 +96,8 @@ const checkUser = asyncHandler(async (req, res, next) => {
     email,
     phoneNumber: phone,
     password,
-    otp: '', // Placeholder value
-    otpExpiresAt: Date.now() + 15 * 60 * 1000 // 15 minutes expiration time
+    otp: '',
+    otpExpiresAt: Date.now() + 15 * 60 * 1000
   })
   console.log(tempUser)
   if (tempUser) {
@@ -230,13 +229,8 @@ const userCreate = asyncHandler(async (req, res, next) => {
 //dec-- for making new acces token
 const makeAccess = (req, res) => {
   const user = req.user
-  console.log(user)
-  const id = user._id
   // Generate a new access token
-  const token = jwt.sign({ id }, process.env.JWT_SECRET_ACCESS, {
-    expiresIn: '15m'
-    // expiresIn: '5s'
-  })
+  const token = generateToken(user._id)
 
   res.json({ token })
 }
@@ -262,11 +256,9 @@ const verifyResetOTP = asyncHandler(async (req, res, next) => {
 
   // OTP is valid, generate a new token for reset password access
   try {
-    const token = jwt.sign(
-      { email },
-      process.env.JWT_RESET_TOKEN,
-      { expiresIn: '30m' } // Token valid for 30 min
-    )
+    const token = jwt.sign({ email }, process.env.JWT_RESET_TOKEN, {
+      expiresIn: '30m'
+    })
 
     res.cookie('jwtResetToken', token, {
       httpOnly: true,
@@ -385,6 +377,245 @@ const resetPassword = asyncHandler(async (req, res) => {
   }
 })
 //
+//
+const addAddress = asyncHandler(async (req, res, next) => {
+  const user = req.user
+  const {
+    addressName,
+    name,
+    phoneNumber,
+    address,
+    locality,
+    city,
+    state,
+    postalCode,
+    isDefault
+  } = req.body
+
+  if (
+    !addressName ||
+    !name ||
+    !phoneNumber ||
+    !address ||
+    !locality ||
+    !city ||
+    !state ||
+    !postalCode
+  ) {
+    const error = new Error('Missing required fields')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  try {
+    const createdAddress = await Address.create({
+      userId: user._id,
+      addressName,
+      name,
+      phoneNumber: phoneNumber.toString(),
+      address,
+      locality,
+      city,
+      state,
+      postalCode: postalCode.toString(),
+      isDefault
+    })
+    const id = user._id
+    if (isDefault === true) {
+      await Address.updateMany(
+        { userId: id, _id: { $ne: addressDoc._id } },
+        { isDefault: false }
+      )
+    }
+
+    return res.status(201).json(createdAddress)
+  } catch (error) {
+    console.error('Error creating address:', error)
+    return next(new Error('Address validation failed: ' + error.message))
+  }
+})
+//
+const getAddress = asyncHandler(async (req, res, next) => {
+  const user = req.user
+  const address = await Address.find({ userId: user._id })
+  if (address) {
+    res.status(200).json({ address })
+  }
+})
+
+//
+//
+const getUserDetails = asyncHandler(async (req, res, next) => {
+  const user = req.user
+  if (!user) {
+    const error = new Error('No User')
+    error.statusCode = 403
+    return next(error)
+  }
+  const id = user._id
+  const userData = await User.findById(id)
+  console.log(userData)
+  res.status(200).json({
+    message: 'userData',
+    userData: {
+      name: userData.username,
+      email: userData.email,
+      phone: userData.phoneNumber
+    }
+  })
+})
+//
+const updateUser = asyncHandler(async (req, res, next) => {
+  const id = req.user._id
+  const { name, email, phone } = req.body.updatedUser
+  if (!name || !email) {
+    const error = new Error('No Data For Updation')
+    error.statusCode = 400
+    return next(error)
+  }
+  const emailExists = await User.findOne({ email, _id: { $ne: id } })
+  if (emailExists) {
+    const error = new Error('Email already in use by another user')
+    error.statusCode = 400
+    return next(error)
+  }
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: id },
+    { username: name, email, phoneNumber: phone },
+    { new: true }
+  )
+  if (!updatedUser) {
+    const error = new Error('No user')
+    error.statusCode = 400
+    return next(error)
+  }
+  res.status(200).json({ message: 'useer Updated' })
+})
+//
+const updatePassword = asyncHandler(async (req, res, next) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body
+  console.log(req.body)
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    const error = new Error('All fileds are Required')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  if (newPassword !== confirmPassword) {
+    const error = new Error('Passwords do not match')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const user = await User.findById(req.user._id)
+
+  if (!user) {
+    const error = new Error('User not found')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const isMatch = await user.matchPassword(currentPassword)
+
+  if (!isMatch) {
+    const error = new Error('Current password is incorrect')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  user.password = newPassword
+  await user.save()
+
+  res.status(200).json({ message: 'Password updated successfully' })
+})
+//
+//
+const deleteAddress = asyncHandler(async (req, res) => {
+  const user = req.user
+  const addressId = req.params.id
+
+  const foundUser = await User.findById(user._id)
+
+  if (!foundUser) {
+    const error = new Error('user not Found')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const address = await Address.findById(addressId)
+
+  if (!address) {
+    const error = new Error('Address not Found')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  if (address.userId.toString() !== user._id.toString()) {
+    const error = new Error('Not authorized to delete this address')
+    error.statusCode = 403
+    return next(error)
+  }
+
+  await Address.findByIdAndDelete(addressId)
+
+  res.status(200).json({ message: 'Address deleted successfully' })
+})
+//
+//
+
+const updateAddress = asyncHandler(async (req, res, next) => {
+  const user = req.user
+  const {
+    addressName,
+    name,
+    phoneNumber,
+    address,
+    locality,
+    city,
+    state,
+    postalCode,
+    isDefault,
+    _id: addressId
+  } = req.body
+  console.log(req.body)
+
+  if (!addressId) {
+    const error = new Error('Address ID is required')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const addressDoc = await Address.findById(addressId)
+
+  if (!addressDoc) {
+    const error = new Error('Address not found')
+    error.statusCode = 404
+    return next(error)
+  }
+
+  // Update only provided ones
+  if (addressName !== undefined) addressDoc.addressName = addressName
+  if (name !== undefined) addressDoc.name = name
+  if (phoneNumber !== undefined) addressDoc.phoneNumber = phoneNumber
+  if (address !== undefined) addressDoc.address = address
+  if (locality !== undefined) addressDoc.locality = locality
+  if (city !== undefined) addressDoc.city = city
+  if (state !== undefined) addressDoc.state = state
+  if (postalCode !== undefined) addressDoc.postalCode = postalCode
+  if (isDefault !== undefined) addressDoc.isDefault = isDefault
+
+  await addressDoc.save()
+  const id = user._id
+  if (isDefault === true) {
+    await Address.updateMany(
+      { userId: id, _id: { $ne: addressDoc._id } },
+      { isDefault: false }
+    )
+  }
+
+  res.status(200).json({ message: 'Address updated successfully' })
+})
+
 export {
   checkUser,
   userlogin,
@@ -397,5 +628,12 @@ export {
   sendForgotPasswordOTP,
   sendToken,
   checkResetTokenCookie,
-  resetPassword
+  resetPassword,
+  addAddress,
+  getAddress,
+  getUserDetails,
+  updateUser,
+  updatePassword,
+  deleteAddress,
+  updateAddress
 }

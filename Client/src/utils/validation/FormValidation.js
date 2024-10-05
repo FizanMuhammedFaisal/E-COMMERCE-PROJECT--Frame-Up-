@@ -55,3 +55,38 @@ export const validateRegisterForm = input => {
 
   return errors
 }
+
+export const validateAddressForm = address => {
+  const errors = {}
+
+  if (!address.addressName) {
+    errors.addressName = 'Address Name is required'
+  }
+  if (!address.name) {
+    errors.name = 'Name is required'
+  }
+  if (!address.phoneNumber) {
+    errors.phoneNumber = 'phoneNumber is required'
+  } else if (!/^\d{10}$/.test(address.phoneNumber)) {
+    errors.phoneNumber = 'PhoneNumber must be a 10-digit number'
+  }
+  if (!address.address) {
+    errors.address = 'address is required'
+  }
+  if (!address.locality) {
+    errors.locality = 'locality is required'
+  }
+  if (!address.city) {
+    errors.city = 'City is required'
+  }
+  if (!address.state) {
+    errors.state = 'State is required'
+  }
+  if (!address.postalCode) {
+    errors.postalCode = 'Postal Code is required'
+  } else if (!/^\d{5}$/.test(address.postalCode)) {
+    errors.postalCode = 'ZIP Code must be a 5-digit number'
+  }
+
+  return errors
+}

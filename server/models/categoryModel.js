@@ -11,7 +11,12 @@ const categorySchema = new mongoose.Schema({
     required: true
   },
   description: {
-    type: String // Optional
+    type: String
+  },
+  status: {
+    type: String,
+    enum: ['Active', 'Blocked'],
+    default: 'Active'
   }
 })
 categorySchema.index({ name: 'text' })

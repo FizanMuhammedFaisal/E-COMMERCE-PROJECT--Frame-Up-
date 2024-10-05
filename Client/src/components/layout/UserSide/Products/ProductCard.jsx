@@ -10,7 +10,7 @@ function ProductCard({ product, viewMode }) {
       className={`block ${viewMode === 'list' ? 'w-full' : 'flex-grow'} `}
     >
       <motion.div
-        className={`bg-white shadow-md overflow-hidden ${
+        className={`bg-white border  overflow-hidden ${
           viewMode === 'list' ? 'flex w-full' : 'flex flex-col h-full'
         }`}
         transition={{ duration: 0.2 }}

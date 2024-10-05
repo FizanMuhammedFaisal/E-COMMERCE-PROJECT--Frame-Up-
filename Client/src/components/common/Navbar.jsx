@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BsCart2 } from 'react-icons/bs'
 import { FaRegUser } from 'react-icons/fa'
@@ -9,6 +9,9 @@ import {
 } from '@heroicons/react/24/outline'
 import { Link, useNavigate } from 'react-router-dom'
 import SearchBar from './SearchBar'
+import { useSelector } from 'react-redux'
+import Logo from './Animations/Logo'
+
 const products = [
   {
     name: 'Shop',
@@ -43,32 +46,37 @@ const navbarData = [
   { name: 'About Us', href: '/about-us' }
 ]
 
+const MLogo = React.memo(Logo)
+const MSearchBar = React.memo(SearchBar)
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const navigate = useNavigate()
+  const { items } = useSelector(state => state.cart)
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+  const handleScroll = useCallback(() => {
+    setIsScrolled(window.scrollY > 50)
   }, [])
 
-  const handleMouseEnter = name => {
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
+
+  const handleMouseEnter = useCallback(name => {
     setActiveDropdown(name)
-  }
+  }, [])
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setActiveDropdown(null)
-  }
+  }, [])
 
-  const toggleDropdown = name => {
+  const toggleDropdown = useCallback(name => {
     setActiveDropdown(prevState => (prevState === name ? null : name))
-  }
+  }, [])
 
   const sidebarVariants = {
     closed: { x: '100%', opacity: 0 },
@@ -92,17 +100,7 @@ export default function Navbar() {
     >
       <nav className='mx-auto flex max-w-7xl items-center justify-between p-3 lg:px-8'>
         <div className='flex lg:flex-1'>
-          <motion.a
-            href='/'
-            className='-m-1.5 p-1.5'
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className='sr-only'>Your Company</span>
-            <h1 className='font-secondary font-bold text-2xl text-textPrimary'>
-              Frame Up
-            </h1>
-          </motion.a>
+          <MLogo />
         </div>
 
         <div className='hidden lg:flex lg:gap-x-11 mr-11'>
@@ -153,12 +151,30 @@ export default function Navbar() {
         </div>
 
         <div className='flex lg:hidden'>
-          <div className='mt-2'>
-            <SearchBar
+          <div className='mt-1 mr-3'>
+            <MSearchBar
               setIsSearchFocused={setIsSearchFocused}
               isSearchFocused={isSearchFocused}
             />
           </div>
+          <motion.button
+            className='text-xl text-textPrimary mr-2'
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate('/account')}
+          >
+            <FaRegUser />
+          </motion.button>
+          <motion.button
+            className='text-2xl text-textPrimary'
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate('/cart')}
+          >
+            <div className='flex'>
+              <BsCart2 /> <p className='text-base'>({items.length})</p>
+            </div>
+          </motion.button>
           <button
             type='button'
             onClick={() => setMobileMenuOpen(true)}
@@ -171,7 +187,7 @@ export default function Navbar() {
 
         <div className='hidden lg:flex lg:flex-1 lg:justify-end'>
           <div className='flex items-center space-x-4 ml-auto'>
-            <SearchBar
+            <MSearchBar
               setIsSearchFocused={setIsSearchFocused}
               isSearchFocused={isSearchFocused}
             />
@@ -179,6 +195,7 @@ export default function Navbar() {
               className='text-xl text-textPrimary'
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
+              onClick={() => navigate('/account')}
             >
               <FaRegUser />
             </motion.button>
@@ -188,7 +205,9 @@ export default function Navbar() {
               whileTap={{ scale: 0.9 }}
               onClick={() => navigate('/cart')}
             >
-              <BsCart2 />
+              <div className='flex'>
+                <BsCart2 /> <p className='text-base'>({items.length})</p>
+              </div>
             </motion.button>
           </div>
         </div>

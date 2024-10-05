@@ -10,7 +10,7 @@ function BrowsePage() {
   const [error, setError] = useState(null)
   //
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(4)
+  const [itemsPerPage, setItemsPerPage] = useState(6)
   const [totalItems, setTotalItems] = useState(0)
 
   useEffect(() => {
@@ -21,7 +21,7 @@ function BrowsePage() {
       )
       .then(response => {
         setProducts(response.data.products || [])
-        setTotalItems(response.data.totalItems || 0) // Assuming your API returns totalItems
+        setTotalItems(response.data.totalItems || 0)
         setLoading(false)
       })
       .catch(error => {

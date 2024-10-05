@@ -10,7 +10,7 @@ const ResultCategory = React.memo(({ category }) => (
   <li>
     <Link
       to={`/category/${category.id}`}
-      className='flex items-center text-sm text-gray-600 hover:text-blue-600 transition duration-150 ease-in-out'
+      className='flex items-center text-sm text-gray-600 hover:text-customColorTertiarypop transition duration-150 ease-in-out'
     >
       <span>{category.name}</span>
       <FiChevronRight className='ml-auto' />
@@ -58,6 +58,7 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
     try {
       setLoading(true)
       const response = await api.get(`products/search/items?q=${query}`)
+
       setLoading(false)
 
       if (
@@ -112,8 +113,8 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
   }, [setIsSearchFocused])
 
   const searchInputVariants = {
-    small: { width: '150px' },
-    large: { width: '175px' }
+    small: { width: '130px' },
+    large: { width: '155px' }
   }
 
   const resultsVariants = {
@@ -134,8 +135,8 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
           placeholder='Search...'
           value={query}
           onChange={handleType}
-          className='w-full py-2 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
-          onFocus={() => setIsSearchFocused(true)}
+          className='w-full py-2 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop text-sm'
+          onClick={() => setIsSearchFocused(true)}
         />
         <button className='absolute right-3 top-1/2 transform -translate-y-1/2'>
           <LuSearch className='text-lg text-gray-500' />
@@ -193,7 +194,7 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
                             <ul className='space-y-3'>
                               {results.products.map((product, index) => (
                                 <ResultProduct
-                                  key={product.id}
+                                  key={product._id}
                                   product={product}
                                 />
                               ))}
@@ -209,7 +210,7 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
                 <div className='p-4 border-t border-gray-200 bg-gray-50'>
                   <Link
                     to={`/search?q=${encodeURIComponent(query)}`}
-                    className='text-sm text-blue-600 hover:underline block text-center'
+                    className='text-sm text-customColorTertiarypop hover:underline block text-center'
                   >
                     View all results for "{query}"
                   </Link>

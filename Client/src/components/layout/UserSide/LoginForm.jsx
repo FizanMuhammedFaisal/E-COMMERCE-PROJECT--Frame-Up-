@@ -14,7 +14,14 @@ function LoginForm() {
   const navigate = useNavigate()
 
   const dispatch = useDispatch()
-
+  const testUser = () => {
+    setEmail('fizanu@gmail.com')
+    setPassword('1')
+  }
+  const testAdmin = () => {
+    setEmail('fizan@gmail.com')
+    setPassword('1')
+  }
   const handleGoogleAuth = async () => {
     try {
       const result = await signInWithPopup(auth, provider)
@@ -203,6 +210,14 @@ function LoginForm() {
                   Login With Google
                 </p>
               </button>
+              <button
+                onClick={() => {
+                  testUser()
+                }}
+              >
+                user
+              </button>
+              <button onClick={testAdmin}>admin</button>
             </div>
           </form>
         </div>

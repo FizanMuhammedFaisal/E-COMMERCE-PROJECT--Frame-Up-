@@ -1,7 +1,11 @@
-import React from 'react'
-import * as AlertDialog from '@radix-ui/react-alert-dialog'
+import React, { useState, useEffect } from 'react'
+import Modal from 'react-modal'
 import CircularProgress from '@mui/material/CircularProgress'
-const AlertDialogDemo = ({
+import { motion, AnimatePresence } from 'framer-motion'
+
+Modal.setAppElement('#root')
+
+const AlertDialog = ({
   placeHolder,
   heading,
   description,
@@ -11,62 +15,116 @@ const AlertDialogDemo = ({
   onCancel,
   onConfirm,
   loading
-}) => (
-  <AlertDialog.Root open={isOpen !== null ? isOpen : undefined}>
-    {isOpen === null && (
-      <AlertDialog.Trigger asChild>
-        <button className='text-violet11 hover:bg-mauve3 shadow-blackA4 inline-flex h-[35px] items-center justify-center rounded-[4px] bg-white px-[15px] font-medium leading-none shadow-[0_2px_10px] outline-none focus:shadow-[0_0_0_2px] focus:shadow-black'>
+}) => {
+  const [modalIsOpen, setModalIsOpen] = useState(false)
+
+  useEffect(() => {
+    if (isOpen !== null) {
+      setModalIsOpen(isOpen)
+    }
+  }, [isOpen])
+
+  const openModal = () => setModalIsOpen(true)
+  const closeModal = () => {
+    setModalIsOpen(false)
+    if (onCancel) onCancel()
+  }
+
+  const handleConfirm = () => {
+    if (onConfirm) onConfirm()
+    if (isOpen === null) closeModal()
+  }
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 }
+  }
+
+  const contentVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 }
+  }
+
+  return (
+    <>
+      {isOpen === null && (
+        <button
+          onClick={openModal}
+          className='text-violet-600 hover:bg-violet-100 inline-flex h-[35px] items-center justify-center rounded-[4px] bg-white px-[15px] font-medium leading-none shadow-[0_2px_10px] outline-none focus:shadow-[0_0_0_2px] focus:shadow-black'
+        >
           {placeHolder}
         </button>
-      </AlertDialog.Trigger>
-    )}
-    <AlertDialog.Portal>
-      <AlertDialog.Overlay className='bg-blackA6 backdrop-blur-sm data-[state=open]:animate-overlayShow fixed inset-0 z-50' />
-      <AlertDialog.Overlay className='bg-blackA6 data-[state=open]:animate-overlayShow fixed inset-0' />
-      <AlertDialog.Content className='data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] font-tertiary bg-customP2BackgroundW_700 text-slate-950 dark:text-slate-50 dark:bg-customP2BackgroundD p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none z-50'>
-        <AlertDialog.Title className='text-mauve12 m-0 text-[20px] font-semibold'>
-          {heading ? heading : 'Are you sure'}
-        </AlertDialog.Title>
-        <AlertDialog.Description className='text-mauve11 mt-4 mb-5 text-[17px] leading-normal text-lg'>
-          {description ? description : 'This action cannot be undone'}
-        </AlertDialog.Description>
-        <div className='flex justify-end gap-[25px]'>
-          <AlertDialog.Cancel asChild>
-            <button
-              onClick={onCancel}
-              className='  hover:bg-customP2Primary duration-200 dark:hover:bg-customP2Primary bg-customP2BackgroundW_400  dark:bg-customP2BackgroundD_500 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none outline-none focus:shadow-[0_0_0_2px]'
+      )}
+      <AnimatePresence>
+        {modalIsOpen && (
+          <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={closeModal}
+            contentLabel='Alert Dialog'
+            className='modal-content'
+            overlayClassName='modal-overlay'
+          >
+            <motion.div
+              className='fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center'
+              variants={overlayVariants}
+              initial='hidden'
+              animate='visible'
+              exit='hidden'
             >
-              {button1 ? button1 : 'Cancel'}
-            </button>
-          </AlertDialog.Cancel>
-          <AlertDialog.Action asChild>
-            <button
-              onClick={onConfirm}
-              className=' bg-red-400 w-20 hover:bg-red-300 dark:hover:bg-red-800 dark:bg-red-900 duration-200 hover:bg-red5 focus:shadow-red7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none outline-none focus:shadow-[0_0_0_2px]'
-            >
-              {loading ? (
-                <CircularProgress
-                  sx={{
-                    color: 'currentColor'
-                  }}
-                  size={20}
-                  thickness={5}
-                />
-              ) : button2 ? (
-                button2 === 'Active' ? (
-                  'Activate'
-                ) : (
-                  'Block'
-                )
-              ) : (
-                'Delete'
-              )}
-            </button>
-          </AlertDialog.Action>
-        </div>
-      </AlertDialog.Content>
-    </AlertDialog.Portal>
-  </AlertDialog.Root>
-)
+              <motion.div
+                className='w-[90vw] sm:w-[80vw] md:w-[70vw] max-w-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl'
+                variants={contentVariants}
+                initial='hidden'
+                animate='visible'
+                exit='hidden'
+              >
+                <div className='p-6 sm:p-8'>
+                  <h2 className='text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100'>
+                    {heading || 'Are you sure?'}
+                  </h2>
+                  <p className='text-base mb-6 text-gray-700 dark:text-gray-300'>
+                    {description || 'This action cannot be undone.'}
+                  </p>
+                  <div className='flex justify-end gap-4'>
+                    <button
+                      onClick={closeModal}
+                      className='px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500'
+                    >
+                      {button1 || 'Cancel'}
+                    </button>
+                    <button
+                      onClick={handleConfirm}
+                      className='px-4 py-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 min-w-[80px]'
+                    >
+                      {loading ? (
+                        <CircularProgress
+                          sx={{
+                            color: 'currentColor'
+                          }}
+                          size={20}
+                          thickness={5}
+                        />
+                      ) : button2 ? (
+                        button2 === 'Active' ? (
+                          'Activate'
+                        ) : button2 === 'Block' ? (
+                          'Block'
+                        ) : (
+                          button2
+                        )
+                      ) : (
+                        'Delete'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </Modal>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
 
-export default AlertDialogDemo
+export default AlertDialog

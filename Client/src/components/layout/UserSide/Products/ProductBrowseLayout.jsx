@@ -25,8 +25,8 @@ function ProductBrowseLayout({
           onClick={() => handlePageChange(i)}
           className={`mx-1 px-4 py-2 rounded-md transition-colors duration-200 ${
             currentPage === i
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-blue-500 border border-blue-500 hover:bg-blue-100'
+              ? 'bg-customColorTertiary text-white'
+              : 'bg-white text-custombg-customColorTertiary border border-custombg-customColorTertiary hover:bg-customColorTertiary/15'
           }`}
         >
           {i}
@@ -37,7 +37,7 @@ function ProductBrowseLayout({
   }
 
   return (
-    <div className='w-full lg:w-3/4 bg-gray-50 p-6 rounded-lg shadow-lg'>
+    <div className='w-full lg:w-3/4 bg-white mb-40'>
       <div className='flex flex-wrap justify-between items-center mb-6'>
         <p className='text-gray-600 font-medium mb-2 lg:mb-0'>
           Displaying {sortedProducts.length} artworks
@@ -66,7 +66,7 @@ function ProductBrowseLayout({
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-md transition-colors duration-200 ${
                 viewMode === 'grid'
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-customColorTertiary text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -76,7 +76,7 @@ function ProductBrowseLayout({
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-md transition-colors duration-200 ${
                 viewMode === 'list'
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-customColorTertiary text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >

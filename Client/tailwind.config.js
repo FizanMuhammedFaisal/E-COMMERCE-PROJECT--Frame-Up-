@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 export default {
   darkMode: 'class', // to enable dark mode stuff
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -11,9 +12,12 @@ export default {
       },
       colors: {
         customColorPrimary: '#e6e3d8',
+        customColorPrimaryLight: '#f5f3eb',
         customColorSecondary: '#ecf3f9',
         textPrimary: '#423e31',
-        customColorTertiary: '#092933',
+        customColorTertiary: '#203E49',
+        customColorTertiaryLight: '#245160',
+        customColorTertiarypop: '#549FB8',
         customP2Primary: '#6E6ADE',
         customP2BackgroundW: '#F8F8FF',
         customP2BackgroundW_500: '#D9DCFF',
@@ -49,5 +53,5 @@ export default {
       }
     }
   },
-  plugins: [require('@tailwindcss/forms')]
+  plugins: [import('@tailwindcss/forms'), 'prettier-plugin-tailwindcss']
 }

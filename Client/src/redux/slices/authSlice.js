@@ -6,7 +6,10 @@ const authSlice = createSlice({
     user: null,
     isAuthenticated: false,
     role: null,
-    status: 'blocked'
+    status: 'blocked',
+    checkoutValidated: false,
+    paymentValidated: false,
+    orderConfirmed: false
   },
   reducers: {
     setUser: (state, action) => {
@@ -20,9 +23,32 @@ const authSlice = createSlice({
       state.user = null
       state.isAuthenticated = !!localStorage.getItem('accessToken')
       state.role = null
+    },
+    validateChekout: state => {
+      state.checkoutValidated = true
+    },
+    validatePayment: state => {
+      state.paymentValidated = true
+    },
+    validateOrder: state => {
+      state.orderConfirmed = true
+    },
+    clearValidations: state => {
+      state.paymentValidated = false
+      state.checkoutValidated = false
+    },
+    clearValidateOrder: state => {
+      state.orderConfirmed = false
     }
   }
 })
 
 export default authSlice.reducer
-export const { setUser, logoutUser } = authSlice.actions
+export const {
+  setUser,
+  logoutUser,
+  validateChekout,
+  validatePayment,
+  clearValidations,
+  validateOrder
+} = authSlice.actions

@@ -23,7 +23,7 @@ const ProductBrowsePage = () => {
     Techniques: [],
     priceRange: [0, 10000]
   })
-  const limit = 3
+  const limit = 6
 
   // Function to fetch products with the provided filters, page, and sort order
   const fetchProducts = async ({
@@ -48,7 +48,7 @@ const ProductBrowsePage = () => {
       }
     })
     setTotalpages(response.data.totalPages)
-    console.log(response.data)
+
     return response.data
   }
 
@@ -82,12 +82,14 @@ const ProductBrowsePage = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 font-primary'>
-      <div className='container mx-auto px-4 py-12'>
-        <h1 className='text-4xl font-bold mb-8 text-textPrimary font-tertiary'>
-          Discover Unique Artworks
-        </h1>
-        <div className='flex flex-col lg:flex-row gap-8'>
+    <div className='min-h-screen bg-white  w-full font-primary'>
+      <div>
+        <div className=' py-6 mb-7  flex justify-center'>
+          <h1 className='sm:text-4xl tracking-tighter text-4xl font-bold text-textPrimary font-primary'>
+            Discover Unique Artworks
+          </h1>
+        </div>
+        <div className='flex flex-col  mx-9 lg:flex-row gap-8'>
           <ProductListFilter
             isFilterOpen={isFilterOpen}
             availableCategories={availableCategories}

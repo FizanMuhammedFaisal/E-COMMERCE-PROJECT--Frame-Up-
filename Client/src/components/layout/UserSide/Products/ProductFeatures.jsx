@@ -22,7 +22,7 @@ export default function ProductFeatures({ features }) {
             )}
             {features.productCategories &&
               features.productCategories.length > 0 && (
-                <p className='mt-2 text-sm text-gray-500'>
+                <div className='mt-2 text-sm text-gray-500'>
                   <strong>Categories:</strong>{' '}
                   {features.productCategories &&
                   features.productCategories.length > 0 ? (
@@ -34,7 +34,7 @@ export default function ProductFeatures({ features }) {
                   ) : (
                     <div>No categories available</div>
                   )}
-                </p>
+                </div>
               )}
             {features.stock !== undefined && (
               <p className='mt-2 text-sm text-gray-500'>

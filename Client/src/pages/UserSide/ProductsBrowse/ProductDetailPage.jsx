@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import apiClient from '../../../services/api/apiClient'
 import ProductDetails from '../../../components/layout/UserSide/Products/ProductDetails'
+import api from '../../../services/api/api'
 
 function ProductDetailPage() {
   const { productId } = useParams()
@@ -11,8 +12,8 @@ function ProductDetailPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    apiClient
-      .get(`/api/products/${productId}`)
+    api
+      .get(`/products/${productId}`)
       .then(response => {
         setProduct(response.data)
         setLoading(false)

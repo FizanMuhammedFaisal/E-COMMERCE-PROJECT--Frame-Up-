@@ -345,7 +345,20 @@ const getSearched = asyncHandler(async (req, res) => {
       .json({ message: 'Server error. Please try again later.' })
   }
 })
+//
+const getProductCards = asyncHandler(async (req, res, next) => {
+  const products = await Product.find({}).sort({ productStock: 1 }).limit(11)
 
+  const Products = products.map((product, i) => {
+    return {
+      image: product.thumbnailImage,
+      title: product.productName,
+      price: product.productPrice,
+      id: product._id
+    }
+  })
+  res.status(200).json({ message: 'fetched Products', Products })
+})
 export {
   addProducts,
   getProducts,
@@ -353,5 +366,6 @@ export {
   updateProduct,
   updateProductStatus,
   getProductsAdmin,
-  getSearched
+  getSearched,
+  getProductCards
 }

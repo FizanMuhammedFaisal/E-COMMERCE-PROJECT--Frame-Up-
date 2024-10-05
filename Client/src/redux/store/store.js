@@ -7,6 +7,7 @@ import adminUsersSlice from '../slices/adminUsersSlice.js'
 import adminProductsSlice from '../slices/Admin/AdminProducts/adminProductsSlice.js'
 import adminArtists from '../slices/Admin/AdminArtists/adminArtists.js'
 import cartSlice from '../slices/Users/Cart/cartSlice.js'
+import addressSlice from '../slices/Users/Address/addressSlice.js'
 
 const store = configureStore({
   reducer: {
@@ -15,9 +16,10 @@ const store = configureStore({
     adminProducts: adminProductsSlice,
     adminCategory: adminCategorySlice,
     categoryFetch: categoriesFetchSlice,
-    product: productSlice,
     adminArtists: adminArtists,
-    cart: cartSlice
+    product: productSlice,
+    cart: cartSlice,
+    address: addressSlice
   }
 })
 export default store

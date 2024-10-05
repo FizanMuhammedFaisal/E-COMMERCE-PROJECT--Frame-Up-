@@ -1,20 +1,21 @@
-import React from 'react'
-import Navbar from '../../components/common/Navbar'
-import { useDispatch } from 'react-redux'
-import { logoutUser } from '../../redux/slices/authSlice'
 import { useNavigate } from 'react-router-dom'
-import apiClient from '../../services/api/apiClient'
+import { motion } from 'framer-motion'
+
+import {
+  MovingProductsSection,
+  BannerSection
+} from '../../components/layout/UserSide/Home/HomePageComponents'
 
 function HomePage() {
-  const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    dispatch(logoutUser())
-    console.log('logged out')
-    navigate('/login')
-  }
+  // const handleLogout = () => {
+  //   localStorage.removeItem('accessToken')
+  //   dispatch(logoutUser())
+  //   console.log('logged out')
+  //   navigate('/login')
+  // }
+
   const handleBrowse = () => {
     navigate('/all')
   }
@@ -22,36 +23,55 @@ function HomePage() {
     <>
       <div className='min-h-screen bg-white'>
         {/* Hero Section */}
-        <section className='py-12 lg:py-24'>
-          <div className='container mx-auto px-4'>
+        <section className='py-12 lg:py-24 pb-52 bg-customColorSecondary'>
+          <div className='container mx-auto px-6'>
             <div className='flex flex-col lg:flex-row items-center'>
               <div className='lg:w-1/2 lg:pr-12 mb-8 lg:mb-0'>
-                <h1 className='text-4xl lg:text-6xl font-bold mb-4 text-gray-900'>
+                <h1 className='text-5xl lg:text-6xl text-textPrimary font-bold mb-4 spacing tracking-tight font-secondary '>
                   Discover Original Art
                 </h1>
-                <p className='text-xl mb-8 text-gray-600'>
+
+                <p className='text-xl mb-8 font-primary'>
                   Shop one-of-a-kind pieces from artists around the world
                 </p>
-                <button
+
+                <motion.button
                   onClick={handleBrowse}
-                  className='bg-customColorTertiary px-3 py-2 text-white hover:opacity-90 duration-300 rounded-md  '
+                  whileHover={{ scale: 1.09 }}
+                  className='bg-customColorTertiary text-white  border-transparent hover:border-customColorTertiary border-2 px-3 py-2 font-primary  hover:bg-customColorTertiaryLight font-bold  duration-300'
                 >
                   Shop Now
-                </button>
+                </motion.button>
               </div>
-              <div className='lg:w-1/2'>
+              <div className='relative lg:w-1/2 mt-4'>
                 <img
-                  src='/public/assets/images/Homepage Hero Aug 24.webp'
+                  src='/assets/images/Homepage Hero Aug 24.webp' // Update the path if needed
                   alt='Featured Artwork'
-                  className='rounded-lg shadow-lg w-full h-auto'
+                  className='relative rounded-lg shadow-lg w-full h-auto'
                 />
               </div>
             </div>
           </div>
         </section>
-
+        {/* <section>
+          <MovingBanner
+            texts={[
+              'Exclusive Art Pieces',
+              'Discover Original Paintings',
+              'Curated Collections'
+            ]}
+          />
+        </section> */}
+        <section className=''>
+          <div className='bg-gradient-to-b from-customColorSecondary to-customColorTertiarypop'></div>
+          {/* <MovingProductsSection />  */}
+          {/* <div className='bg-gradient-to-b h-20 from-[#C9BDF4] to-customColorSecondary'></div> */}
+        </section>
         {/* Featured Artworks */}
-        <section className='py-16 bg-gray-50'>
+        <section>
+          <BannerSection />
+        </section>
+        <section className='py-16 bg-customColorSecondary'>
           {/* <div className='container mx-auto px-4'>
             <h2 className='text-3xl font-bold mb-8 text-center text-gray-900'>
               Featured Artworks

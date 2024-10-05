@@ -5,6 +5,7 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async page => {
   const response = await apiClient.get(
     `/api/admin/getusers?page=${page}&limit=15`
   )
+  console.log(response)
   return response.data
 })
 

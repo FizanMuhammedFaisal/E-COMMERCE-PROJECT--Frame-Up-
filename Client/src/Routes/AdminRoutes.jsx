@@ -9,7 +9,7 @@ import AdminProducts from '../pages/AdminSide/Products/AdminProducts'
 import AdminUsers from '../pages/AdminSide/Users/AdminUsers'
 import DashboardLayout from '../components/layout/AdminSide/DashBoardLayout'
 import AdminAddProducts from '../pages/AdminSide/AdminAddProducts'
-import AdminOrders from '../pages/AdminSide/AdminOrders'
+import AdminOrders from '../pages/AdminSide/Orders/AdminOrders'
 import AdminCategory from '../pages/AdminSide/Categories/AdminCategories'
 import AdminSalesReport from '../pages/AdminSide/AdminSalesReport'
 import AddCategoriesPage from '../pages/AdminSide/Categories/AddCategoriesPage'
@@ -21,6 +21,7 @@ const AdminRoutes = [
     path: '/admin/login',
     element: <AuthenticationRouter element={<AdminLoginPage />} />
   },
+
   {
     path: '',
     element: (
@@ -34,6 +35,7 @@ const AdminRoutes = [
         element: (
           <ProtectedRoute element={<DashboardLayout />} adminRoute={true} />
         ),
+
         children: [
           {
             path: '',

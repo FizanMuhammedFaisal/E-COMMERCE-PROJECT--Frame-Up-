@@ -34,6 +34,7 @@ apiClient.interceptors.response.use(
           { withCredentials: true }
         )
         const accessToken = res.data.token
+        console.log(accessToken)
 
         if (accessToken) {
           // Save the new access token in localStorage and retry original request
@@ -45,7 +46,7 @@ apiClient.interceptors.response.use(
         console.error('Refresh token error:', refreshError)
         // Dispatch sessionTimeout event when refresh token fails
         localStorage.removeItem('accessToken')
-        window.dispatchEvent(new Event('sessionTimeout'))
+        // window.dispatchEvent(new Event('sessionTimeout'))
       }
     }
     return Promise.reject(error)

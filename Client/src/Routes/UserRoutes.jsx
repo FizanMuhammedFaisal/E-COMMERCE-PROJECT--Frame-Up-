@@ -4,7 +4,6 @@ import HomePage from '../pages/UserSide/HomePage'
 import GoogleAuthLoadingPage from '../pages/UserSide/GoogleAuthLoadingPage'
 import AuthenticationRouter from '../utils/AuthenticationRouter'
 import UserOTPPage from '../pages/UserSide/UserOTPPage'
-import BrowsePage from '../pages/UserSide/BrowsePage'
 import UserLayout from '../components/layout/UserSide/UserLayout'
 import BlockedPage from '../pages/UserSide/BlockedUser/BlockedPage'
 import ProtectedRoute from '../utils/ProtectedRoute'
@@ -14,6 +13,13 @@ import PasswordResetPage from '../pages/UserSide/Login/PasswordResetPage.jsx'
 import ProductBrowsePage from '../pages/UserSide/ProductsBrowse/ProductBrowsePage.jsx'
 import ProductDetailPage from '../pages/UserSide/ProductsBrowse/ProductDetailPage.jsx'
 import CartPage from '../pages/UserSide/Cart/CartPage.jsx'
+import AccountPage from '../pages/UserSide/Account/AccountPage.jsx'
+import CheckoutPage from '../pages/UserSide/Checkout/CheckoutPage.jsx'
+import CheckoutWrapper from '../utils/CheckoutWrapper.jsx'
+import PaymentWrapper from '../utils/PaymentWrapper.jsx'
+import OrderConfirmationWrapper from '../utils/OrderConfirmationWrapper.jsx'
+import PaymentPage from '../pages/UserSide/Payment/PaymentPage.jsx'
+import OrderConfirmedPage from '../pages/UserSide/Payment/OrderConfirmedPage.jsx'
 
 const UserRoutes = [
   {
@@ -22,7 +28,7 @@ const UserRoutes = [
   },
   {
     path: '/login/forgot-password',
-    element: <AuthenticationRouter element={<ForgotPasswordPage />} />
+    element: <ForgotPasswordPage />
   },
   {
     path: '/reset-password',
@@ -63,6 +69,45 @@ const UserRoutes = [
       {
         path: 'cart',
         element: <CartPage />
+      },
+
+      {
+        path: 'account',
+        element: <ProtectedRoute element={<AccountPage />} />
+      },
+      {
+        path: 'account/:routes',
+        element: <ProtectedRoute element={<AccountPage />} />
+      },
+      {
+        path: 'order-confirmed',
+        element: <OrderConfirmationWrapper />,
+        children: [
+          {
+            path: '',
+            element: <OrderConfirmedPage />
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: '/checkout',
+    element: <CheckoutWrapper />,
+    children: [
+      {
+        path: '',
+        element: <CheckoutPage />
+      },
+      {
+        path: 'payment',
+        element: <PaymentWrapper />,
+        children: [
+          {
+            path: '',
+            element: <PaymentPage />
+          }
+        ]
       }
     ]
   }

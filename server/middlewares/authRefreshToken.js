@@ -13,7 +13,7 @@ const refreshTokenMiddleware = asyncHandler(async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_REFRESH)
-    req.user = await User.findById(decoded.userId).select('-password') // Attach user to req
+    req.user = await User.findById(decoded.userId).select('-password')
     console.log('new acces token created' + decoded.userId)
     next()
   } catch (error) {

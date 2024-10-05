@@ -14,7 +14,14 @@ import {
   sendForgotPasswordOTP,
   sendToken,
   checkResetTokenCookie,
-  resetPassword
+  resetPassword,
+  addAddress,
+  getAddress,
+  getUserDetails,
+  updateUser,
+  updatePassword,
+  deleteAddress,
+  updateAddress
 } from '../controllers/userController.js'
 import verifyResetToken from '../middlewares/authResetTokenMiddleware.js'
 router.post('/checkUser', checkUser)
@@ -29,5 +36,13 @@ router.post('/send-otp', verifySignUpToken, sendOTP)
 router.post('/verify-otp', verifySignUpToken, verifyOTP)
 router.post('/access', refreshTokenMiddleware, makeAccess)
 //
+router.post('/add-address', protect, addAddress)
+router.get('/get-address', protect, getAddress)
+//
+router.get('/get-user', protect, getUserDetails)
+router.post('/update-profile', protect, updateUser)
+router.post('/update-password', protect, updatePassword)
+router.delete('/delete-address/:id', protect, deleteAddress)
+router.post('/update-address', protect, updateAddress)
 
 export default router

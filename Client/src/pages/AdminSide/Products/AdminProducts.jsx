@@ -14,6 +14,7 @@ import { ToastContainer } from 'react-toastify'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Select } from '@headlessui/react'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const AdminProducts = () => {
   const navigate = useNavigate()
@@ -30,14 +31,17 @@ const AdminProducts = () => {
   const [currentUserId, setCurrentUserId] = useState('')
   useEffect(() => {
     dispatch(fetchProducts(page))
-  }, [page])
+  }, [page, dispatch])
 
   useEffect(() => {
     if (loading || !hasMore) return
-
+    console.log('asdfasf')
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting) {
+        console.log('here')
+        if (entries[0].isIntersecting) console.log('thene hre')
+        {
+          console.log('sdadsf')
           dispatch(setPage(page + 1))
         }
       },
@@ -46,11 +50,12 @@ const AdminProducts = () => {
 
     const currentLastProductRef = lastProductRef.current
     if (currentLastProductRef) observer.observe(currentLastProductRef)
+    console.log('created')
 
     return () => {
       if (currentLastProductRef) observer.unobserve(currentLastProductRef)
     }
-  }, [loading, hasMore, page])
+  }, [loading, hasMore, page, dispatch])
   const handleStatusChange = useCallback(
     (id, newStatus) => {
       setIsOpen(true)
@@ -152,6 +157,13 @@ const AdminProducts = () => {
   )
   return (
     <div className='p-4'>
+      <button
+        onClick={() => {
+          dispatch(setPage(2))
+        }}
+      >
+        sdfaf
+      </button>
       <div className='flex flex-col sm:flex-row justify-between items-center mb-4'>
         <h1 className='text-4xl font-bold mb-2 sm:mb-0 '>Product Management</h1>
       </div>
@@ -171,7 +183,7 @@ const AdminProducts = () => {
         <ProductsTable columns={columns} data={data} />
       </div>
       <div className='text-center mt-4'>
-        {/* {loading && <CircularProgress size={30} color='inherit ' />} */}
+        {loading && <CircularProgress size={30} color='inherit' />}
       </div>
       {hasMore && !loading && (
         <div ref={lastProductRef} className='text-center'>
