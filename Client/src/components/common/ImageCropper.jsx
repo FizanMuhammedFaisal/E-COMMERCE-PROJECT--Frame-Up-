@@ -41,9 +41,9 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
       // Convert canvas to JPEG format with specified quality
       const croppedImageBase64 = cropperRef.current.cropper
         .getCroppedCanvas()
-        .toDataURL('image/jpeg', 0.9)
+        .toDataURL('image/webp', 0.8)
 
-      const fileName = `cropped-image-${Date.now()}.jpeg`
+      const fileName = `cropped-image-${Date.now()}.webp`
       const file = base64ToFile(croppedImageBase64, fileName)
 
       // Pass the cropped image to the parent component via callback

@@ -105,41 +105,45 @@ const EmptyCart = () => {
 }
 const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {items.map(item => (
-        <Card key={item.productId}>
-          <CardContent className='p-6'>
-            <div className='flex flex-col sm:flex-row items-center justify-between'>
-              <div className='flex flex-col sm:flex-row items-center mb-4 sm:mb-0 w-full sm:w-auto'>
+        <Card
+          key={item.productId}
+          elevation={0}
+          className='border border-gray-200'
+        >
+          <CardContent className='p-4'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between'>
+              <div className='flex items-center mb-4 sm:mb-0 w-full sm:w-auto'>
                 <img
                   src={item.thumbnailImage}
                   alt={item.productName}
-                  className='w-32 h-32 object-cover rounded-md mr-6 transition-transform duration-300 hover:scale-105 shadow-md'
+                  className='w-24 h-24 object-cover rounded-md mr-4'
                   loading='lazy'
                 />
-                <div className='text-center sm:text-left mt-4 sm:mt-0'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+                <div>
+                  <h2 className='text-lg font-semibold text-gray-900 mb-1'>
                     {item.productName}
                   </h2>
-                  <p className='text-2xl text-indigo-600 font-bold'>
+                  <p className='text-xl text-customColorTertiaryDark font-bold'>
                     ${item.price.toFixed(2)}
                   </p>
                 </div>
               </div>
-              <div className='flex items-center relative mt-4 sm:mt-0'>
+              <div className='flex items-center justify-between w-full sm:w-auto mt-4 sm:mt-0'>
                 {item.quantity === 0 ? (
                   <Badge
                     variant='destructive'
-                    className='text-base px-3 bg-red-100 text-red-600 me-2 py-2 rounded-full'
+                    className='text-sm px-2 bg-red-100 text-red-600 py-1 rounded-full'
                   >
-                    <ExclamationCircleIcon className='w-5 h-5 mr-1' />
+                    <ExclamationCircleIcon className='w-4 h-4 mr-1 inline' />
                     Out of Stock
                   </Badge>
                 ) : (
                   <div className='flex items-center space-x-2'>
                     <MotionButton
-                      variant='outline'
-                      size='icon'
+                      variant='outlined'
+                      size='small'
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleUpdateQuantity(item.productId, -1)}
@@ -151,8 +155,8 @@ const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
                       {item.quantity}
                     </span>
                     <MotionButton
-                      variant='outline'
-                      size='icon'
+                      variant='outlined'
+                      size='small'
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleUpdateQuantity(item.productId, 1)}
@@ -162,14 +166,14 @@ const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
                   </div>
                 )}
                 <MotionButton
-                  variant='ghost'
-                  size='icon'
-                  className='ml-4'
+                  variant='text'
+                  size='small'
+                  className='ml-4 text-gray-500'
                   whileHover={{ scale: 1.1, color: '#EF4444' }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => handleRemoveItem(item.productId)}
                 >
-                  <XMarkIcon className='h-6 w-6' />
+                  <XMarkIcon className='h-5 w-5' />
                 </MotionButton>
               </div>
             </div>

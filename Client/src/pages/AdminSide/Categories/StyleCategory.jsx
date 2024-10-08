@@ -18,7 +18,7 @@ function StyleCategory() {
     <div className=''>
       <h2 className='text-2xl text-center font-bold'>Styles</h2>
       <div className='mt-6'>
-        <CategoriesTable data={styles.data} />
+        <CategoriesTable type={'styles'} data={styles.data} />
       </div>
     </div>
   )

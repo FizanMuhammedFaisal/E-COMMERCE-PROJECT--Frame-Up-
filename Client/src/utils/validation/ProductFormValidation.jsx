@@ -19,10 +19,20 @@ const validateProductForm = (
   if (!formData.productPrice || formData.productPrice <= 0) {
     errors.productPrice = 'Product price must be greater than zero'
   }
+  // Validate product price
+  if (!formData.discountPrice || formData.discountPrice <= 0) {
+    errors.discountPrice = 'Product price must be greater than zero'
+  }
+  if (
+    formData.discountPrice <= 0 ||
+    formData.discountPrice >= formData.productPrice
+  ) {
+    errors.discountPrice = 'Product price must be less than actuall price'
+  }
 
   // Validate product category
   const productCategories = formData.productCategory || {}
-  console.log(productCategories)
+
   // Check if at least one category type is non-empty
   const hasAtLeastOneCategory = Object.values(productCategories).some(
     categoryArray => Array.isArray(categoryArray) && categoryArray.length > 0
@@ -39,6 +49,19 @@ const validateProductForm = (
   } else if (formData.productDescription.length < 10) {
     errors.productDescription =
       'Description should be at least 10 characters long'
+  }
+  const artistName = formData.artistName || []
+
+  // Check if at least one element in the artistName array is an object
+  const hasOneOption = artistName.some(
+    option =>
+      typeof option === 'object' &&
+      !Array.isArray(option) &&
+      Object.keys(option).length > 0
+  )
+
+  if (!hasOneOption) {
+    errors.artistName = 'At least one artist Name is required'
   }
 
   // Validate product information (optional but can have min length)

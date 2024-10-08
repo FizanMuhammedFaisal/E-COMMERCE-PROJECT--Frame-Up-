@@ -2,9 +2,11 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 let initialState = {
   productName: '',
   productPrice: '',
+  discountPrice: '',
   productYear: '',
   productStock: '',
   productCategory: { themes: [], styles: [], techniques: [] },
+  artistName: '',
   productDescription: '',
   productInformation: '',
   productImages: [],

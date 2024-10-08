@@ -6,12 +6,15 @@ const addToCart = asyncHandler(async (req, res, next) => {
   const user = req.user
   console.log(user._id)
   const { productId, price, quantity } = req.body
+
+  // Validate input
   if (!productId || !quantity || quantity < 1 || !price) {
-    const error = new Error('invalid product data')
+    const error = new Error('Invalid product data')
     error.statusCode = 400
     return next(error)
   }
-  // stock checking to see if it is available
+
+  // Check if the product exists
   const product = await Product.findById(productId)
   if (!product) {
     const error = new Error('Product not found')
@@ -19,27 +22,50 @@ const addToCart = asyncHandler(async (req, res, next) => {
     return next(error)
   }
 
-  if (product.productStock < quantity) {
-    const error = new Error('Not enough stock available')
-    error.statusCode = 400
-    return next(error)
-  }
+  console.log(`Product stock: ${product.productStock}`)
+  console.log(`Requested quantity: ${quantity}`)
 
+  // Fetch the cart for the user
   let cart = await Cart.findOne({ userId: req.user.id })
   if (!cart) {
     cart = new Cart({ userId: req.user.id, items: [] })
   }
 
+  // Find the item in the cart
   const existingItemIndex = cart.items.findIndex(
     item => item.productId.toString() === productId
   )
+
+  let totalQuantityInCart = quantity
   if (existingItemIndex > -1) {
+    // Add the quantity already in the cart to the requested quantity
+    totalQuantityInCart += cart.items[existingItemIndex].quantity
+  }
+
+  // Check if the combined quantity exceeds the stock
+  if (totalQuantityInCart > product.productStock) {
+    const error = new Error(
+      'Not enough stock available for the total quantity requested'
+    )
+    error.statusCode = 400
+    return next(error)
+  }
+
+  // Update the cart
+  if (existingItemIndex > -1) {
+    // If the product is already in the cart, just update the quantity
     cart.items[existingItemIndex].quantity += quantity
   } else {
+    // If the product is not in the cart, add it
     cart.items.push({ productId, price, quantity })
   }
+
+  // Save the cart
   await cart.save()
+
+  // Populate the product details
   await cart.populate('items.productId', 'productName thumbnailImage')
+
   const populatedItems = cart.items.map(item => ({
     productId: item.productId._id,
     productName: item.productId.productName,
@@ -49,11 +75,13 @@ const addToCart = asyncHandler(async (req, res, next) => {
   }))
 
   console.log(cart.items)
+
   return res.status(200).json({
     message: 'Product added to cart successfully',
     items: populatedItems
   })
 })
+
 // for fetching cart
 //
 const fetchCart = asyncHandler(async (req, res, next) => {

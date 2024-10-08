@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBagIcon } from '@heroicons/react/24/outline'
+import { ShoppingBagIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -8,40 +8,30 @@ import {
   EmptyCart,
   CartItems
 } from '../../../components/layout/UserSide/Cart/CartComponents'
-
 import { useCart } from '../../../hooks/useCart'
 import { Alert, Button, Snackbar } from '@mui/material'
 import apiClient from '../../../services/api/apiClient'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
 import { validateChekout } from '../../../redux/slices/authSlice'
-validateChekout
-const MotionButton = motion.create(Button)
+
+const MotionButton = motion(Button)
 
 export default function CartPage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { isAuthenticated } = useSelector(state => state.auth)
   const { items, subtotal, totalPrice } = useSelector(state => state.cart)
   const { updateCartQuantity, removeFromCart } = useCart()
-  const dispatch = useDispatch()
   const [error, setError] = useState({ productId: null, message: '' })
   const [snackbarData, setSnackbarData] = useState({
     open: false,
     message: '',
     severity: 'success'
   })
-  const MemoizedCartItems = React.memo(CartItems)
+
   useEffect(() => {
     validateCart(items)
   }, [items])
-
-  const handleRemoveItem = id => {
-    removeFromCart(id)
-    setSnackbarData({
-      open: true,
-      message: 'Item removed from cart',
-      severity: 'success'
-    })
-  }
 
   const validateCart = items => {
     const outOfStockItems = items.filter(item => item.quantity === 0)
@@ -52,6 +42,15 @@ export default function CartPage() {
         severity: 'warning'
       })
     }
+  }
+
+  const handleRemoveItem = id => {
+    removeFromCart(id)
+    setSnackbarData({
+      open: true,
+      message: 'Item removed from cart',
+      severity: 'success'
+    })
   }
 
   const handleCheckout = async () => {
@@ -65,21 +64,19 @@ export default function CartPage() {
     } else {
       try {
         const res = await apiClient.get('/api/cart')
-        console.log(res)
         if (res?.data?.cart) {
           dispatch(setCart(res.data.cart))
         }
-
         if (res.data.outofstock) {
           return
         }
         dispatch(validateChekout())
         navigate('/checkout')
       } catch (error) {
-        console.log(error)
+        console.error(error)
         setSnackbarData({
           open: true,
-          message: 'Failed to Operate',
+          message: 'Failed to proceed to checkout',
           severity: 'error'
         })
       }
@@ -108,66 +105,86 @@ export default function CartPage() {
     }
   }
 
+  const MemoizedCartItems = useMemo(() => React.memo(CartItems), [])
+
   if (!isAuthenticated) {
     return <NotLoggedIn />
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 font-primary'>
       <div className='max-w-4xl mx-auto'>
-        <h1 className='text-4xl font-bold mb-10 text-gray-900 text-center'>
-          Your Shopping Cart
-        </h1>
-        <button onClick={() => navigate('/order-confirmed')}>afasf</button>
-        {items.length === 0 ? (
-          <EmptyCart />
-        ) : (
-          <MemoizedCartItems
-            items={items}
-            handleUpdateQuantity={handleUpdateQuantity}
-            handleRemoveItem={handleRemoveItem}
-          />
-        )}
-        {items.length > 0 && (
-          <div className='mt-10 bg-white p-8 rounded-lg shadow-lg'>
-            <div className='flex justify-between text-xl font-medium text-gray-900 mb-4'>
-              <p>Subtotal</p>
-              <p>${subtotal.toFixed(2)}</p>
-            </div>
-            <div className='flex justify-between text-2xl font-bold text-gray-900 mb-8'>
-              <p>Total</p>
-              <p>${totalPrice.toFixed(2)}</p>
-            </div>
-            <motion.button
-              className='w-full mb-4 py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200'
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleCheckout}
+        <header className='mb-8 flex items-center justify-between'>
+          <h1 className='text-3xl sm:text-4xl font-semibold text-customColorTertiaryDark'>
+            Shopping Cart
+          </h1>
+          <MotionButton
+            variant='text'
+            startIcon={<ArrowLeftIcon className='w-5 h-5' />}
+            onClick={() => navigate('/all')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Continue Shopping
+          </MotionButton>
+        </header>
+
+        <AnimatePresence>
+          {items.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <div className='flex items-center justify-center'>
-                <ShoppingBagIcon className='w-5 h-5 mr-2' />
-                Proceed to Checkout
+              <EmptyCart />
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <MemoizedCartItems
+                items={items}
+                handleUpdateQuantity={handleUpdateQuantity}
+                handleRemoveItem={handleRemoveItem}
+              />
+
+              <div className='mt-8 bg-white p-6 rounded-lg shadow-sm'>
+                <div className='flex justify-between text-lg font-medium text-gray-900 mb-4'>
+                  <p>Subtotal</p>
+                  <p>${subtotal.toFixed(2)}</p>
+                </div>
+                <div className='flex justify-between text-xl font-bold text-gray-900 mb-6'>
+                  <p>Total</p>
+                  <p>${totalPrice.toFixed(2)}</p>
+                </div>
+                <motion.button
+                  className='w-full mb-4 py-3 px-4 border border-transparent rounded-md text-base font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiary transition-colors duration-200'
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCheckout}
+                >
+                  <div className='flex items-center justify-center'>
+                    <ShoppingBagIcon className='w-5 h-5 mr-2' />
+                    Proceed to Checkout
+                  </div>
+                </motion.button>
               </div>
-            </motion.button>
-            <MotionButton
-              variant='outline'
-              className='w-full text-lg h-14'
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/all')}
-            >
-              Continue Shopping
-            </MotionButton>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <Snackbar
           open={snackbarData.open}
           autoHideDuration={6000}
           onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
           <Alert
             onClose={handleCloseSnackbar}
             severity={snackbarData.severity}
+            variant='filled'
             className='w-full'
           >
             {snackbarData.message}

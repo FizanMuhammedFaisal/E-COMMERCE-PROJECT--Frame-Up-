@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema(
     productCategories: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category', // Reference to the Category model
+        ref: 'Category',
         required: true
       }
     ],
@@ -25,6 +25,13 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    artist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Artist',
+        required: true
+      }
+    ],
     productImages: {
       type: [String], // Array of image URLs or paths
       required: true

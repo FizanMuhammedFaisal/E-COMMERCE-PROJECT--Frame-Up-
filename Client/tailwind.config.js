@@ -10,14 +10,24 @@ export default {
         primary: ['Montserrat', ' sans-serif'],
         tertiary: ['Quicksand', 'sans-serif']
       },
+      fontSize: {
+        '4.5xl': ['2.5rem', { lineHeight: '3rem' }] // 40px
+      },
       colors: {
-        customColorPrimary: '#e6e3d8',
+        customColorPrimary: '#E6E3D8',
         customColorPrimaryLight: '#f5f3eb',
         customColorSecondary: '#ecf3f9',
         textPrimary: '#423e31',
-        customColorTertiary: '#203E49',
-        customColorTertiaryLight: '#245160',
-        customColorTertiarypop: '#549FB8',
+        customColorTertiary: '#2B5D6E',
+        customColorTertiaryLight: '#6295A8',
+        customColorTertiaryDark: '#203E49',
+        customColorTertiarypop: '#7CADC0',
+        Neutral1: '#4C4C4C',
+        Neutral2: '#686868',
+        Neutral3: '#686868',
+        Neutral4: '#D9D9D9',
+        Neutral5: '#E4E4E4',
+        customBorder: '#C2B99E',
         customP2Primary: '#6E6ADE',
         customP2BackgroundW: '#F8F8FF',
         customP2BackgroundW_500: '#D9DCFF',

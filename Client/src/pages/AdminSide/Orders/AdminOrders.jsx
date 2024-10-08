@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
@@ -8,6 +8,8 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import apiClient from '../../../services/api/apiClient'
 import AlertDialog from '../../../components/common/AlertDialog'
 import UsersTable from '../../../components/common/ReusableTable'
+import { FaEdit } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 
 const OrderStatusBadge = ({ status }) => {
   const statusColors = {
@@ -35,15 +37,19 @@ const OrderStatusBadge = ({ status }) => {
 const AdminOrders = () => {
   const [page, setPage] = useState(1)
   const [isOpen, setIsOpen] = useState(false)
-  const [currentOrderId, setCurrentOrderId] = useState(null)
+  const [newState, setNewState] = useState({
+    currentOrderId: '',
+    newStatus: '',
+    index: ''
+  })
+  const navigate = useNavigate()
   const [statusLoading, setStatusLoading] = useState(false)
-  const [newStatus, setNewStatus] = useState('')
   const [orders, setOrders] = useState([])
   const queryClient = useQueryClient()
 
   const fetchOrders = async ({ pageParam = page }) => {
     const response = await apiClient.get(
-      `/api/admin/orders?page=${pageParam}&limit=20`
+      `/api/order?page=${pageParam}&limit=20`
     )
     console.log(response)
     return response.data
@@ -55,25 +61,37 @@ const AdminOrders = () => {
     keepPreviousData: true
   })
 
-  const handleStatusChange = useCallback((id, newStatus) => {
+  const handleStatusChange = useCallback((id, newStatus, index) => {
     setIsOpen(true)
-    setNewStatus(newStatus)
-    setCurrentOrderId(id)
+    setNewState({ currentOrderId: id, newStatus, index })
   }, [])
-
+  const handleOrderEdit = id => {
+    navigate(`/dashboard/orders/${id}`)
+  }
   const updateStatus = async () => {
-    await apiClient.post(`/api/admin/orders/update-status/`, {
-      newStatus,
-      orderId: currentOrderId
+    await apiClient.put(`/api/order/update-status/`, {
+      newStatus: newState.newStatus,
+      orderId: newState.currentOrderId
     })
   }
 
+  const updateStateStatus = () => {
+    setOrders(prevOrders =>
+      prevOrders.map((order, index) =>
+        index === newState.index
+          ? { ...order, orderStatus: newState.newStatus }
+          : order
+      )
+    )
+  }
   const onConfirm = async () => {
     setStatusLoading(true)
     try {
       await updateStatus()
       toast.success('Order status updated successfully!')
+      updateStateStatus()
       setIsOpen(false)
+
       queryClient.invalidateQueries(['orders'])
     } catch (error) {
       toast.error('Failed to update order status')
@@ -93,11 +111,27 @@ const AdminOrders = () => {
       })
     }
   }, [data])
-  const loadMoreOrders = () => {
-    if (data?.hasMore) {
-      setPage(prevPage => prevPage + 1)
+  const lastOrder = useRef()
+  useEffect(() => {
+    if (isLoading || !data?.hasMore) return
+    console.log('sadfasdf')
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setPage(prevPage => prevPage + 1)
+        }
+      },
+      {
+        rootMargin: '0px',
+        threshold: 1.0
+      }
+    )
+    const currentLastOrderRef = lastOrder.current
+    if (currentLastOrderRef) observer.observe(currentLastOrderRef)
+    return () => {
+      if (currentLastOrderRef) observer.unobserve(currentLastOrderRef)
     }
-  }
+  }, [isLoading, data?.hasMore, page])
 
   const columns = useMemo(
     () => [
@@ -107,7 +141,8 @@ const AdminOrders = () => {
       { label: 'Total Price', field: 'totalPrice' },
       { label: 'Order Date', field: 'orderDate' },
       { label: 'Status', field: 'status' },
-      { label: 'Action', field: 'action' }
+      { label: 'Action', field: 'action' },
+      { label: 'Details', field: 'details' }
     ],
     []
   )
@@ -115,7 +150,7 @@ const AdminOrders = () => {
   const ordersData = useMemo(() => {
     if (!orders) return []
     return orders.map((order, index) => ({
-      number: index + 1,
+      number: <p className='ms-5'>{index + 1}</p>,
       orderNo: order._id.slice(-6).toUpperCase(),
       customerName: order.shippingAddress.name || 'No name available',
       totalPrice: `$${order.totalAmount.toFixed(2)}`,
@@ -124,7 +159,7 @@ const AdminOrders = () => {
       action: (
         <select
           value={order.orderStatus}
-          onChange={e => handleStatusChange(order._id, e.target.value)}
+          onChange={e => handleStatusChange(order._id, e.target.value, index)}
           className='w-full sm:w-auto px-2 py-1 text-sm border rounded-md bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400'
         >
           <option value='Pending'>Pending</option>
@@ -132,6 +167,14 @@ const AdminOrders = () => {
           <option value='Shipped'>Shipped</option>
           <option value='Delivered'>Delivered</option>
         </select>
+      ),
+      details: (
+        <button
+          onClick={() => handleOrderEdit(order._id)}
+          className=' text-white p-4 duration-300 hover:duration-300 rounded-full hover:bg-gray-200 hover:dark:bg-customP2BackgroundD_300'
+        >
+          <FaEdit className='sm:text-xl md:text-2xl dark:text-white text-black' />
+        </button>
       )
     }))
   }, [orders, handleStatusChange])
@@ -163,10 +206,9 @@ const AdminOrders = () => {
           </motion.div>
         )}
       </div>
+
       {data?.hasMore && !isLoading && (
-        <button onClick={loadMoreOrders} className='text-center mt-4'>
-          Load more orders
-        </button>
+        <div ref={lastOrder}>Scroll to load more..</div>
       )}
       {!data?.hasMore && !isLoading && ordersData.length > 0 && (
         <div className='text-center mt-4 text-gray-600 dark:text-gray-400'>
@@ -181,7 +223,7 @@ const AdminOrders = () => {
       <AlertDialog
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
-        button2={newStatus}
+        button2={newState.newStatus}
         onConfirm={onConfirm}
         loading={statusLoading}
       />

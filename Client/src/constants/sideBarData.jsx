@@ -5,6 +5,7 @@ import { FaPlusSquare } from 'react-icons/fa'
 import { FaShoppingCart } from 'react-icons/fa'
 import { MdCategory } from 'react-icons/md'
 import { IoBarChartSharp } from 'react-icons/io5'
+import { MdDiscount } from 'react-icons/md'
 export const sideBarData = [
   {
     title: 'Dashboard',
@@ -47,6 +48,12 @@ export const sideBarData = [
     link: '/dashboard/category',
     icon: <MdCategory />,
     pathname: '/dashboard/category'
+  },
+  {
+    title: 'Discounts',
+    link: '/dashboard/discounts',
+    icon: <MdDiscount />,
+    pathname: '/dashboard/discounts'
   },
   {
     title: 'Sales Report',

@@ -98,8 +98,11 @@ export default function Navbar() {
         isScrolled ? 'bg-customColorPrimary shadow-md' : 'bg-transparent'
       }`}
     >
-      <nav className='mx-auto flex max-w-7xl items-center justify-between p-3 lg:px-8'>
-        <div className='flex lg:flex-1'>
+      <nav className='mx-auto flex max-w-7xl items-center  justify-between p-3 lg:px-8'>
+        <div
+          className='flex mb-1
+         lg:flex-1'
+        >
           <MLogo />
         </div>
 
@@ -157,7 +160,7 @@ export default function Navbar() {
               isSearchFocused={isSearchFocused}
             />
           </div>
-          <motion.button
+          {/* <motion.button
             className='text-xl text-textPrimary mr-2'
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -174,7 +177,7 @@ export default function Navbar() {
             <div className='flex'>
               <BsCart2 /> <p className='text-base'>({items.length})</p>
             </div>
-          </motion.button>
+          </motion.button> */}
           <button
             type='button'
             onClick={() => setMobileMenuOpen(true)}

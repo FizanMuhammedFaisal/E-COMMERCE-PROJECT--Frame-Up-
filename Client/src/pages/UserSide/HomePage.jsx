@@ -1,10 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-
+import MovingBanner from '../../components/common/Animations/MovingBanner'
 import {
   MovingProductsSection,
-  BannerSection
+  BannerSection,
+  AnimatedCarousalSection,
+  FeaturedArtSection
 } from '../../components/layout/UserSide/Home/HomePageComponents'
+import Sample from '../../components/common/Animations/Sample'
+import { useState } from 'react'
+import { ChevronRight } from 'lucide-react'
 
 function HomePage() {
   const navigate = useNavigate()
@@ -19,6 +24,69 @@ function HomePage() {
   const handleBrowse = () => {
     navigate('/all')
   }
+  const artworks = [
+    {
+      id: 1,
+      title: 'Ethereal Dreams',
+      artist: 'Luna Starlight',
+      price: 2200,
+      image:
+        'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXJ0fGVufDB8fDB8fHww',
+      description:
+        'A mesmerizing blend of colors that evoke a dreamlike state, capturing the essence of the subconscious mind.'
+    },
+    {
+      id: 2,
+      title: 'Cosmic Harmony',
+      artist: 'Zephyr Breeze',
+      price: 1800,
+      image:
+        'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8YXJ0fGVufDB8fDB8fHww',
+      description:
+        "An abstract representation of the universe's intricate balance, showcasing the interconnectedness of celestial bodies."
+    },
+    {
+      id: 3,
+      title: 'Whispers of Nature',
+      artist: 'Willow Rayne',
+      price: 2500,
+      image:
+        'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGFydHxlbnwwfHwwfHx8MA%3D%3D',
+      description:
+        'A serene landscape that captures the subtle beauty of nature, inviting viewers to listen to the quiet whispers of the earth.'
+    },
+    {
+      id: 4,
+      title: 'Urban Rhythms',
+      artist: 'Jasper Stone',
+      price: 1950,
+      image:
+        'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGFydHxlbnwwfHwwfHx8MA%3D%3D',
+      description:
+        'A dynamic piece that pulses with the energy of city life, capturing the vibrant patterns and movements of urban environments.'
+    },
+    {
+      id: 5,
+      title: 'Celestial Dance',
+      artist: 'Aurora Skye',
+      price: 2800,
+      image:
+        'https://images.unsplash.com/photo-1549490349-8643362247b5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGFydHxlbnwwfHwwfHx8MA%3D%3D',
+      description:
+        'An ethereal portrayal of the northern lights, capturing the magical dance of colors across the night sky.'
+    },
+    {
+      id: 6,
+      title: 'Echoes of Serenity',
+      artist: 'River Moss',
+      price: 2100,
+      image:
+        'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGFydHxlbnwwfHwwfHx8MA%3D%3D',
+      description:
+        'A tranquil scene that resonates with inner peace, inviting viewers to find their own moments of serenity within the artwork.'
+    }
+  ]
+  const [hoveredId, setHoveredId] = useState(null)
   return (
     <>
       <div className='min-h-screen bg-white'>
@@ -27,7 +95,7 @@ function HomePage() {
           <div className='container mx-auto px-6'>
             <div className='flex flex-col lg:flex-row items-center'>
               <div className='lg:w-1/2 lg:pr-12 mb-8 lg:mb-0'>
-                <h1 className='text-5xl lg:text-6xl text-textPrimary font-bold mb-4 spacing tracking-tight font-secondary '>
+                <h1 className='text-5xl lg:text-6xl text-textPrimary font-semibold mb-4 spacing tracking-tight font-secondary '>
                   Discover Original Art
                 </h1>
 
@@ -53,51 +121,21 @@ function HomePage() {
             </div>
           </div>
         </section>
-        {/* <section>
-          <MovingBanner
-            texts={[
-              'Exclusive Art Pieces',
-              'Discover Original Paintings',
-              'Curated Collections'
-            ]}
-          />
-        </section> */}
-        <section className=''>
-          <div className='bg-gradient-to-b from-customColorSecondary to-customColorTertiarypop'></div>
-          {/* <MovingProductsSection />  */}
-          {/* <div className='bg-gradient-to-b h-20 from-[#C9BDF4] to-customColorSecondary'></div> */}
-        </section>
-        {/* Featured Artworks */}
         <section>
-          <BannerSection />
+          {/* <MovingBanner texts={' Exclusive Art Pieces'} /> */}
         </section>
-        <section className='py-16 bg-customColorSecondary'>
-          {/* <div className='container mx-auto px-4'>
-            <h2 className='text-3xl font-bold mb-8 text-center text-gray-900'>
-              Featured Artworks
-            </h2>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
-              {[1, 2, 3, 4, 5, 6].map(item => (
-                <div key={item} className='group'>
-                  <div className='aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8'>
-                    <img
-                      src={`/placeholder.svg?height=500&width=500&text=Artwork ${item}`}
-                      alt={`Artwork ${item}`}
-                      className='h-full w-full object-cover object-center group-hover:opacity-75 transition-opacity duration-300'
-                    />
-                  </div>
-                  <h3 className='mt-4 text-sm text-gray-700'>
-                    Artwork Title {item}
-                  </h3>
-                  <p className='mt-1 text-lg font-medium text-gray-900'>
-                    $149.99
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div> */}
+        <section className=''>
+          {/* <Sample text={'heymsadf sdfasdfa sadfasf asdsdf'} /> */}
         </section>
 
+        <section> {/* <BannerSection />{' '} */}</section>
+
+        <section>
+          <FeaturedArtSection />
+        </section>
+        <section>
+          <AnimatedCarousalSection />
+        </section>
         {/* Call to Action */}
         <section className='py-16 bg-primary text-primary-foreground'>
           <div className='container mx-auto px-4 text-center'>

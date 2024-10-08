@@ -107,7 +107,7 @@ function AddArtistForm() {
             value={artistName}
             onChange={e => setArtistName(e.target.value)}
             placeholder='Enter artist name'
-            className='mt-1 block w-full px-4 py-2 border dark:bg-customP2ForegroundD_100 dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary sm:text-sm'
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -124,7 +124,7 @@ function AddArtistForm() {
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder='Enter artist description'
-            className='mt-1 block w-full px-4 py-2 border dark:bg-customP2ForegroundD_100 dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary sm:text-sm'
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           ></textarea>
         </div>
 

@@ -60,11 +60,16 @@ export default function InfiniteScrollText({
       aria-live='polite'
       aria-atomic='true'
     >
-      <div ref={containerRef} className='inline-block whitespace-nowrap'>
-        <div ref={textRef} className='inline-block px-4'>
+      <div
+        ref={containerRef}
+        className='inline-block whitespace-nowrap bg-textPrimary font-tertiary font-extrabold text-3xl width: max-content text-white'
+      >
+        <div ref={textRef} className='inline-block px-4  '>
           {text}
         </div>
       </div>
     </div>
   )
 }
+// className =
+//   'flex gap-4 py-4 absolute bg-textPrimary font-tertiary font-extrabold text-3xl width: max-content text-white'

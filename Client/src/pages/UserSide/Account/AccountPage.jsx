@@ -62,10 +62,10 @@ function UserAccountPage() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-customColorSecondary to-white py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen bg-gradient-to-b font-primary from-customColorSecondary to-white py-9 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-8xl mx-auto'>
         <motion.h1
-          className='text-5xl font-primary font-extrabold text-gray-900 mb-12 text-center lg:text-left'
+          className='mt-10 pb-11 md:text-4.5xl text-4xl font-primary tracking-tighter leading-5 font-semibold text-center text-customColorTertiaryDark'
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -101,7 +101,7 @@ function UserAccountPage() {
                       } flex-shrink-0 -ml-1 mr-4 h-6 w-6 transition-colors duration-200 ease-in-out`}
                       aria-hidden='true'
                     />
-                    <span className='truncate'>{item.name}</span>
+                    <span className='truncate '>{item.name}</span>
                     <MotionChevronRight
                       className={`${
                         activeSection === item.name
@@ -125,7 +125,7 @@ function UserAccountPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className='bg-white p-8 rounded-2xl shadow-lg border border-gray-100'
+                    className=' p-8 '
                   >
                     {renderContent()}
                   </motion.div>

@@ -4,7 +4,7 @@ import api from '../../services/api/api'
 import validataImages from '../../utils/validation/ImageValidation'
 import { uploadImagesToCloudinary } from '../../services/Cloudinary/UploadImages'
 import { useDispatch, useSelector } from 'react-redux'
-import { ToastContainer } from 'react-toastify'
+
 import { toast } from 'react-toastify'
 import {
   addDeletedImageUrl,
@@ -18,7 +18,8 @@ import {
   addImageToDB,
   addImagesToDB,
   DeleteImageFromDB,
-  getImageFromDB
+  getImageFromDB,
+  clearAllFilesInDB
 } from '../../utils/indexedDB/adminImageDB'
 import validateProductForm from '../../utils/validation/ProductFormValidation'
 import { useNavigate } from 'react-router-dom'
@@ -53,6 +54,7 @@ const AdminAddProducts = () => {
   const [DBError, setDBError] = useState(false)
 
   const handleChange = async e => {
+    console.log('triggering')
     const { id, value, files } = e.target
 
     if (files) {
@@ -179,6 +181,8 @@ const AdminAddProducts = () => {
     } catch (error) {
       setLoading(false)
       console.error('Error uploading images:', error)
+    } finally {
+      clearAllFilesInDB()
     }
     navigate('/dashboard/products')
     setLoading(false)
@@ -273,17 +277,6 @@ const AdminAddProducts = () => {
         onClose={handleCropperClose}
         initialImage={imageForCrop}
         onCropComplete={handleCroppedImage}
-      />
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
       />
     </div>
   )

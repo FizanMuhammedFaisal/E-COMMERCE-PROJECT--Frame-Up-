@@ -99,13 +99,19 @@ function ProductBrowseLayout({
                 : 'grid-cols-1'
             } gap-6 transition-all duration-300 ease-in-out`}
           >
-            {sortedProducts.map(product => (
-              <ProductCard
-                key={product._id}
-                product={product}
-                viewMode={viewMode}
-              />
-            ))}
+            {sortedProducts.length === 0 ? (
+              <div className='text-center mt-10 font-semibold'>
+                no products to diaplay
+              </div>
+            ) : (
+              sortedProducts.map(product => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  viewMode={viewMode}
+                />
+              ))
+            )}
           </div>
           <div className='flex justify-center mt-8'>
             {renderPaginationButtons()}

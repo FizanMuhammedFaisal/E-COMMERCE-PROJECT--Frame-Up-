@@ -229,67 +229,7 @@ const fetchTechniques = asyncHandler(async (req, res) => {
 })
 //
 //
-const getOrders = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1
-  const limit = parseInt(req.query.limit) || 10
 
-  const skip = (page - 1) * limit
-
-  try {
-    const orders = await Order.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-
-    const totalOrders = await Order.countDocuments()
-    const totalPages = Math.ceil(totalOrders / limit)
-    let hasMore = true
-    if (page > totalPages) {
-      hasMore = false
-    }
-    res.status(200).json({
-      orders,
-      currentPage: page,
-      totalPages,
-      totalOrders,
-      hasMore
-    })
-  } catch (err) {
-    const error = new Error('error fetching orders')
-    error.statusCode = 400
-    return next(error)
-  }
-})
-//
-//
-const updateOrderStatus = asyncHandler(async (req, res, next) => {
-  const { orderId, newStatus } = req.body
-  console.log(orderId, newStatus)
-
-  try {
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { orderStatus: newStatus },
-      { new: true }
-    )
-    console.log(updatedOrder)
-    if (!updatedOrder) {
-      const error = new Error('order not found')
-      error.statusCode = 404
-      return next(error)
-    }
-
-    res.status(200).json({
-      message: 'Order status updated successfully',
-      order: updatedOrder
-    })
-  } catch (er) {
-    const error = new Error('failed to update user status')
-    error.statusCode = 500
-    return next(error)
-  }
-})
-//
 const updateArtistStatus = asyncHandler(async (req, res, next) => {
   const artistId = req.params.id
   const { status } = req.body
@@ -308,6 +248,23 @@ const updateArtistStatus = asyncHandler(async (req, res, next) => {
     return res.status(200).json({ message: 'status updated sucessfully' })
   }, 100)
 })
+//
+//
+
+const updateCategories = asyncHandler(async (req, res) => {
+  const { id, newStatus } = req.body
+  console.log(id, newStatus)
+  const category = await Category.findOneAndUpdate(
+    { _id: id },
+    { status: newStatus }
+  )
+  if (category) {
+    return res.status(200).json({ message: 'status updated successfully' })
+  }
+  const error = new Error('failed to update user status')
+  error.statusCode = 400
+  return next(error)
+})
 // end
 export {
   login,
@@ -321,7 +278,6 @@ export {
   fetchThemes,
   fetchStyles,
   fetchTechniques,
-  getOrders,
-  updateOrderStatus,
-  updateArtistStatus
+  updateArtistStatus,
+  updateCategories
 }

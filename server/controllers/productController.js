@@ -15,7 +15,9 @@ const addProducts = asyncHandler(async (req, res) => {
     dimensions,
     productYear,
     productStock,
-    productInformation
+    productInformation,
+    artistName,
+    discountPrice
   } = req.body
 
   console.log(req.body)
@@ -32,15 +34,17 @@ const addProducts = asyncHandler(async (req, res) => {
       ...processedProductCategory.styles,
       ...processedProductCategory.techniques
     ]
-    console.log(processedProductCategory, productCategories)
+    console.log(artistName)
 
     // Create the product using the extracted IDs
     const newProduct = await Product.create({
       productName,
       productPrice,
+      discountPrice,
       productDescription,
       productImages,
       thumbnailImage,
+      artist: artistName.id,
       weight,
       dimensions,
       productCategories,
@@ -66,6 +70,7 @@ const getProducts = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10
   const skip = (page - 1) * limit
   const {
+    searchData,
     sortBy,
     themes,
     styles,
@@ -75,9 +80,10 @@ const getProducts = asyncHandler(async (req, res) => {
     zZ_aA,
     includeCategories
   } = req.query
-  console.log(aA_zZ, zZ_aA, priceRange)
+
   const filter = {}
   const priceFilter = {}
+
   // Category filters
   const categoryNames = [
     ...(themes ? themes.split(',') : []),
@@ -98,6 +104,16 @@ const getProducts = asyncHandler(async (req, res) => {
     const [minPrice, maxPrice] = priceRange.split(',').map(Number)
     filter.productPrice = { $gte: minPrice, $lte: maxPrice }
     priceFilter.productPrice = { $gte: minPrice, $lte: maxPrice }
+  }
+
+  // Search functionality
+  if (searchData) {
+    const searchRegex = new RegExp(searchData, 'i') // 'i' for case-insensitive search
+    filter.$or = [
+      { productName: { $regex: searchRegex } },
+      { productDescription: { $regex: searchRegex } }
+      // Add more fields here if needed
+    ]
   }
 
   let sortOption = {}
@@ -124,7 +140,7 @@ const getProducts = asyncHandler(async (req, res) => {
     // Total number of items after applying filters (for pagination purposes)
     const countQuery = Product.countDocuments(filter)
 
-    let categoriesQuery
+    let categoriesQuery = null
     if (includeCategories === 'true') {
       categoriesQuery = Product.aggregate([
         { $match: priceFilter },
@@ -186,7 +202,6 @@ const getProducts = asyncHandler(async (req, res) => {
         }
       })
     }
-    console.log(Math.ceil(totalItems / limit))
 
     res.json({
       products,
@@ -347,7 +362,7 @@ const getSearched = asyncHandler(async (req, res) => {
 })
 //
 const getProductCards = asyncHandler(async (req, res, next) => {
-  const products = await Product.find({}).sort({ productStock: 1 }).limit(11)
+  const products = await Product.find({}).sort({ productStock: 1 }).limit(9)
 
   const Products = products.map((product, i) => {
     return {

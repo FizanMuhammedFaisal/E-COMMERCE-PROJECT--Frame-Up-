@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import ImageCarouselSection from '../../../common/Animations/ImageCarouselSection'
 import api from '../../../../services/api/api'
 import { useEffect, useState } from 'react'
-
+import AnimatedCarousal from '../../../common/Animations/AnimatedCarousal'
 const MovingProductsSection = () => {
   const [products, setProducts] = useState({ cards1: [], cards2: [] })
 
@@ -45,7 +45,9 @@ const MovingProductsSection = () => {
   )
 }
 
-import React from 'react'
+import { ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Link, useNavigate } from 'react-router-dom'
 
 const Banner = ({ title, description, image }) => (
   <div className='relative overflow-hidden rounded-lg shadow-md group'>
@@ -159,4 +161,182 @@ function BannerSection() {
     </section>
   )
 }
-export { MovingProductsSection, BannerSection }
+const AnimatedCarousalSection = () => {
+  const [products, setProducts] = useState()
+
+  const fetchProducts = async () => {
+    const res = await api.get('/products/get-cards')
+    console.log(res)
+    return res.data
+  }
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['productCards'],
+    queryFn: fetchProducts,
+    staleTime: 10 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  })
+
+  useEffect(() => {
+    if (data?.Products && Array.isArray(data.Products)) {
+      setProducts(data.Products)
+    } else {
+      setProducts([])
+    }
+  }, [data])
+
+  if (isError) {
+    return <p className='text-red-500'>Failed to load products.</p>
+  }
+  console.log(products)
+
+  return (
+    <AnimatedCarousal
+      products={products}
+      loading={isLoading}
+      isError={isError}
+    />
+  )
+}
+
+const FeaturedArtSection = () => {
+  const navigate = useNavigate()
+  const artworks = [
+    {
+      id: 1,
+      title: 'Ethereal Dreams',
+      artist: 'Luna Starlight',
+      price: '$2,200',
+      image:
+        'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXJ0fGVufDB8fDB8fHww'
+    },
+    {
+      id: 2,
+      title: 'Cosmic Harmony',
+      artist: 'Zephyr Breeze',
+      price: '$1,800',
+      image:
+        'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8YXJ0fGVufDB8fDB8fHww'
+    },
+    {
+      id: 3,
+      title: 'Whispers of Nature',
+      artist: 'Willow Rayne',
+      price: '$2,500',
+      image:
+        'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGFydHxlbnwwfHwwfHx8MA%3D%3D'
+    },
+    {
+      id: 4,
+      title: 'Urban Rhythms',
+      artist: 'Jasper Stone',
+      price: '$1,950',
+      image:
+        'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGFydHxlbnwwfHwwfHx8MA%3D%3D'
+    },
+    {
+      id: 5,
+      title: 'Celestial Dance',
+      artist: 'Aurora Skye',
+      price: '$2,800',
+      image:
+        'https://images.unsplash.com/photo-1549490349-8643362247b5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGFydHxlbnwwfHwwfHx8MA%3D%3D'
+    },
+    {
+      id: 6,
+      title: 'Echoes of Serenity',
+      artist: 'River Moss',
+      price: '$2,100',
+      image:
+        'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGFydHxlbnwwfHwwfHx8MA%3D%3D'
+    }
+  ]
+
+  const [hoveredId, setHoveredId] = useState(null)
+  const handleClick = id => {
+    navigate(`/products/${id}`)
+  }
+  return (
+    <section className=' bg-slate'>
+      <div className='bg-gradient-to-b from-customColorSecondary via-slate-50 to-white h-28'></div>
+      <div className='container mx-auto px-4 pb-12'>
+        <div className='mb-16 text-center'>
+          <h2 className=' md:text-4.5xl  text-4xl font-primary tracking-tighter leading-5 font-semibold text-center text-customColorTertiaryDark'>
+            Featured Artworks
+          </h2>
+          <div className='w-24 h-1 bg-primary mx-auto mb-8'></div>
+          <p className='text-xl text-gray-600 font-primary max-w-2xl mx-auto'>
+            Discover our curated selection of masterpieces that captivate the
+            imagination and inspire the soul.
+          </p>
+        </div>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16'>
+          {artworks.map(artwork => (
+            <motion.div
+              onClick={() => {
+                handleClick(artwork.id)
+              }}
+              key={artwork.id}
+              className='group hover:cursor-pointer'
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: artwork.id * 0.1 }}
+              onHoverStart={() => setHoveredId(artwork.id)}
+              onHoverEnd={() => setHoveredId(null)}
+            >
+              <div className='relative mb-6 overflow-hidden'>
+                <img
+                  src={artwork.image}
+                  alt={`Artwork ${artwork.title}`}
+                  className='w-full h-64 object-cover object-center rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105'
+                />
+                <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+              </div>
+              <div className='relative'>
+                <h3 className='text-xl font-semibold text-gray-900 font-primary group-hover:text-primary transition-colors duration-300'>
+                  {artwork.title}
+                </h3>
+                <p className='mt-1 text-md text-gray-600 font-primary'>
+                  {artwork.artist}
+                </p>
+                <p className='mt-2 text-lg font-bold text-primary font-primary'>
+                  {artwork.price}
+                </p>
+                <motion.div
+                  className='absolute -right-4 top-1/2 transform -translate-y-1/2'
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{
+                    opacity: hoveredId === artwork.id ? 1 : 0,
+                    x: hoveredId === artwork.id ? 0 : -10
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ArrowRight className='w-6 h-6 text-primary' />
+                </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className='mt-20 text-center'>
+          <Link
+            to={'/all'}
+            className='inline-flex items-center text-primary font-semibold text-lg font-primary hover:underline'
+          >
+            Explore All Artworks
+            <ArrowRight className='ml-2 w-5 h-5' />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export {
+  MovingProductsSection,
+  BannerSection,
+  AnimatedCarousalSection,
+  FeaturedArtSection
+}

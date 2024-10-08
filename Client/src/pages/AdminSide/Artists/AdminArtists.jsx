@@ -85,8 +85,10 @@ const AdminArtists = () => {
 
   const columns = [
     { label: 'Serial No.', field: 'serialNo' },
+
+    { label: 'Profile', field: 'profile' },
     { label: 'Name', field: 'name' },
-    { label: 'Email', field: 'email' },
+
     { label: 'Action', field: 'action' }
   ]
 
@@ -94,16 +96,21 @@ const AdminArtists = () => {
     () =>
       artists.map((artist, index) => ({
         serialNo: <p className='ms-5'>{index + 1}</p>,
+        profile: (
+          <div className='p-1 text-lg font-tertiary'>
+            <img
+              className='rounded-full sm:max-w-12 h-auto md:max-w-14 lg:max-w-16'
+              src={artist.image}
+              alt={artist.name || 'no profile'}
+            />
+          </div>
+        ),
         name: (
           <div className='p-1 text-lg font-tertiary'>
             {artist.name || 'Name not available'}
           </div>
         ),
-        email: (
-          <div className='p-1 text-lg font-tertiary'>
-            {artist.email || 'Email not available'}
-          </div>
-        ),
+
         action: (
           <Select
             name='status'
@@ -176,17 +183,6 @@ const AdminArtists = () => {
         button2={newStatus}
         onConfirm={onConfirm}
         loading={statusLoading}
-      />
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
       />
     </div>
   )

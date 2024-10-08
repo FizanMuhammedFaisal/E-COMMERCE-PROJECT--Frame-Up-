@@ -79,7 +79,7 @@ function AddCategoryForm() {
             value={categoryName}
             onChange={e => setCategoryName(e.target.value)}
             placeholder='Enter category name'
-            className='mt-1 block w-full px-4 py-2  border dark:bg-customP2ForegroundD_100  dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm'
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -95,7 +95,7 @@ function AddCategoryForm() {
             id='categoryType'
             value={categoryType}
             onChange={e => setCategoryType(e.target.value)}
-            className='mt-1 block w-full px-4 py-2 border dark:bg-customP2ForegroundD_100  dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm'
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           >
             <option value=''>Select type</option>
             <option value='Theme'>Theme</option>
@@ -117,7 +117,7 @@ function AddCategoryForm() {
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder='Enter category description'
-            className='mt-1 block w-full px-4 py-2 border dark:bg-customP2ForegroundD_100  dark:border-customP2ForegroundD_400 border-gray-300 rounded-md shadow-sm focus:ring-customP2Primary focus:border-customP2Primary ring-customP2Primary sm:text-sm'
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           ></textarea>
         </div>
 

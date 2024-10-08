@@ -4,7 +4,7 @@ import { LuSearch } from 'react-icons/lu'
 import { FiChevronRight } from 'react-icons/fi'
 import api from '../../services/api/api'
 import { useDebounce } from '../../hooks/useDebounce'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CircularProgress } from '@mui/material'
 const ResultCategory = React.memo(({ category }) => (
   <li>
@@ -41,6 +41,8 @@ const ResultProduct = React.memo(({ product }) => (
 
 function SearchBar({ setIsSearchFocused, isSearchFocused }) {
   const [query, setQuery] = useState('')
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [results, setResults] = useState({
     products: [],
     categories: [],
@@ -94,6 +96,17 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
     setQuery(e.target.value)
   }
 
+  const handleSearchSubmit = event => {
+    event.preventDefault()
+    const newSearchParams = new URLSearchParams(searchParams)
+    const q = query.trim()
+    if (q) {
+      console.log('asdf')
+      newSearchParams.set('searchQuery', q)
+      setSearchParams(newSearchParams)
+    }
+  }
+
   useEffect(() => {
     fetchSearchResults(debouncedQuery)
   }, [debouncedQuery])
@@ -124,24 +137,26 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
 
   return (
     <div className='relative ml-auto sm:ml-0' ref={searchRef}>
-      <motion.div
-        className='relative z-10'
-        initial='small'
-        animate={isSearchFocused ? 'large' : 'small'}
-        variants={searchInputVariants}
-      >
-        <input
-          type='text'
-          placeholder='Search...'
-          value={query}
-          onChange={handleType}
-          className='w-full py-2 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop text-sm'
-          onClick={() => setIsSearchFocused(true)}
-        />
-        <button className='absolute right-3 top-1/2 transform -translate-y-1/2'>
-          <LuSearch className='text-lg text-gray-500' />
-        </button>
-      </motion.div>
+      <form onSubmit={handleSearchSubmit}>
+        <motion.div
+          className='relative z-10'
+          initial='small'
+          animate={isSearchFocused ? 'large' : 'small'}
+          variants={searchInputVariants}
+        >
+          <input
+            type='text'
+            placeholder='Search...'
+            value={query}
+            onChange={handleType}
+            className='w-full py-2 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop text-sm'
+            onClick={() => setIsSearchFocused(true)}
+          />
+          <button className='absolute right-3 top-1/2 transform -translate-y-1/2'>
+            <LuSearch className='text-lg text-gray-500' />
+          </button>
+        </motion.div>
+      </form>
 
       <AnimatePresence>
         {isSearchFocused && (
@@ -208,12 +223,14 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
               </div>
               {query && !loading && (
                 <div className='p-4 border-t border-gray-200 bg-gray-50'>
-                  <Link
-                    to={`/search?q=${encodeURIComponent(query)}`}
+                  {/* newSearchParams.set('searchQuery', q)
+                   setSearchParams(newSearchParams) */}
+                  <p
+                    onClick={handleSearchSubmit}
                     className='text-sm text-customColorTertiarypop hover:underline block text-center'
                   >
                     View all results for "{query}"
-                  </Link>
+                  </p>
                 </div>
               )}
             </div>

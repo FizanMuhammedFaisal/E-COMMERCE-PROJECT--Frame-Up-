@@ -58,7 +58,21 @@ const categoriesSlice = createSlice({
       error: null
     }
   },
-  reducers: {},
+  reducers: {
+    updateStatus: (state, action) => {
+      const { newStatus, type, id } = action.payload
+      console.log(newStatus, type, id)
+      const category = state[type]?.data
+
+      if (category) {
+        const item = category.find(item => item._id === id)
+
+        if (item) {
+          item.status = newStatus
+        }
+      }
+    }
+  },
   extraReducers: builder => {
     // Themes
     builder
@@ -106,3 +120,4 @@ const categoriesSlice = createSlice({
 })
 
 export default categoriesSlice.reducer
+export const { updateStatus } = categoriesSlice.actions

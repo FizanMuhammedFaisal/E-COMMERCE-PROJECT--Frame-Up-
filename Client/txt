@@ -1,0 +1,3 @@
+for heading==           className='mt-10  text-4.5xl  md:text-4xl font-primary tracking-tighter leading-5 font-semibold text-center text-customColorTertiaryDark'
+                  className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
+for input box====   

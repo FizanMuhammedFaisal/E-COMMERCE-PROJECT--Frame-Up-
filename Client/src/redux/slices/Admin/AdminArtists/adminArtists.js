@@ -6,7 +6,7 @@ export const fetchArtists = createAsyncThunk(
   'artists/fetchArtists',
   async page => {
     const response = await apiClient.get(
-      `/api/artists/getartists?page=${page}&limit=17`
+      `/api/artists/get-artists?page=${page}&limit=17`
     )
     return response.data
   }
@@ -46,10 +46,11 @@ const adminArtistsSlice = createSlice({
       .addCase(fetchArtists.fulfilled, (state, action) => {
         state.loading = false
         state.status = 'succeeded'
-        const newArtists = action.payload.filter(
-          artist =>
+
+        const newArtists = action.payload.artists.filter(
+          artists =>
             !state.data.some(
-              existingArtist => existingArtist._id === artist._id
+              existingArtist => existingArtist._id === artists._id
             )
         )
         state.data = [...state.data, ...newArtists]

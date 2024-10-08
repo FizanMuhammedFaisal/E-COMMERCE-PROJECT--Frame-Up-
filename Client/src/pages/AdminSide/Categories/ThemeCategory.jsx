@@ -1,10 +1,4 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import {
-  fetchStyles,
-  fetchTechniques,
-  fetchThemes
-} from '../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
+import { useSelector } from 'react-redux'
 import CategoriesTable from '../../../components/layout/AdminSide/category/CategoryTable'
 import { CircularProgress } from '@mui/material'
 
@@ -26,7 +20,7 @@ function ThemeCategory() {
       <h2 className='text-2xl text-center font-bold'>Themes</h2>
 
       <div className='mt-6'>
-        <CategoriesTable data={themes.data} />
+        <CategoriesTable type={'themes'} data={themes.data} />
       </div>
     </div>
   )

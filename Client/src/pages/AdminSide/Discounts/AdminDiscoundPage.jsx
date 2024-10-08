@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import ThemeCategory from './ThemeCategory'
-import StyleCategory from './StyleCategory'
-import TechniquesCategory from './TechniquesCategory'
+import CategoryDiscound from './CategoryDiscound'
+import ProductDiscound from './ProductDiscound'
+
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -11,7 +11,7 @@ import {
   fetchThemes,
   updateStatus
 } from '../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
-const AdminCategory = () => {
+const AdminDiscoundPage = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -26,15 +26,16 @@ const AdminCategory = () => {
   const tabRefs = useRef([])
 
   const tabs = [
-    { value: 'themes', label: 'Themes' },
-    { value: 'styles', label: 'Styles' },
-    { value: 'techniques', label: 'Techniques' }
+    { value: 'productDiscound', label: 'Product Discound' },
+    { value: 'categoryDiscound', label: 'Category Discound' }
   ]
 
   return (
     <div className='p-6 font-primary bg-gray-100 dark:bg-customP2BackgroundD_darkest text-black dark:text-slate-50 min-h-screen  mt-3 rounded-sm'>
       <div className='flex flex-col sm:flex-row justify-between items-center mb-4'>
-        <h1 className='text-4xl font-bold mb-2 sm:mb-0 '>Categories</h1>
+        <h1 className='text-4xl font-bold mb-2 sm:mb-0 '>
+          Discounds Management
+        </h1>
       </div>
       <div className='flex justify-end'>
         <motion.button
@@ -84,19 +85,14 @@ const AdminCategory = () => {
         </div>
         {/* Tab Content */}
         <div className='p-4 '>
-          {selectedTab === 'themes' && (
+          {selectedTab === 'productDiscound' && (
             <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <ThemeCategory />
+              <CategoryDiscound />
             </div>
           )}
-          {selectedTab === 'styles' && (
+          {selectedTab === 'categoryDiscound' && (
             <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <StyleCategory />
-            </div>
-          )}
-          {selectedTab === 'techniques' && (
-            <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <TechniquesCategory />
+              <ProductDiscound />
             </div>
           )}
         </div>
@@ -105,4 +101,4 @@ const AdminCategory = () => {
   )
 }
 
-export default AdminCategory
+export default AdminDiscoundPage

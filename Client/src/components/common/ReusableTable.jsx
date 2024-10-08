@@ -38,7 +38,7 @@ const ReusableTable = ({ columns, data }) => {
                 <TableCell
                   key={colIndex}
                   sx={{ padding: '8px' }}
-                  className='dark:bg-customP2BackgroundD dark:bg-opacity-80 dark:text-teal-50'
+                  className='dark:bg-customP2BackgroundD/45 dark:bg-opacity-80 dark:text-teal-50'
                 >
                   {row[column.field]}
                 </TableCell>

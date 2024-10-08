@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import Select from 'react-select'
 import PropTypes from 'prop-types'
 import { useDispatch, useSelector } from 'react-redux'
@@ -16,7 +16,6 @@ const CategorySelect = ({
 }) => {
   const dispatch = useDispatch()
 
-  // Get the state slices based on type
   const { themes, styles, techniques } = useSelector(
     state => state.categoryFetch
   )
@@ -58,7 +57,6 @@ const CategorySelect = ({
     }
   })()
 
-  // Transform the data to the format react-select expects
   const formattedData = data.map(item => ({
     value: item._id,
     label: item.name
@@ -93,13 +91,6 @@ const CategorySelect = ({
       }}
     />
   )
-}
-
-CategorySelect.propTypes = {
-  value: PropTypes.array,
-  onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
-  type: PropTypes.oneOf(['theme', 'style', 'technique']).isRequired // Ensure type is required and one of the specified values
 }
 
 export default CategorySelect

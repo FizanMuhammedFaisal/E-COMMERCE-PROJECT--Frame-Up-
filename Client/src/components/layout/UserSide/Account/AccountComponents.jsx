@@ -107,7 +107,7 @@ const EditProfile = () => {
             <div>
               <label
                 htmlFor='name'
-                className='block text-sm font-medium text-gray-700'
+                className='block text-sm pb-1 font-medium text-gray-700'
               >
                 Name
               </label>
@@ -117,7 +117,7 @@ const EditProfile = () => {
                 id='name'
                 value={editedUser?.name || ''}
                 onChange={handleInputChange}
-                className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-customColorTertiarypop focus:border-customColorTertiarypop sm:text-sm'
+                className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               />
               {errorMessages && (
                 <p className='text-red-500 hover:text-red-300'>
@@ -128,7 +128,7 @@ const EditProfile = () => {
             <div>
               <label
                 htmlFor='email'
-                className='block text-sm font-medium text-gray-700'
+                className='block text-sm pb-1 font-medium text-gray-700'
               >
                 Email
               </label>
@@ -138,7 +138,7 @@ const EditProfile = () => {
                 id='email'
                 value={editedUser?.email || ''}
                 onChange={handleInputChange}
-                className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-customColorTertiarypop focus:border-customColorTertiarypop sm:text-sm'
+                className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               />
               {errorMessages && (
                 <p className='text-red-500 hover:text-red-300'>
@@ -149,7 +149,7 @@ const EditProfile = () => {
             <div>
               <label
                 htmlFor='phone'
-                className='block text-sm font-medium text-gray-700'
+                className='block text-sm pb-1 font-medium text-gray-700'
               >
                 Phone
               </label>
@@ -159,7 +159,7 @@ const EditProfile = () => {
                 id='phone'
                 value={editedUser?.phone || ''}
                 onChange={handleInputChange}
-                className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-customColorTertiarypop focus:border-customColorTertiarypop sm:text-sm'
+                className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               />
               {errorMessages && (
                 <p className='text-red-500 hover:text-red-300'>
@@ -369,9 +369,9 @@ const ChangePassword = () => {
                 name={field}
                 value={formData[field]}
                 onChange={handleInputChange}
-                className={`block w-full px-3 py-2 border ${
+                className={`block w-full px-3 py-2  ${
                   errors[field] ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm focus:outline-none focus:ring-customColorTertiarypop focus:border-customColorTertiarypop sm:text-sm`}
+                }   border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75`}
               />
               <button
                 type='button'

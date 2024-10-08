@@ -15,7 +15,7 @@ const addArtist = asyncHandler(async (req, res, next) => {
     error.statusCode = 400
     return next(error)
   }
-  const artist = Artist.create({ name, description, image })
+  const artist = await Artist.create({ name, description, image })
   console.log(artist)
   if (!artist) {
     const error = new Error("could't create artist")
@@ -54,14 +54,39 @@ const checkArtist = asyncHandler(async (req, res, next) => {
 const getArtists = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1
   const limit = 10
+  const search = req.query.search
   const skip = (page - 1) * limit
+  let artists
 
-  const artist = await User.find({ role: 'user' }).skip(skip).limit(limit)
-  console.log()
-  if (artist) {
-    setTimeout(() => {
-      res.status(200).json(artist)
-    }, 100)
+  if (search) {
+    const regex = new RegExp(search, 'i')
+    artists = await Artist.find({ name: { $regex: regex } })
+      .skip(skip)
+      .limit(limit)
+    const totalCount = await Artist.countDocuments({
+      name: { $regex: search, $options: 'i' }
+    })
+    const totalPages = Math.ceil(totalCount / limit)
+    if (artists) {
+      return res.json({
+        artists,
+        hasNextPage: page < totalPages,
+        currentPage: Number(page),
+        totalPages
+      })
+    } else {
+      const error = new Error('error finding user')
+      error.statusCode = 400
+      return next(error)
+    }
+  } else {
+    artists = await Artist.find({}).skip(skip).limit(limit)
+  }
+
+  if (artists) {
+    res.json({
+      artists
+    })
   } else {
     const error = new Error('error finding user')
     error.statusCode = 400

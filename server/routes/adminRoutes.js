@@ -14,9 +14,8 @@ import {
   fetchThemes,
   fetchStyles,
   fetchTechniques,
-  getOrders,
-  updateOrderStatus,
-  updateArtistStatus
+  updateArtistStatus,
+  updateCategories
 } from '../controllers/adminController.js'
 
 router.post('/login', login)
@@ -30,9 +29,9 @@ router.post('/add-category', addCategory)
 router.get('/get-category-themes', fetchThemes)
 router.get('/get-category-styles', fetchStyles)
 router.get('/get-category-techniques', fetchTechniques)
+router.post('/categories/update-status', updateCategories)
 //
 router.put('/artists/:id/status', updateArtistStatus)
 //
-router.get('/orders/', getOrders)
-router.post('/orders/update-status', updateOrderStatus)
+
 export default router

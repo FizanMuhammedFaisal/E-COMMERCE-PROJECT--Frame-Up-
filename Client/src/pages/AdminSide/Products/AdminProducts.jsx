@@ -147,9 +147,9 @@ const AdminProducts = () => {
         edit: (
           <button
             onClick={() => handleProductEdit(product._id)}
-            className=' text-white p-4 duration-300 hover:duration-500 rounded-full hover:bg-customP2BackgroundD_300'
+            className=' text-white p-4 duration-300 hover:duration-300 rounded-full hover:bg-gray-200 hover:dark:bg-customP2BackgroundD_300'
           >
-            <FaEdit className='sm:text-xl md:text-2xl ' />
+            <FaEdit className='sm:text-xl md:text-2xl dark:text-white text-black' />
           </button>
         )
       })),
@@ -201,17 +201,6 @@ const AdminProducts = () => {
         button2={newStatus}
         onConfirm={onConfirm}
         loading={statusLoading}
-      />
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
       />
     </div>
   )

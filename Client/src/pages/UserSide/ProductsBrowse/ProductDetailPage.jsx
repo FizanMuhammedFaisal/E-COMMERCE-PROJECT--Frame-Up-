@@ -38,7 +38,7 @@ function ProductDetailPage() {
   ]
 
   return (
-    <div className='min-h-screen bg-white'>
+    <div className='min-h-screen font-primary bg-white'>
       <ProductDetails
         allImages={allImages}
         handleThumbnailClick={handleThumbnailClick}

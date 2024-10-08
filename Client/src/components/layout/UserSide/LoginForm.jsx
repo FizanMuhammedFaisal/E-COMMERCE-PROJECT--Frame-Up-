@@ -74,14 +74,9 @@ function LoginForm() {
   }
   return (
     <>
-      <div className='flex bg-slate-50 min-h-full flex-1  flex-col justify-center px-6 py-12 lg:px-8'>
+      <div className='flex bg-slate-50 min-h-full flex-1 pt-20 flex-col justify-center px-6 py-12 lg:px-8'>
         <div className='sm:mx-auto mt-6 sm:w-full sm:max-w-sm'>
-          {/* <img
-            alt='Your Company'
-            src='https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600'
-            className='mx-auto h-10 w-auto'
-          /> */}
-          <h2 className='mt-10  text-3xl font-tertiary leading-7 font-semibold text-center text-textPrimary'>
+          <h2 className='mt-10 md:text-4.5xl text-4xl font-primary tracking-tighter whitespace-nowrap leading-5 font-semibold text-center text-customColorTertiaryDark'>
             Sign Into your account
           </h2>
         </div>
@@ -133,7 +128,7 @@ function LoginForm() {
                     setEmail(e.target.value)
                   }}
                   autoComplete='email'
-                  className='block w-full  border-0 py-1.5 text-textPrimary shadow-sm ring-1 ring-inset ring-neutral-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-slate-400 sm:text-sm sm:leading-6'
+                  className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
                 />
                 <div className='pt-2 font-tertiary'>
                   {errors.email && (
@@ -155,7 +150,7 @@ function LoginForm() {
                 </label>
                 <div className='text-sm'>
                   <Link
-                    className='font-semibold text-textPrimary hover:underline'
+                    className='font-semibold text-textPrimary hover:text-textPrimary/80 underline'
                     to={'/login/forgot-password'}
                   >
                     Forgot password?
@@ -172,7 +167,7 @@ function LoginForm() {
                     setPassword(e.target.value)
                   }}
                   autoComplete='current-password'
-                  className='block w-full  border-0 py-1.5 text-textPrimary shadow-sm ring-1 ring-inset ring-neutral-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-slate-400 sm:text-sm sm:leading-6'
+                  className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
                 />
               </div>
               <div className='pt-2 font-tertiary'>
@@ -187,7 +182,7 @@ function LoginForm() {
             <div className='flex justify-center pt-2'>
               <button
                 type='submit'
-                className='flex  w-4/12 justify-center duration-300  bg-customColorTertiary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-customColorPrimary hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-customColorSecondary'
+                className='flex  w-4/12 justify-center duration-300  bg-customColorTertiary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-customColorTertiaryLight  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-customColorSecondary'
               >
                 Sign in
               </button>

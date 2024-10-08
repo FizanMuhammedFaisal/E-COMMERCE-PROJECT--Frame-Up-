@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   XMarkIcon,
   AdjustmentsHorizontalIcon,
@@ -7,14 +7,16 @@ import {
 } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useDebounce } from '../../../hooks/useDebounce'
+import { useSearchParams } from 'react-router-dom'
 
-const ProductListFilter = ({
+function ProductListFilter({
   onFiltersChange,
   setIsFilterOpen,
   isFilterOpen,
-  setIncludeCategories,
-  availableCategories
-}) => {
+  availableCategories,
+  onSearch
+}) {
+  const [searchData, setSearchData] = useState('')
   const [filters, setFilters] = useState({
     Themes: [],
     Styles: [],
@@ -23,13 +25,86 @@ const ProductListFilter = ({
     aA_zZ: false,
     zZ_aA: false
   })
-  const [expandedCategories, setExpandedCategories] = useState({})
-  const debouncedFilter = useDebounce(filters, 500)
+
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [urlLoaded, setUrlLoaded] = useState(false)
 
   useEffect(() => {
-    onFiltersChange(debouncedFilter)
-  }, [debouncedFilter, onFiltersChange])
+    const initialFilters = {
+      Themes: searchParams.get('Themes')?.split(',') || [],
+      Styles: searchParams.get('Styles')?.split(',') || [],
+      Techniques: searchParams.get('Techniques')?.split(',') || [],
+      priceRange: [0, Number(searchParams.get('priceRange')) || 10000],
+      aA_zZ: searchParams.get('aA_zZ') === 'true',
+      zZ_aA: searchParams.get('zZ_aA') === 'true'
+    }
+    const search = searchParams.get('searchQuery') || ''
+    console.log(search)
+    setFilters(initialFilters)
+    setSearchData(search)
+    setUrlLoaded(true)
 
+    onFiltersChange(initialFilters)
+    onSearch(search)
+  }, [searchParams])
+  const [expandedCategories, setExpandedCategories] = useState({})
+  const debouncedFilter = useDebounce(filters, 500)
+  const debouncedSearchData = useDebounce(searchData, 500)
+
+  useEffect(() => {
+    if (!urlLoaded) {
+      return setUrlLoaded(true)
+    }
+    const newParams = new URLSearchParams(searchParams)
+    console.log(searchData)
+    onFiltersChange(debouncedFilter)
+    onSearch(debouncedSearchData)
+
+    if (searchData.length > 0) {
+      newParams.set('searchQuery', searchData)
+    } else {
+      newParams.delete('searchQuery')
+    }
+
+    if (debouncedFilter.Themes.length > 0) {
+      newParams.set('Themes', debouncedFilter.Themes.join(','))
+    }
+    if (debouncedFilter.Styles.length > 0) {
+      newParams.set('Styles', debouncedFilter.Styles.join(','))
+    } else {
+      newParams.delete('Styles')
+    }
+
+    if (debouncedFilter.Techniques.length > 0) {
+      newParams.set('Techniques', debouncedFilter.Techniques.join(','))
+    } else {
+      newParams.delete('Techniques')
+    }
+
+    if (debouncedFilter.priceRange[1] !== 10000) {
+      newParams.set('priceRange', debouncedFilter.priceRange[1].toString())
+    } else {
+      newParams.delete('priceRange')
+    }
+
+    // Handle sorting options
+    if (debouncedFilter.aA_zZ) {
+      newParams.set('aA_zZ', 'true')
+      newParams.delete('zZ_aA')
+    } else if (debouncedFilter.zZ_aA) {
+      newParams.set('zZ_aA', 'true')
+      newParams.delete('aA_zZ')
+    } else {
+      newParams.delete('aA_zZ')
+      newParams.delete('zZ_aA')
+    }
+
+    if (newParams.toString() !== searchParams.toString()) {
+      setSearchParams(newParams)
+    }
+
+    // Trigger filtering/search
+  }, [debouncedFilter, debouncedSearchData])
   const handleFilterChange = (option, value) => {
     setFilters(prev => ({
       ...prev,
@@ -48,7 +123,6 @@ const ProductListFilter = ({
   }
 
   const handlePriceChange = newPrice => {
-    setIncludeCategories(true)
     setFilters(prev => ({
       ...prev,
       priceRange: [prev.priceRange[0], newPrice]

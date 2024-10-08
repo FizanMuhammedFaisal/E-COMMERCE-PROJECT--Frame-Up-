@@ -16,6 +16,8 @@ import AddCategoriesPage from '../pages/AdminSide/Categories/AddCategoriesPage'
 import ProductEditPage from '../pages/AdminSide/Products/ProductEditPage'
 import AdminArtists from '../pages/AdminSide/Artists/AdminArtists'
 import AddArtists from '../pages/AdminSide/Artists/AddArtists'
+import OrdersEditPage from '../pages/AdminSide/Orders/OrdersEditPage'
+import DiscountsPage from '../pages/AdminSide/Discounts/AdminDiscoundPage'
 const AdminRoutes = [
   {
     path: '/admin/login',
@@ -65,6 +67,11 @@ const AdminRoutes = [
             path: 'orders',
             element: <AdminOrders />
           },
+
+          {
+            path: 'orders/:orderId',
+            element: <OrdersEditPage />
+          },
           {
             path: 'category',
             element: <AdminCategory />
@@ -74,12 +81,17 @@ const AdminRoutes = [
             element: <AddCategoriesPage />
           },
           {
-            path: 'sales-report',
-            element: <AdminSalesReport />
-          },
-          {
             path: 'products/:productId',
             element: <ProductEditPage />
+          },
+          {
+            path: 'discounts',
+            element: <DiscountsPage />
+          },
+
+          {
+            path: 'sales-report',
+            element: <AdminSalesReport />
           }
         ]
       }

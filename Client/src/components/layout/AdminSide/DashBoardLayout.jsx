@@ -9,7 +9,7 @@ const DashboardLayout = data => {
     setIsCompact(data)
   }
   return (
-    <div className='dark:bg-customP2BackgroundD_darkest '>
+    <div className='dark:bg-customP2BackgroundD_darkest font-primary'>
       <Sidebar setData={handleset} />
       {/* Main content area */}
       <div
