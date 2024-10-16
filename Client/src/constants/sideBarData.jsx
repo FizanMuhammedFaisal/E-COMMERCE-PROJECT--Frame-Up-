@@ -6,6 +6,7 @@ import { FaShoppingCart } from 'react-icons/fa'
 import { MdCategory } from 'react-icons/md'
 import { IoBarChartSharp } from 'react-icons/io5'
 import { MdDiscount } from 'react-icons/md'
+import { RiCoupon3Fill } from 'react-icons/ri'
 export const sideBarData = [
   {
     title: 'Dashboard',
@@ -54,6 +55,12 @@ export const sideBarData = [
     link: '/dashboard/discounts',
     icon: <MdDiscount />,
     pathname: '/dashboard/discounts'
+  },
+  {
+    title: 'Coupons',
+    link: '/dashboard/coupons',
+    icon: <RiCoupon3Fill />,
+    pathname: '/dashboard/coupons'
   },
   {
     title: 'Sales Report',

@@ -19,7 +19,7 @@ export const updateProductStatus = createAsyncThunk(
       status
     })
 
-    return { id, status }
+    return { id, status, response }
   }
 )
 // Product slice
@@ -67,10 +67,12 @@ const adminProductsSlice = createSlice({
       })
       /// handling the upadte of the state
       .addCase(updateProductStatus.fulfilled, (state, action) => {
-        const { id, status } = action.payload
-        const user = state.data.find(product => product._id === id)
-        if (user) {
-          user.status = status
+        const { id, status, response } = action.payload
+        if (response.data.success) {
+          const user = state.data.find(product => product._id === id)
+          if (user) {
+            user.status = status
+          }
         }
       })
   }

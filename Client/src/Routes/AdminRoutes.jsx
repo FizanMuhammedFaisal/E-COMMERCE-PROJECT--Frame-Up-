@@ -17,7 +17,10 @@ import ProductEditPage from '../pages/AdminSide/Products/ProductEditPage'
 import AdminArtists from '../pages/AdminSide/Artists/AdminArtists'
 import AddArtists from '../pages/AdminSide/Artists/AddArtists'
 import OrdersEditPage from '../pages/AdminSide/Orders/OrdersEditPage'
-import DiscountsPage from '../pages/AdminSide/Discounts/AdminDiscoundPage'
+import AdminDiscountPage from '../pages/AdminSide/Discounts/AdminDiscountPage'
+import AddDiscountPage from '../pages/AdminSide/Discounts/AddDiscountPage'
+import AdminCouponsPage from '../pages/AdminSide/Coupons/AdminCouponsPage'
+import AddCouponsPage from '../pages/AdminSide/Coupons/AddCouponsPage'
 const AdminRoutes = [
   {
     path: '/admin/login',
@@ -86,7 +89,20 @@ const AdminRoutes = [
           },
           {
             path: 'discounts',
-            element: <DiscountsPage />
+            element: <AdminDiscountPage />
+          },
+          {
+            path: 'discounts/add',
+            element: <AddDiscountPage />
+          },
+
+          {
+            path: 'coupons',
+            element: <AdminCouponsPage />
+          },
+          {
+            path: 'coupons/add-coupons',
+            element: <AddCouponsPage />
           },
 
           {

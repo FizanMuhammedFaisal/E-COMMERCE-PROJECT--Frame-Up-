@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  CreditCardIcon,
-  TruckIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/outline'
-import { BsCash } from 'react-icons/bs'
 import { useMutation } from '@tanstack/react-query'
-import apiClient from '../../../services/api/apiClient'
-import { Alert, CircularProgress, Snackbar } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
+import { CreditCard, Truck, DollarSign } from 'lucide-react'
+import apiClient from '../../../services/api/apiClient'
 import {
   clearValidations,
   validateOrder
 } from '../../../redux/slices/authSlice'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
+import { handleRazorPaySuccess } from '../../../services/RazorPay/razorPay'
+import { Alert, CircularProgress, Snackbar } from '@mui/material'
 
 const paymentMethods = [
-  { id: 'credit_card', name: 'Credit Card', icon: CreditCardIcon },
-  { id: 'Cash on Delivery', name: 'Cash on Delivery', icon: BsCash }
+  { id: 'Razor Pay', name: 'Razor Pay', icon: CreditCard },
+  { id: 'Cash on Delivery', name: 'Cash on Delivery', icon: DollarSign }
 ]
 
 export default function PaymentPage() {
@@ -26,6 +22,8 @@ export default function PaymentPage() {
     paymentMethods[0].id
   )
   const [loading, setLoading] = useState(false)
+  const [paymentError, setPaymentError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const { items, subtotal } = useSelector(state => state.cart)
   const address = useSelector(state => state.address.selectedAddressId)
   const navigate = useNavigate()
@@ -35,109 +33,128 @@ export default function PaymentPage() {
     message: '',
     severity: 'success'
   })
-  // Calculate totals
   const shipping = 5.99
   const tax = subtotal * 0.03
   const discount = 10
-  const total = subtotal + shipping + tax - discount
-  const makeOrder = async () => {
-    const data = {
-      items,
-      shippingAddress: address,
-      paymentMethod: selectedPaymentMethod,
-      shippingCost: shipping,
-      discount,
-      taxAmount: tax,
-      totalAmount: total,
-      subtotal
-    }
-    const res = await apiClient.post('/api/order/initiate-order', {
-      data
-    })
-    console.log(res)
+  const total = Math.round(subtotal + shipping + tax - discount)
+
+  const orderData = {
+    items,
+    shippingAddress: address,
+    paymentMethod: selectedPaymentMethod,
+    shippingCost: shipping,
+    discount,
+    taxAmount: tax,
+    totalAmount: total,
+    subtotal
+  }
+
+  const initiateOrder = async () => {
+    const endpoint =
+      selectedPaymentMethod === 'Razor Pay'
+        ? '/api/order/initiate-order/razor-pay'
+        : '/api/order/initiate-order'
+    const res = await apiClient.post(endpoint, { data: orderData })
     if (!res || res.status !== 200) {
       throw new Error('Order initiation failed')
     }
+    return selectedPaymentMethod === 'Razor Pay' ? res.data.orderData : res.data
+  }
 
-    return res.data
+  const { mutate } = useMutation({
+    mutationFn: initiateOrder,
+    onMutate: () => setLoading(true),
+    onSuccess: async data => {
+      setLoading(false)
+      try {
+        if (selectedPaymentMethod === 'Razor Pay') {
+          const result = await handleRazorPaySuccess(data)
+          if (result?.success) {
+            dispatch(validateOrder())
+            navigate('/order-confirmed')
+          }
+        } else {
+          navigate('/order-confirmed')
+        }
+      } catch (error) {
+        console.error('Error during payment:', error.message)
+        setPaymentError(true)
+        setErrorMessage(
+          error.message.includes('interrupted')
+            ? 'Payment was interrupted. Please try again.'
+            : 'Payment failed. Please retry or contact support.'
+        )
+      }
+    },
+    onError: error => {
+      setLoading(false)
+      console.log(error?.response?.data?.outOfStock)
+      if (error?.response?.data.outOfStock) {
+        console.log('out of stock')
+        setPaymentError(true)
+        setErrorMessage('Some items in the cart are out of stock')
+        setSnackbarData({
+          message: 'Redirecting to Cart',
+          open: true,
+          severity: 'error'
+        })
+        setTimeout(() => {
+          navigate('/cart')
+          dispatch(clearValidations())
+        }, 3000)
+
+        dispatch(setCart(error?.response?.data.cart))
+      }
+      console.error('Error placing order:', error)
+      setPaymentError(true)
+      setErrorMessage(
+        'Payment failed. Please try again or contact support if the issue persists.'
+      )
+    }
+  })
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    setPaymentError(false)
+    setErrorMessage('')
+    mutate()
   }
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return
     setSnackbarData(prev => ({ ...prev, open: false }))
   }
-  const { mutate } = useMutation({
-    mutationFn: makeOrder,
-    onMutate: () => {
-      setLoading(true)
-    },
-    onSuccess: async () => {
-      setLoading(false)
 
-      dispatch(validateOrder())
-      navigate('/order-confirmed')
-    },
-    onError: error => {
-      setLoading(false)
-
-      if (error?.response?.data.outofstock) {
-        return dispatch(setCart(error?.response?.data.cart))
-      }
-      console.error('Error placing order:', error)
-      setSnackbarData({
-        message:
-          'Payment failed. Please try again or contact support if the issue persists.',
-        open: true,
-        severity: 'error'
-      })
-      setTimeout(() => {
-        dispatch(clearValidations())
-
-        navigate('/cart')
-      }, 3000)
-    }
-  })
-  const handleSubmit = e => {
-    e.preventDefault()
-    setLoading(true)
-    mutate()
-  }
   useEffect(() => {
-    const handleBeforeUnload = e => {
-      // Show confirmation dialog
-      const confirmationMessage =
-        'Are you sure you want to leave? Payment is in progress.'
-      e.returnValue = confirmationMessage
-      return confirmationMessage
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    document.body.appendChild(script)
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.body.removeChild(script)
     }
   }, [])
 
   return (
     <div className='min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-3xl mx-auto'>
-        <h1 className='text-3xl font-extrabold text-gray-900 mb-8 text-center'>
+        <h1 className='text-3xl font-bold text-gray-900 mb-8 text-center'>
           Complete Your Order
         </h1>
-        <div className='bg-white shadow overflow-hidden sm:rounded-lg'>
+        <div className='bg-white shadow-lg rounded-lg overflow-hidden'>
           <div className='p-6 space-y-6'>
             {/* Shipping Address */}
             <div>
-              <h2 className='text-xl font-semibold mb-4'>Shipping Address</h2>
-              <div className='bg-gray-50 p-4 rounded-md flex items-start'>
-                <TruckIcon className='h-6 w-6 text-gray-400 mr-3 flex-shrink-0 mt-1' />
-                <div>
-                  <p className='font-medium text-gray-800'>{address.name}</p>
-                  <p className='text-gray-600'>{address.street}</p>
-                  <p className='text-gray-600'>
-                    {address.city}, {address.state} {address.zipCode}
-                  </p>
-                  <p className='text-gray-600'>{address.country}</p>
-                </div>
+              <h2 className='text-xl font-semibold mb-4 flex items-center'>
+                <Truck className='w-6 h-6 mr-2 text-blue-500' />
+                Shipping Address
+              </h2>
+              <div className='bg-gray-50 p-4 rounded-md'>
+                <p className='font-medium text-gray-800'>{address.name}</p>
+                <p className='text-gray-600'>{address.street}</p>
+                <p className='text-gray-600'>
+                  {address.city}, {address.state} {address.zipCode}
+                </p>
+                <p className='text-gray-600'>{address.country}</p>
               </div>
             </div>
 
@@ -148,7 +165,11 @@ export default function PaymentPage() {
                 {paymentMethods.map(method => (
                   <label
                     key={method.id}
-                    className='flex items-center space-x-3 p-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer'
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-colors cursor-pointer ${
+                      selectedPaymentMethod === method.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
                   >
                     <input
                       type='radio'
@@ -184,21 +205,23 @@ export default function PaymentPage() {
                     </span>
                   </div>
                 ))}
-                <div className='border-t border-gray-200 pt-4 flex justify-between items-center'>
-                  <span className='text-gray-600'>Subtotal</span>
-                  <span className='font-medium'>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className='flex justify-between items-center'>
-                  <span className='text-gray-600'>Shipping</span>
-                  <span className='font-medium'>${shipping.toFixed(2)}</span>
-                </div>
-                <div className='flex justify-between items-center'>
-                  <span className='text-gray-600'>Tax</span>
-                  <span className='font-medium'>${tax.toFixed(2)}</span>
-                </div>
-                <div className='flex justify-between items-center text-green-600'>
-                  <span>Discount</span>
-                  <span>-${discount.toFixed(2)}</span>
+                <div className='border-t border-gray-200 pt-4 space-y-2'>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-gray-600'>Subtotal</span>
+                    <span className='font-medium'>${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-gray-600'>Shipping</span>
+                    <span className='font-medium'>${shipping.toFixed(2)}</span>
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-gray-600'>Tax</span>
+                    <span className='font-medium'>${tax.toFixed(2)}</span>
+                  </div>
+                  <div className='flex justify-between items-center text-green-600'>
+                    <span>Discount</span>
+                    <span>-${discount.toFixed(2)}</span>
+                  </div>
                 </div>
                 <div className='border-t border-gray-200 pt-4 flex justify-between items-center'>
                   <span className='text-lg font-semibold'>Total</span>
@@ -212,12 +235,38 @@ export default function PaymentPage() {
 
           <div className='px-6 py-4 bg-gray-50 border-t border-gray-200'>
             <form onSubmit={handleSubmit}>
-              <button
-                type='submit'
-                className='w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200'
-              >
-                {loading ? <CircularProgress /> : 'Place Order'}
-              </button>
+              {paymentError ? (
+                <div className='w-full py-3 px-4 bg-red-100 text-red-600 border border-red-500 rounded-md mb-4'>
+                  <p className='mb-2'>{errorMessage}</p>
+                  <button
+                    type='button'
+                    onClick={handleSubmit}
+                    className='w-full py-3 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors'
+                  >
+                    Retry Payment
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type='submit'
+                  className='w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors'
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className='flex items-center justify-center'>
+                      <CircularProgress
+                        color='inherit'
+                        size={20}
+                        thickness={10}
+                        className='mr-2'
+                      />
+                      Processing...
+                    </span>
+                  ) : (
+                    'Place Order'
+                  )}
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -226,10 +275,12 @@ export default function PaymentPage() {
         open={snackbarData.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbarData.severity}
+          variant='filled'
           className='w-full'
         >
           {snackbarData.message}

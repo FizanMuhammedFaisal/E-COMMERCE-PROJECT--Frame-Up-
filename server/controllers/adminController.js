@@ -5,6 +5,7 @@ import asyncHandler from 'express-async-handler'
 import generateCookie from '../utils/generateCookie.js'
 import generateToken from '../utils/generateToken.js'
 import Order from '../models/orderModel.js'
+import Discount from '../models/discoundModel.js'
 
 //@ discp   login route
 //route      api/admin/login
@@ -265,6 +266,54 @@ const updateCategories = asyncHandler(async (req, res) => {
   error.statusCode = 400
   return next(error)
 })
+//
+//
+const getProductDiscounds = asyncHandler(async (req, res, next) => {
+  const productDiscounts = await Discount.find({
+    discountType: 'Products'
+  })
+  if (productDiscounts) {
+    return res.status(200).json({
+      success: true,
+      discounts: productDiscounts
+    })
+  }
+  const error = new Error('Server error while fetching product discounts.')
+  error.statusCode = 400
+  return next(error)
+})
+//
+const getCategoryDiscounds = asyncHandler(async (req, res, next) => {
+  const CategoryDiscounts = await Discount.find({
+    discountType: 'Category'
+  })
+  if (CategoryDiscounts) {
+    return res.status(200).json({
+      success: true,
+      discounts: CategoryDiscounts
+    })
+  }
+  const error = new Error('Server error while fetching product discounts.')
+  error.statusCode = 400
+  return next(error)
+})
+//
+//
+const addDiscount = asyncHandler(async (req, res, next) => {
+  const {
+    name,
+    discountType,
+    discountPercentage,
+    startDate,
+    endDate,
+    description,
+    targetDiscountId,
+    status,
+    maxDiscountAmount,
+    minDiscountAmount
+  } = req.body.discountData
+  console.log(req.body)
+})
 // end
 export {
   login,
@@ -279,5 +328,8 @@ export {
   fetchStyles,
   fetchTechniques,
   updateArtistStatus,
-  updateCategories
+  updateCategories,
+  getCategoryDiscounds,
+  getProductDiscounds,
+  addDiscount
 }

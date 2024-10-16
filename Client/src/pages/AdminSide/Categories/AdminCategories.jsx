@@ -15,9 +15,8 @@ const AdminCategory = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    // Fetch themes only if not already fetched
     dispatch(fetchThemes())
-    // Fetch other categories concurrently, but conditionally if needed
+
     dispatch(fetchStyles())
     dispatch(fetchTechniques())
   }, [dispatch])

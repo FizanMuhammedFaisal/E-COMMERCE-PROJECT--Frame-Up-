@@ -8,6 +8,7 @@ import adminProductsSlice from '../slices/Admin/AdminProducts/adminProductsSlice
 import adminArtists from '../slices/Admin/AdminArtists/adminArtists.js'
 import cartSlice from '../slices/Users/Cart/cartSlice.js'
 import addressSlice from '../slices/Users/Address/addressSlice.js'
+import adminDiscountSlice from '../slices/Admin/AdminDiscount/adminDiscountSlice.js'
 
 const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ const store = configureStore({
     adminCategory: adminCategorySlice,
     categoryFetch: categoriesFetchSlice,
     adminArtists: adminArtists,
+    adminDiscount: adminDiscountSlice,
     product: productSlice,
     cart: cartSlice,
     address: addressSlice

@@ -2,8 +2,11 @@ import asyncHandler from 'express-async-handler'
 import Cart from '../models/cartModel.js'
 import Product from '../models/productModel.js'
 import Order from '../models/orderModel.js'
+import Razorpay from 'razorpay'
+import crypto from 'crypto'
+import { v4 as uuidv4 } from 'uuid'
 
-const initiateOrder = asyncHandler(async (req, res) => {
+const initiateOrder = asyncHandler(async (req, res, next) => {
   const {
     items,
     shippingAddress,
@@ -65,7 +68,7 @@ const initiateOrder = asyncHandler(async (req, res) => {
       paymentStatus: 'Pending',
       subtotal
     })
-    console.log(newOrder)
+
     await newOrder.save()
     // Deduct stock
     for (const item of updatedCart) {
@@ -76,11 +79,16 @@ const initiateOrder = asyncHandler(async (req, res) => {
 
     // Clear the user's cart
     await Cart.findOneAndUpdate({ userId: user._id }, { items: [] })
-
-    res.status(200).json({
-      order: newOrder,
-      message: 'Order placed successfully and cart cleared!'
-    })
+    console.log(paymentMethod)
+    if (paymentMethod === 'Razor Pay') {
+      req.orderDetails = newOrder
+      next()
+    } else {
+      res.status(200).json({
+        order: newOrder,
+        message: 'Order placed successfully and cart cleared!'
+      })
+    }
   } catch (error) {
     console.error('Error placing order:', error)
     res
@@ -186,11 +194,210 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
   }
 })
 //
+//
+//for razor pay order intiating
+const razorpay = new Razorpay({
+  key_id: process.env.RAZOR_PAY_KEY_ID,
+  key_secret: process.env.RAZOR_PAY_KEY_SECRET
+})
+const createOrder = asyncHandler(async (req, res) => {
+  const {
+    items,
+    shippingAddress,
+    paymentMethod,
+    shippingCost,
+    discount,
+    taxAmount,
+    totalAmount,
+    subtotal
+  } = req.body.data
+
+  const user = req.user
+
+  // Validate total amount
+  if (!totalAmount || isNaN(totalAmount)) {
+    return res.status(400).json({ message: 'Invalid total amount' })
+  }
+
+  let newOrder = null
+  let updatedCart = []
+
+  try {
+    // Step 1: Check stock and prepare updated cart
+    const productIds = items.map(item => item.productId)
+    const products = await Product.find({ _id: { $in: productIds } }).lean()
+
+    let outOfStock = false
+    updatedCart = items.map(item => {
+      const product = products.find(p => p._id.equals(item.productId))
+
+      if (!product || product.productStock === 0) {
+        outOfStock = true
+        return { ...item, quantity: 0 }
+      }
+
+      const updatedQuantity =
+        product.productStock < item.quantity
+          ? product.productStock
+          : item.quantity
+
+      return { ...item, quantity: updatedQuantity }
+    })
+
+    if (outOfStock) {
+      return res.status(400).json({
+        updatedCart,
+        message: 'Some items are out of stock',
+        outOfStock
+      })
+    }
+
+    // Step 2: Create the order in the database
+    newOrder = new Order({
+      userId: user._id,
+      items: updatedCart,
+      shippingAddress,
+      paymentMethod,
+      shippingCost,
+      discount,
+      taxAmount,
+      totalAmount,
+      orderStatus: 'Pending',
+      paymentStatus: 'Pending',
+      subtotal
+    })
+
+    await newOrder.save()
+
+    // Step 3: Deduct stock for each item and rollback if fails
+    for (const item of updatedCart) {
+      if (item.quantity > 0) {
+        const result = await Product.findByIdAndUpdate(item.productId, {
+          $inc: { productStock: -item.quantity }
+        })
+
+        if (!result) {
+          throw new Error(`Stock update failed for product ${item.productId}`)
+        }
+      }
+    }
+
+    // Step 4: Clear the user's cart
+    const cartUpdateResult = await Cart.findOneAndUpdate(
+      { userId: user._id },
+      { items: [] }
+    )
+    if (!cartUpdateResult) {
+      throw new Error('Failed to clear cart')
+    }
+
+    // Step 5: Handle payment method
+    if (paymentMethod === 'Razor Pay') {
+      const options = {
+        amount: totalAmount * 100, // Convert to paise
+        currency: 'INR',
+        receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
+        payment_capture: 1
+      }
+
+      const razorpayOrder = await razorpay.orders.create(options)
+
+      const orderData = {
+        razorpayOrderId: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        orderId: newOrder._id,
+        name: newOrder.shippingAddress.name,
+        contact: newOrder.shippingAddress.phoneNumber
+      }
+
+      res.status(200).json({ orderData })
+    } else {
+      res.status(200).json({
+        order: newOrder,
+        message: 'Order placed successfully and cart cleared!'
+      })
+    }
+  } catch (error) {
+    console.error('Error placing order:', error)
+
+    // Rollback the order if an error occurs
+    if (newOrder) {
+      await Order.findByIdAndDelete(newOrder._id)
+    }
+
+    // Restore stock
+    for (const item of updatedCart) {
+      if (item.quantity > 0) {
+        await Product.findByIdAndUpdate(item.productId, {
+          $inc: { productStock: item.quantity } // Restore stock
+        })
+      }
+    }
+
+    // Optionally restore cart items if they were cleared earlier
+    await Cart.findOneAndUpdate(
+      { userId: user._id },
+      { items: originalCartItems } // This assumes you store original cart items before clearing
+    )
+
+    // Respond with an error message
+    res.status(500).json({
+      message: 'An error occurred while placing the order. Rollback completed.',
+      error
+    })
+  }
+})
+
+//
+//
+const verifyPayment = async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+    req.body.paymentResponse
+  const { orderId } = req.body
+
+  console.log('Payment Response:', req.body)
+  console.log('Secret Key:', process.env.RAZOR_PAY_KEY_SECRET)
+
+  const expectedSignature = crypto
+    .createHmac('sha256', process.env.RAZOR_PAY_KEY_SECRET)
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest('hex')
+
+  console.log('Expected Signature:', expectedSignature)
+  console.log('Received Signature:', razorpay_signature)
+
+  const isSignatureValid = expectedSignature === razorpay_signature
+
+  if (!isSignatureValid) {
+    return res.status(400).json({ message: 'Payment verification failed' })
+  }
+
+  // Update order status in your database
+  try {
+    console.log(orderId)
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { paymentStatus: 'Paid' },
+      { new: true }
+    )
+
+    console.log(order)
+    return res
+      .status(200)
+      .json({ success: true, message: 'Payment verified successfully' })
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: 'Failed to update order' })
+  }
+}
 export {
   initiateOrder,
   getOrdersAdmin,
   cancelOrder,
   getOrderDetails,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  createOrder,
+  verifyPayment
 }

@@ -6,7 +6,7 @@ const authSlice = createSlice({
     user: null,
     isAuthenticated: false,
     role: null,
-    status: 'blocked',
+    status: null,
     checkoutValidated: false,
     paymentValidated: false,
     orderConfirmed: false

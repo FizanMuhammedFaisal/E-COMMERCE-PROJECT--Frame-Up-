@@ -15,7 +15,10 @@ import {
   fetchStyles,
   fetchTechniques,
   updateArtistStatus,
-  updateCategories
+  updateCategories,
+  getCategoryDiscounds,
+  getProductDiscounds,
+  addDiscount
 } from '../controllers/adminController.js'
 
 router.post('/login', login)
@@ -30,6 +33,10 @@ router.get('/get-category-themes', fetchThemes)
 router.get('/get-category-styles', fetchStyles)
 router.get('/get-category-techniques', fetchTechniques)
 router.post('/categories/update-status', updateCategories)
+//
+router.get('/get-category-discounts', getCategoryDiscounds)
+router.get('/get-product-discounts', getProductDiscounds)
+router.post('/add-discount', addDiscount)
 //
 router.put('/artists/:id/status', updateArtistStatus)
 //

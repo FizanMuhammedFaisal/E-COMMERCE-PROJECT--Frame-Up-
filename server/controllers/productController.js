@@ -305,9 +305,9 @@ const updateProductStatus = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'product not found' })
   }
 
-  setTimeout(() => {
-    return res.status(200).json({ message: 'status updated sucessfully' })
-  }, 100)
+  return res
+    .status(200)
+    .json({ message: 'status updated sucessfully', success: true })
 })
 //
 
@@ -315,17 +315,68 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const limit = parseInt(req.query.limit) || 10
   const skip = (page - 1) * limit
+  const search = req.query.search
+  const includeCategories = req.query.includeCategories
+  console.log(search)
+  function getProducts(products = []) {
+    return products.map(product => {
+      return { productName: product.productName, _id: product._id }
+    })
+  }
+  if (includeCategories) {
+    if (search) {
+      console.log('inside serach')
+      const regex = new RegExp(search, 'i')
+      const Ufproducts = await Product.find({ productName: { $regex: regex } })
+        .skip(skip)
+        .limit(limit)
+      const totalCount = await Product.countDocuments({
+        name: { $regex: search, $options: 'i' }
+      })
+      const totalPages = Math.ceil(totalCount / limit)
 
-  // Create the filter based on the user's request
-  try {
-    const products = await Product.find({})
-      .skip(skip)
-      .limit(limit)
-      .populate('productCategories')
-    const totalItems = await Product.countDocuments()
-    res.json({ products, totalItems })
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching products' })
+      if (Ufproducts) {
+        const products = getProducts(Ufproducts)
+        return res.json({
+          products,
+          hasNextPage: page < totalPages,
+          currentPage: Number(page),
+          totalPages
+        })
+      } else {
+        const error = new Error('error finding user')
+        error.statusCode = 400
+        return next(error)
+      }
+    } else {
+      try {
+        const Ufproducts = await Product.find({}).skip(skip).limit(limit)
+        const totalCount = await Product.countDocuments({})
+        const totalPages = Math.ceil(totalCount / limit)
+        if (Ufproducts) {
+          const products = getProducts(Ufproducts)
+          res.json({
+            products,
+            hasNextPage: page < totalPages,
+            currentPage: Number(page),
+            totalPages
+          })
+        }
+      } catch (error) {
+        res.status(500).json({ message: 'Error fetching products' })
+      }
+    }
+  } else {
+    try {
+      const products = await Product.find({})
+        .skip(skip)
+        .limit(limit)
+        .populate('productCategories')
+      const totalItems = await Product.countDocuments()
+      res.json({ products, totalItems })
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching products' })
+    }
   }
 })
 

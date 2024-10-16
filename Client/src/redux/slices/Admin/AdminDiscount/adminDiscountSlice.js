@@ -1,26 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import apiClient from '../../../../services/api/apiClient'
 
-// Define async thunks for fetching product discounts
 export const fetchProductDiscounts = createAsyncThunk(
   'discounts/fetchProductDiscounts',
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-product-discounts')
-      return response.data.result
+      return response.data.discounts
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
     }
   }
 )
 
-// Define async thunks for fetching category discounts
 export const fetchCategoryDiscounts = createAsyncThunk(
   'discounts/fetchCategoryDiscounts',
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-category-discounts')
-      return response.data.result
+      return response.data.discounts
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message)
+    }
+  }
+)
+
+export const addDiscount = createAsyncThunk(
+  'discounts/addDiscount',
+
+  async (discountData, { rejectWithValue }) => {
+    console.log(discountData)
+    try {
+      const response = await apiClient.post('/api/admin/add-discount', {
+        discountData
+      })
+      return response.data.discount
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
     }
@@ -39,7 +53,9 @@ const adminDiscountSlice = createSlice({
       data: [],
       status: 'idle',
       error: null
-    }
+    },
+    addDiscountStatus: 'idle',
+    addDiscountError: null
   },
   reducers: {
     updateDiscountStatus: (state, action) => {
@@ -83,6 +99,26 @@ const adminDiscountSlice = createSlice({
       .addCase(fetchCategoryDiscounts.rejected, (state, action) => {
         state.categoryDiscounts.status = 'failed'
         state.categoryDiscounts.error = action.payload
+      })
+
+    // Add Discount
+    builder
+      .addCase(addDiscount.pending, state => {
+        state.addDiscountStatus = 'loading'
+      })
+      .addCase(addDiscount.fulfilled, (state, action) => {
+        state.addDiscountStatus = 'succeeded'
+        // You can choose to push the newly added discount to either productDiscounts or categoryDiscounts based on its type
+        const newDiscount = action.payload
+        if (newDiscount.offerType === 'Products') {
+          state.productDiscounts.data.push(newDiscount)
+        } else if (newDiscount.offerType === 'Category') {
+          state.categoryDiscounts.data.push(newDiscount)
+        }
+      })
+      .addCase(addDiscount.rejected, (state, action) => {
+        state.addDiscountStatus = 'failed'
+        state.addDiscountError = action.payload
       })
   }
 })

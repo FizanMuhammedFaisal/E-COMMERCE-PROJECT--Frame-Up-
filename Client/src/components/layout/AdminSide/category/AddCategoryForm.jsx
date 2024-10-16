@@ -3,30 +3,26 @@ import { useDispatch, useSelector } from 'react-redux'
 import { addCategory } from '../../../../redux/slices/Admin/AdminCategory/adminCategorySlice'
 import { toast, ToastContainer } from 'react-toastify'
 function AddCategoryForm() {
-  // State for the form inputs
   const [categoryName, setCategoryName] = useState('')
   const [categoryType, setCategoryType] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const dispatch = useDispatch()
-  // Function to handle form submission
+
   const handleSubmit = async e => {
     e.preventDefault()
 
-    // Validate the form
     if (!categoryName || !categoryType || !description) {
       setError('All fields are required')
       return
     }
 
-    // Handle the category submission logic here
     const newCategory = {
       name: categoryName,
       type: categoryType,
       description: description
     }
     try {
-      // Dispatch the action and unwrap the result
       const result = await dispatch(addCategory(newCategory)).unwrap()
 
       toast.success('Category Created ', {
@@ -35,16 +31,14 @@ function AddCategoryForm() {
       })
 
       console.log('Category added successfully:', result)
-      // Optionally, you can show a success message or handle it however you like
 
-      // Clear the form and error
       setCategoryName('')
       setCategoryType('')
       setDescription('')
       setError('')
     } catch (err) {
       console.error('Failed to add category:', err)
-      // Set the error based on the rejected reason
+
       setError(err.message)
     }
   }
@@ -131,15 +125,6 @@ function AddCategoryForm() {
           </button>
         </div>
       </form>
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-      />
     </div>
   )
 }

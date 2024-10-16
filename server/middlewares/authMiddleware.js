@@ -25,11 +25,13 @@ const protect = asyncHandler(async (req, res, next) => {
 
       next()
     } catch (error) {
+      console.log('no tokensadf')
       // If verification fails, return 401 Unauthorized
       res.status(401).json({ message: "'Not authorized, invalid token'" })
     }
   } else {
     // If the token is missing, return 401 Unauthorized
+    console.log('not authourized')
     res.status(401).json({ message: "'Not authorized, no token'" })
   }
 })

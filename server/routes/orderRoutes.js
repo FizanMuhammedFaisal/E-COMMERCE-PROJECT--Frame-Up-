@@ -7,11 +7,15 @@ import {
   cancelOrder,
   getOrderDetails,
   getOrdersAdmin,
-  updateOrderStatus
+  updateOrderStatus,
+  createOrder,
+  verifyPayment
 } from '../controllers/orderController.js'
 
 //users
 router.post('/initiate-order', protect, initiateOrder)
+router.post('/initiate-order/razor-pay', protect, createOrder)
+router.post('/verify-payment', protect, verifyPayment)
 router.get('/', protect, getOrders)
 router.post('/cancel/:id', cancelOrder)
 router.get('/:orderId', getOrderDetails)
