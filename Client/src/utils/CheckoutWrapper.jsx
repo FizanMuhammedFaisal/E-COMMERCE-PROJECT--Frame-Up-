@@ -3,9 +3,8 @@ import { Navigate } from 'react-router-dom'
 import { Outlet } from 'react-router-dom/dist'
 
 const CheckoutWrapper = () => {
-  const { isAuthenticated, status, checkoutValidated } = useSelector(
-    state => state.auth
-  )
+  const { isAuthenticated, status } = useSelector(state => state.auth)
+  const { checkoutValidated } = useSelector(state => state.checkout)
 
   if (!isAuthenticated) {
     return <Navigate to='/login' replace />

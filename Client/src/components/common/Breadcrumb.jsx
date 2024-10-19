@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-const Breadcrumb = ({ showHome = true, type = 'user' }) => {
+const Breadcrumb = ({ showHome = true, type = 'user', productName }) => {
   const location = useLocation()
   const pathnames = location.pathname.split('/').filter(x => x)
 
@@ -38,13 +38,20 @@ const Breadcrumb = ({ showHome = true, type = 'user' }) => {
           const isLast = index === pathnames.length - 1
 
           return isLast ? (
-            <li key={index} className={lastItemClass}>
-              <span className='mx-2  font-bold'>＞</span>
-              {value.charAt(0).toUpperCase() + value.slice(1)}
-            </li>
+            productName ? (
+              <li key={index} className={lastItemClass}>
+                <span className='mx-2  font-bold'>＞</span>
+                {productName}
+              </li>
+            ) : (
+              <li key={index} className={lastItemClass}>
+                <span className='mx-2  font-bold'>＞</span>
+                {value.charAt(0).toUpperCase() + value.slice(1)}
+              </li>
+            )
           ) : (
             <li key={index}>
-              <span className='mx-2 text-white font-bold'>/</span>
+              <span className='mx-2 text-dark font-bold'>/</span>
               <Link to={routeTo} className={linkClass}>
                 {value.charAt(0).toUpperCase() + value.slice(1)}
               </Link>

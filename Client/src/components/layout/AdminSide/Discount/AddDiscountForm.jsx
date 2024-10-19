@@ -1,25 +1,29 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { addDiscount } from '../../../../redux/slices/Admin/AdminDiscount/adminDiscountSlice'
-
-import { toast, ToastContainer } from 'react-toastify'
+import { useLocation } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { addDiscount } from '../../../../redux/slices/Admin/AdminDiscount/adminDiscountSlice'
 import {
   fetchStyles,
   fetchTechniques,
   fetchThemes
 } from '../../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
-
 import ProductSelect from '../../../common/ProductSelect'
-import TestSelect from '../../../common/TestSelect'
 
-function AddDiscountForm() {
+export default function AddDiscountForm() {
+  const location = useLocation()
+  const { type } = location.state || ''
   const [discountData, setDiscountData] = useState({
-    discountTarget: '',
-    targetId: '',
+    name: '',
+    discountTarget: type,
     discountType: '',
     discountValue: '',
-    status: 'active'
+    startDate: '',
+    endDate: '',
+    description: '',
+    targetId: '',
+    status: 'Active'
   })
   const [error, setError] = useState('')
   const dispatch = useDispatch()
@@ -27,12 +31,10 @@ function AddDiscountForm() {
   const { themes, styles, techniques } = useSelector(
     state => state.categoryFetch
   )
-
   const categories = [...themes.data, ...styles.data, ...techniques.data]
 
   useEffect(() => {
     dispatch(fetchThemes())
-
     dispatch(fetchStyles())
     dispatch(fetchTechniques())
   }, [dispatch])
@@ -49,10 +51,13 @@ function AddDiscountForm() {
     e.preventDefault()
 
     if (
+      !discountData.name ||
       !discountData.discountTarget ||
       !discountData.targetId ||
       !discountData.discountType ||
-      !discountData.discountValue
+      !discountData.discountValue ||
+      !discountData.startDate ||
+      !discountData.endDate
     ) {
       setError('Please fill in all required fields')
       return
@@ -60,19 +65,20 @@ function AddDiscountForm() {
 
     try {
       const result = await dispatch(addDiscount(discountData)).unwrap()
-
       toast.success('Discount Created', {
         className:
           'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white'
       })
-
       console.log('Discount added successfully:', result)
-
       setDiscountData({
+        name: '',
         discountTarget: '',
-        targetId: '',
         discountType: '',
         discountValue: '',
+        startDate: '',
+        endDate: '',
+
+        targetId: '',
         status: 'active'
       })
       setError('')
@@ -80,6 +86,10 @@ function AddDiscountForm() {
       console.error('Failed to add discount:', err)
       setError(err.message || 'An error occurred while adding the discount')
     }
+  }
+
+  const handleSelectedOption = option => {
+    setDiscountData(prev => ({ ...prev, targetId: option.value }))
   }
 
   return (
@@ -99,10 +109,28 @@ function AddDiscountForm() {
       <form onSubmit={handleSubmit} className='space-y-6'>
         <div className='form-group'>
           <label
+            htmlFor='name'
+            className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
+          >
+            Discount Name
+          </label>
+          <input
+            type='text'
+            id='name'
+            name='name'
+            value={discountData.name}
+            onChange={handleChange}
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            placeholder='Enter discount name'
+          />
+        </div>
+
+        <div className='form-group'>
+          <label
             htmlFor='discountTarget'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
           >
-            Discount Target
+            Offer Type
           </label>
           <select
             id='discountTarget'
@@ -111,24 +139,24 @@ function AddDiscountForm() {
             onChange={handleChange}
             className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           >
-            <option value=''>Select target</option>
-            <option value='product'>Product</option>
-            <option value='category'>Category</option>
+            <option value=''>Select offer type</option>
+            <option value='Category'>Category</option>
+            <option value='Products'>Products</option>
           </select>
         </div>
-        <TestSelect />
+
         {discountData.discountTarget && (
           <div className='form-group'>
             <label
               htmlFor='targetId'
               className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
             >
-              {discountData.discountTarget === 'product'
+              {discountData.discountTarget === 'Products'
                 ? 'Product'
                 : 'Category'}
             </label>
-            {discountData.discountTarget === 'product' ? (
-              <ProductSelect />
+            {discountData.discountTarget === 'Products' ? (
+              <ProductSelect onSelect={handleSelectedOption} />
             ) : (
               <select
                 id='targetId'
@@ -138,7 +166,6 @@ function AddDiscountForm() {
                 className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
               >
                 <option value=''>Select a category</option>
-
                 {categories.map(category => (
                   <option key={category._id} value={category._id}>
                     {category.name}
@@ -194,6 +221,40 @@ function AddDiscountForm() {
 
         <div className='form-group'>
           <label
+            htmlFor='startDate'
+            className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
+          >
+            Start Date
+          </label>
+          <input
+            type='datetime-local'
+            id='startDate'
+            name='startDate'
+            value={discountData.startDate}
+            onChange={handleChange}
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+          />
+        </div>
+
+        <div className='form-group'>
+          <label
+            htmlFor='endDate'
+            className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
+          >
+            End Date
+          </label>
+          <input
+            type='datetime-local'
+            id='endDate'
+            name='endDate'
+            value={discountData.endDate}
+            onChange={handleChange}
+            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+          />
+        </div>
+
+        <div className='form-group'>
+          <label
             htmlFor='status'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
           >
@@ -206,8 +267,9 @@ function AddDiscountForm() {
             onChange={handleChange}
             className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           >
-            <option value='active'>Active</option>
-            <option value='disabled'>Disabled</option>
+            <option value='Active'>Active</option>
+            <option value='Expired'>Expired</option>
+            <option value='Disabled'>Disabled</option>
           </select>
         </div>
 
@@ -220,17 +282,6 @@ function AddDiscountForm() {
           </button>
         </div>
       </form>
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-      />
     </div>
   )
 }
-
-export default AddDiscountForm

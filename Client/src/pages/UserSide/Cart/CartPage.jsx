@@ -12,9 +12,9 @@ import { useCart } from '../../../hooks/useCart'
 import { Alert, Button, Snackbar } from '@mui/material'
 import apiClient from '../../../services/api/apiClient'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
-import { validateChekout } from '../../../redux/slices/authSlice'
+import { validateChekout } from '../../../redux/slices/Users/Checkout/checkoutSlice'
 
-const MotionButton = motion(Button)
+const MotionButton = motion.create(Button)
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -160,7 +160,7 @@ export default function CartPage() {
                   <p>${totalPrice.toFixed(2)}</p>
                 </div>
                 <motion.button
-                  className='w-full mb-4 py-3 px-4 border border-transparent rounded-md text-base font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiary transition-colors duration-200'
+                  className='w-full mb-4 py-3 px-4 border border-transparent rounded-md text-base font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none  transition-colors duration-200'
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleCheckout}

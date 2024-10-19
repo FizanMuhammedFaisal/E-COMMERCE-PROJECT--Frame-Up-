@@ -400,7 +400,10 @@ const getSearched = asyncHandler(async (req, res) => {
         },
         { productName: 1, thumbnailImage: 1, productPrice: 1, _id: 1 }
       ).limit(5),
-      Category.find({ name: { $regex: regex } }, { name: 1, _id: 1 }).limit(5)
+      Category.find(
+        { name: { $regex: regex } },
+        { name: 1, _id: 1, type: 1 }
+      ).limit(5)
     ])
     console.log(products, categories)
     return res.json({ products, categories })

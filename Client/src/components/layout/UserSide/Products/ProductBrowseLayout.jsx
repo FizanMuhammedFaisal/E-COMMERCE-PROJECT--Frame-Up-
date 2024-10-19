@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { FiFilter, FiX, FiChevronDown, FiGrid, FiList } from 'react-icons/fi'
 import ProductCard from './ProductCard'
 import CircularProgress from '@mui/material/CircularProgress'
+import api from '../../../../services/api/api'
+import apiClient from '../../../../services/api/apiClient'
+import Spinner from '../../../common/Animations/Spinner'
 
 function ProductBrowseLayout({
   sortedProducts,
@@ -35,6 +38,14 @@ function ProductBrowseLayout({
     }
     return buttons
   }
+  const handleAddToWishlist = async productId => {
+    try {
+      const res = await apiClient.post('/api/wishlist/add', { productId })
+    } catch (error) {
+      //handle error case
+      console.log(error)
+    }
+  }
 
   return (
     <div className='w-full lg:w-3/4 bg-white mb-40'>
@@ -53,7 +64,7 @@ function ProductBrowseLayout({
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className='appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200'
+              className='appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customring-customColorTertiarypop transition-colors duration-200'
             >
               <option value='featured'>Featured</option>
               <option value='priceLowToHigh'>Price: Low to High</option>
@@ -88,7 +99,7 @@ function ProductBrowseLayout({
 
       {isLoading ? (
         <div className='flex justify-center items-center h-64'>
-          <CircularProgress />
+          <Spinner />
         </div>
       ) : (
         <div>
@@ -106,6 +117,7 @@ function ProductBrowseLayout({
             ) : (
               sortedProducts.map(product => (
                 <ProductCard
+                  addToWishlist={handleAddToWishlist}
                   key={product._id}
                   product={product}
                   viewMode={viewMode}

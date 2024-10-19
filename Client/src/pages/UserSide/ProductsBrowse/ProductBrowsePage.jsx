@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 import ProductBrowseLayout from '../../../components/layout/UserSide/Products/ProductBrowseLayout'
 import ProductListFilter from './ProductListFilter'
 import { useQuery } from '@tanstack/react-query'
+import Breadcrumb from '../../../components/common/Breadcrumb'
 
 const ProductBrowsePage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -55,7 +56,6 @@ const ProductBrowsePage = () => {
     return response.data
   }
 
-  // Use React Query to fetch products
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [
       'products',
@@ -98,6 +98,9 @@ const ProductBrowsePage = () => {
 
   return (
     <div className='min-h-screen bg-white  w-full font-primary'>
+      <div className='mt-10'>
+        <Breadcrumb />
+      </div>
       <div>
         <div className=' py-6 mb-7  flex justify-center'>
           <h1 className=' md:text-4.5xl  text-4xl font-primary tracking-tight leading-5 font-semibold text-center text-customColorTertiaryDark'>

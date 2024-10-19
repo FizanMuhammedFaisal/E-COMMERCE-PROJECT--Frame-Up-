@@ -18,7 +18,8 @@ import {
   updateCategories,
   getCategoryDiscounds,
   getProductDiscounds,
-  addDiscount
+  addDiscount,
+  updateDiscountStatus
 } from '../controllers/adminController.js'
 
 router.post('/login', login)
@@ -37,8 +38,9 @@ router.post('/categories/update-status', updateCategories)
 router.get('/get-category-discounts', getCategoryDiscounds)
 router.get('/get-product-discounts', getProductDiscounds)
 router.post('/add-discount', addDiscount)
+router.put('/discounts/update-status', updateDiscountStatus)
 //
 router.put('/artists/:id/status', updateArtistStatus)
 //
-
+router.post('/coupon/add')
 export default router

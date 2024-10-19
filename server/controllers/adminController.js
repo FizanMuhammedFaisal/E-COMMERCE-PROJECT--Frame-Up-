@@ -252,7 +252,7 @@ const updateArtistStatus = asyncHandler(async (req, res, next) => {
 //
 //
 
-const updateCategories = asyncHandler(async (req, res) => {
+const updateCategories = asyncHandler(async (req, res, next) => {
   const { id, newStatus } = req.body
   console.log(id, newStatus)
   const category = await Category.findOneAndUpdate(
@@ -270,7 +270,7 @@ const updateCategories = asyncHandler(async (req, res) => {
 //
 const getProductDiscounds = asyncHandler(async (req, res, next) => {
   const productDiscounts = await Discount.find({
-    discountType: 'Products'
+    discountTarget: 'Products'
   })
   if (productDiscounts) {
     return res.status(200).json({
@@ -285,8 +285,9 @@ const getProductDiscounds = asyncHandler(async (req, res, next) => {
 //
 const getCategoryDiscounds = asyncHandler(async (req, res, next) => {
   const CategoryDiscounts = await Discount.find({
-    discountType: 'Category'
+    discountTarget: 'Category'
   })
+  console.log(CategoryDiscounts)
   if (CategoryDiscounts) {
     return res.status(200).json({
       success: true,
@@ -299,21 +300,86 @@ const getCategoryDiscounds = asyncHandler(async (req, res, next) => {
 })
 //
 //
+
 const addDiscount = asyncHandler(async (req, res, next) => {
-  const {
-    name,
-    discountType,
-    discountPercentage,
-    startDate,
-    endDate,
-    description,
-    targetDiscountId,
-    status,
-    maxDiscountAmount,
-    minDiscountAmount
-  } = req.body.discountData
-  console.log(req.body)
+  try {
+    const {
+      name,
+      discountTarget,
+      discountType,
+      discountValue,
+      startDate,
+      endDate,
+      targetId,
+      status
+    } = req.body.discountData
+    console.log(req.body)
+    if (
+      !name ||
+      !discountTarget ||
+      !discountType ||
+      !discountValue ||
+      !startDate ||
+      !endDate ||
+      !targetId
+    ) {
+      const error = new Error('All required fields must be provided')
+      error.statusCode = 500
+      return next(error)
+    }
+    console.log(status)
+    const discount = new Discount({
+      name,
+      discountTarget,
+      discountType,
+      discountValue,
+      startDate,
+      endDate,
+      targetId,
+      status: status || 'Active'
+    })
+
+    const createdDiscount = await discount.save()
+
+    res.status(201).json({
+      message: 'Discount added successfully',
+      discount: createdDiscount
+    })
+  } catch (error) {
+    next(error)
+  }
 })
+//
+
+const updateDiscountStatus = asyncHandler(async (req, res, next) => {
+  const { id, newStatus, discountTarget } = req.body
+  console.log(req.body)
+  if (!id || !newStatus || !discountTarget) {
+    const error = new Error('All fields  must be provided')
+    error.statusCode = 500
+    return next(error)
+  }
+
+  const discount = await Discount.findById(id)
+
+  if (!discount) {
+    const error = new Error('no Discount document available')
+    error.statusCode = 500
+    return next(error)
+  }
+
+  discount.status = newStatus
+
+  const updatedDiscount = await discount.save()
+
+  res.status(200).json({
+    message: 'Discount status updated successfully',
+    discount: updatedDiscount
+  })
+})
+
+export default updateDiscountStatus
+
 // end
 export {
   login,
@@ -331,5 +397,6 @@ export {
   updateCategories,
   getCategoryDiscounds,
   getProductDiscounds,
-  addDiscount
+  addDiscount,
+  updateDiscountStatus
 }

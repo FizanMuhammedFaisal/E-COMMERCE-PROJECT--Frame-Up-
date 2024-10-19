@@ -3,9 +3,8 @@ import { Navigate } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
 
 const PaymentWrapper = () => {
-  const { isAuthenticated, status, paymentValidated } = useSelector(
-    state => state.auth
-  )
+  const { isAuthenticated, status } = useSelector(state => state.auth)
+  const { paymentValidated } = useSelector(state => state.checkout)
 
   if (!isAuthenticated) {
     return <Navigate to='/login' replace />

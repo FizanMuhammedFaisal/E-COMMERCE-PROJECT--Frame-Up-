@@ -8,15 +8,12 @@ import { useFetchCart } from '../../../hooks/useFetchCart'
 
 const UserLayout = () => {
   const { isAuthenticated, role } = useSelector(state => state.auth)
+
   useFetchCart()
   return (
     <>
-      <div className='pb-3'>
+      <div className='pb-16'>
         <Navbar />
-      </div>
-
-      <div className='mt-10'>
-        <Breadcrumb />
       </div>
 
       <Outlet />

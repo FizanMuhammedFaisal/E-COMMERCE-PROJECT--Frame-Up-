@@ -6,7 +6,6 @@ const Logo = () => {
   const SelectedLogo = [style1, style2, style3, style4][
     Math.floor(Math.random() * 3)
   ]
-
   return <SelectedLogo />
 }
 
@@ -102,7 +101,7 @@ const style2 = () => {
       whileTap={{ scale: 0.95 }}
       className='relative block overflow-hidden whitespace-nowrap'
     >
-      <Link to={'/'}>
+      <Link to='/'>
         <div>
           {letters.map((letter, index) => (
             <motion.span
@@ -122,14 +121,8 @@ const style2 = () => {
                     stiffness: 200,
                     damping: 25,
                     duration: DURATION,
-                    ease: 'easeInOut',
                     delay: STAGGER * index
                   }
-                },
-                opacity: {
-                  duration: 0.5,
-                  ease: 'easeInOut',
-                  delay: STAGGER * index
                 },
                 exit: {
                   y: '0%',
@@ -148,10 +141,10 @@ const style2 = () => {
             </motion.span>
           ))}
         </div>
-        <div className='absolute  '>
+        <div className='absolute'>
           {letters.map((letter, index) => (
             <motion.span
-              className={`font-secondary font-semibold  text-3xl ${letter === ' ' ? 'mr-2' : ''}`}
+              className={`font-secondary font-semibold text-3xl ${letter === ' ' ? 'mr-2' : ''}`}
               style={{
                 display: 'inline-block'
               }}
@@ -167,23 +160,17 @@ const style2 = () => {
                     stiffness: 100,
                     damping: 8,
                     duration: DURATION,
-                    ease: 'easeInOut',
                     delay: STAGGER * index
-                  },
-                  opacity: {
-                    duration: 0.5,
-                    ease: 'easeInOut',
+                  }
+                },
+                exit: {
+                  y: '0%',
+                  transition: {
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 25,
+                    duration: DURATION * 2,
                     delay: STAGGER * index
-                  },
-                  exit: {
-                    y: '0%',
-                    transition: {
-                      type: 'spring',
-                      stiffness: 200,
-                      damping: 25,
-                      duration: DURATION * 2,
-                      delay: STAGGER * index
-                    }
                   }
                 }
               }}

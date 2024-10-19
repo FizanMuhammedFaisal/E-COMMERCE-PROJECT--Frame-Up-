@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useState } from 'react'
 import { toast } from 'react-toastify'
-import { CalendarIcon } from 'lucide-react'
+import apiClient from '../../../services/api/apiClient'
 
-// Assuming you have an addCoupon action in your Redux slice
-// import { addCoupon } from '../path/to/your/couponSlice'
+import { CalendarIcon } from 'lucide-react'
+import { validateCoupon } from '../../../utils/validation/FormValidation'
+import { useNavigate } from 'react-router-dom'
 
 export default function AddCouponForm() {
   const [formData, setFormData] = useState({
@@ -15,12 +15,10 @@ export default function AddCouponForm() {
     maxDiscountAmount: '',
     validFrom: '',
     validTill: '',
-    isActive: true
+    status: true
   })
-  const [error, setError] = useState('')
-
-  const dispatch = useDispatch()
-
+  const [errors, setErrors] = useState({})
+  const navigate = useNavigate()
   const handleChange = e => {
     const { name, value, type } = e.target
     setFormData(prev => ({
@@ -31,15 +29,11 @@ export default function AddCouponForm() {
 
   const handleSubmit = async e => {
     e.preventDefault()
+    // Validate form data
+    const validationErrors = validateCoupon(formData)
 
-    if (
-      !formData.code ||
-      !formData.discountType ||
-      !formData.discountAmount ||
-      !formData.validFrom ||
-      !formData.validTill
-    ) {
-      setError('All required fields must be filled')
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       return
     }
 
@@ -57,9 +51,8 @@ export default function AddCouponForm() {
     }
 
     try {
-      // Assuming you have an addCoupon action
-      // const result = await dispatch(addCoupon(newCoupon)).unwrap()
-
+      const res = await apiClient.post('/api/coupons/add-coupon', { newCoupon })
+      navigate('/dashboard/coupons')
       toast.success('Coupon Created', {
         className:
           'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white'
@@ -74,12 +67,12 @@ export default function AddCouponForm() {
         maxDiscountAmount: '',
         validFrom: '',
         validTill: '',
-        isActive: true
+        status: true
       })
-      setError('')
+      setErrors({})
     } catch (err) {
       console.error('Failed to add coupon:', err)
-      setError('Failed to add coupon. Please try again.')
+      setErrors({ general: 'Failed to add coupon. Please try again.' })
     }
   }
 
@@ -89,10 +82,10 @@ export default function AddCouponForm() {
         Add New Coupon
       </h1>
 
-      {error && (
+      {errors.general && (
         <div className='dark:bg-customP2ForegroundD_400 border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
           <p className='text-red-900 dark:text-red-500 ms-4 text-start'>
-            {error}
+            {errors.general}
           </p>
         </div>
       )}
@@ -114,6 +107,11 @@ export default function AddCouponForm() {
             placeholder='Enter coupon code'
             className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           />
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>{errors.code}</p>
+            )}
+          </div>
         </div>
 
         <div className='form-group'>
@@ -134,6 +132,13 @@ export default function AddCouponForm() {
             <option value='percentage'>Percentage</option>
             <option value='fixed'>Fixed</option>
           </select>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.discountType}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className='form-group'>
@@ -152,6 +157,13 @@ export default function AddCouponForm() {
             placeholder='Enter discount amount'
             className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           />
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.discountAmount}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className='form-group'>
@@ -170,6 +182,13 @@ export default function AddCouponForm() {
             placeholder='Enter minimum purchase amount'
             className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           />
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.minPurchaseAmount}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className='form-group'>
@@ -188,6 +207,13 @@ export default function AddCouponForm() {
             placeholder='Enter maximum discount amount'
             className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
           />
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.maxDiscountAmount}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className='form-group relative'>
@@ -207,6 +233,13 @@ export default function AddCouponForm() {
               className='p-2 pr-10 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50 [color-scheme:light]'
             />
             <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' />
+          </div>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.validFrom}
+              </p>
+            )}
           </div>
         </div>
 
@@ -228,19 +261,26 @@ export default function AddCouponForm() {
             />
             <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' />
           </div>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.validTill}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className='form-group'>
           <label className='flex items-center space-x-2'>
             <input
               type='checkbox'
-              name='isActive'
-              checked={formData.isActive}
+              name='status'
+              checked={formData.status}
               onChange={handleChange}
               className='form-checkbox h-5 w-5 text-customP2Primary'
             />
             <span className='text-sm font-semibold text-gray-700 dark:text-slate-200'>
-              Is Active
+              Status: {formData.status ? 'Active' : 'Blocked'}
             </span>
           </label>
         </div>

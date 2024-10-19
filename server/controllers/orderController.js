@@ -196,11 +196,8 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
 //
 //
 //for razor pay order intiating
-const razorpay = new Razorpay({
-  key_id: process.env.RAZOR_PAY_KEY_ID,
-  key_secret: process.env.RAZOR_PAY_KEY_SECRET
-})
-const createOrder = asyncHandler(async (req, res) => {
+
+const createOrder = asyncHandler(async (req, res, next) => {
   const {
     items,
     shippingAddress,
@@ -213,17 +210,22 @@ const createOrder = asyncHandler(async (req, res) => {
   } = req.body.data
 
   const user = req.user
-
-  // Validate total amount
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZOR_PAY_KEY_ID,
+    key_secret: process.env.RAZOR_PAY_KEY_SECRET
+  })
   if (!totalAmount || isNaN(totalAmount)) {
     return res.status(400).json({ message: 'Invalid total amount' })
   }
 
   let newOrder = null
   let updatedCart = []
-
+  let originalCartItems = []
   try {
-    // Step 1: Check stock and prepare updated cart
+    const originalCart = await Cart.findOne({ userId: user._id })
+    if (originalCart) {
+      originalCartItems = originalCart.items
+    }
     const productIds = items.map(item => item.productId)
     const products = await Product.find({ _id: { $in: productIds } }).lean()
 
@@ -252,7 +254,6 @@ const createOrder = asyncHandler(async (req, res) => {
       })
     }
 
-    // Step 2: Create the order in the database
     newOrder = new Order({
       userId: user._id,
       items: updatedCart,
@@ -269,7 +270,6 @@ const createOrder = asyncHandler(async (req, res) => {
 
     await newOrder.save()
 
-    // Step 3: Deduct stock for each item and rollback if fails
     for (const item of updatedCart) {
       if (item.quantity > 0) {
         const result = await Product.findByIdAndUpdate(item.productId, {
@@ -282,7 +282,6 @@ const createOrder = asyncHandler(async (req, res) => {
       }
     }
 
-    // Step 4: Clear the user's cart
     const cartUpdateResult = await Cart.findOneAndUpdate(
       { userId: user._id },
       { items: [] }
@@ -291,26 +290,31 @@ const createOrder = asyncHandler(async (req, res) => {
       throw new Error('Failed to clear cart')
     }
 
-    // Step 5: Handle payment method
     if (paymentMethod === 'Razor Pay') {
-      const options = {
-        amount: totalAmount * 100, // Convert to paise
-        currency: 'INR',
-        receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
-        payment_capture: 1
+      try {
+        const options = {
+          amount: totalAmount * 100,
+          currency: 'INR',
+          receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
+          payment_capture: 1
+        }
+        console.log(options)
+        const razorpayOrder = await razorpay.orders.create(options)
+        const orderData = {
+          razorpayOrderId: razorpayOrder.id,
+          amount: razorpayOrder.amount,
+          orderId: newOrder._id,
+          name: newOrder.shippingAddress.name,
+          contact: newOrder.shippingAddress.phoneNumber
+        }
+        console.log(orderData)
+        res.status(200).json({ orderData })
+      } catch (err) {
+        console.log(err)
+        const error = new Error('razor pay order failed')
+        error.statusCode = 500
+        return next(error)
       }
-
-      const razorpayOrder = await razorpay.orders.create(options)
-
-      const orderData = {
-        razorpayOrderId: razorpayOrder.id,
-        amount: razorpayOrder.amount,
-        orderId: newOrder._id,
-        name: newOrder.shippingAddress.name,
-        contact: newOrder.shippingAddress.phoneNumber
-      }
-
-      res.status(200).json({ orderData })
     } else {
       res.status(200).json({
         order: newOrder,
@@ -320,27 +324,23 @@ const createOrder = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error('Error placing order:', error)
 
-    // Rollback the order if an error occurs
     if (newOrder) {
       await Order.findByIdAndDelete(newOrder._id)
     }
 
-    // Restore stock
     for (const item of updatedCart) {
       if (item.quantity > 0) {
         await Product.findByIdAndUpdate(item.productId, {
-          $inc: { productStock: item.quantity } // Restore stock
+          $inc: { productStock: item.quantity }
         })
       }
     }
 
-    // Optionally restore cart items if they were cleared earlier
     await Cart.findOneAndUpdate(
       { userId: user._id },
-      { items: originalCartItems } // This assumes you store original cart items before clearing
+      { items: originalCartItems }
     )
 
-    // Respond with an error message
     res.status(500).json({
       message: 'An error occurred while placing the order. Rollback completed.',
       error

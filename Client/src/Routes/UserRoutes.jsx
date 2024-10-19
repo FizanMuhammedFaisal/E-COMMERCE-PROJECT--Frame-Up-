@@ -20,6 +20,7 @@ import PaymentWrapper from '../utils/PaymentWrapper.jsx'
 import OrderConfirmationWrapper from '../utils/OrderConfirmationWrapper.jsx'
 import PaymentPage from '../pages/UserSide/Payment/PaymentPage.jsx'
 import OrderConfirmedPage from '../pages/UserSide/Payment/OrderConfirmedPage.jsx'
+import WishlistPage from '../pages/UserSide/Wishlist/WishlistPage.jsx'
 
 const UserRoutes = [
   {
@@ -69,6 +70,10 @@ const UserRoutes = [
       {
         path: 'cart',
         element: <CartPage />
+      },
+      {
+        path: 'wishlist',
+        element: <WishlistPage />
       },
 
       {

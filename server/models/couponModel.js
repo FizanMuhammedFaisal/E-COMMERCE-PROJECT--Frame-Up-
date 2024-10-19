@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const couponSchema = new mongoose.Schema(
   {
@@ -33,10 +33,17 @@ const couponSchema = new mongoose.Schema(
       type: Date,
       required: true
     },
-    isActive: {
-      type: Boolean,
-      default: true
-    }
+    status: {
+      type: String,
+      enum: ['Active', 'Blocked'],
+      default: 'Active'
+    },
+    usedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ]
   },
   { timestamps: true }
 )
@@ -48,7 +55,7 @@ couponSchema.methods.isValidPeriod = function () {
 
 couponSchema.methods.isValid = function (totalPurchaseAmount) {
   return (
-    this.isActive &&
+    this.status === 'Active' &&
     this.isValidPeriod() &&
     totalPurchaseAmount >= this.minPurchaseAmount
   )
@@ -57,4 +64,4 @@ couponSchema.methods.isValid = function (totalPurchaseAmount) {
 // Export the model
 const Coupon = mongoose.model('Coupon', couponSchema)
 
-module.exports = Coupon
+export default Coupon

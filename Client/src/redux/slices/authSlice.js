@@ -4,41 +4,25 @@ const authSlice = createSlice({
   name: 'authSlice',
   initialState: {
     user: null,
+    accessToken: null,
     isAuthenticated: false,
     role: null,
-    status: null,
-    checkoutValidated: false,
-    paymentValidated: false,
-    orderConfirmed: false
+    status: null
   },
   reducers: {
     setUser: (state, action) => {
       console.log(action.payload)
       state.user = action.payload.user
-      state.isAuthenticated = !!localStorage.getItem('accessToken')
+      state.accessToken = action.payload.accessToken
+      state.isAuthenticated = !!action.payload.accessToken
       state.role = action.payload.role
       state.status = action.payload.status
     },
     logoutUser: state => {
       state.user = null
-      state.isAuthenticated = !!localStorage.getItem('accessToken')
+      state.isAuthenticated = false
+      state.accessToken = null
       state.role = null
-    },
-    validateChekout: state => {
-      state.checkoutValidated = true
-    },
-    validatePayment: state => {
-      state.paymentValidated = true
-    },
-    validateOrder: state => {
-      state.orderConfirmed = true
-    },
-    clearValidations: state => {
-      state.paymentValidated = false
-      state.checkoutValidated = false
-    },
-    clearValidateOrder: state => {
-      state.orderConfirmed = false
     }
   }
 })

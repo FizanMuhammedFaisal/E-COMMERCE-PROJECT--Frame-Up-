@@ -61,6 +61,12 @@ const cartSlice = createSlice({
       state.subtotal = calculateSubtotal(state.items)
       state.totalPrice = calculateTotalPrice(state.items, state.discount)
     },
+    applyCoupon: (state, action) => {
+      const { discount } = action.payload
+      state.discount += discount
+      state.subtotal = calculateSubtotal(state.items)
+      state.totalPrice = calculateTotalPrice(state.items, state.discount)
+    },
 
     removeItemFromCart: (state, action) => {
       const { productId } = action.payload
@@ -115,7 +121,8 @@ export const {
   addToCartd,
   updateQuantity,
   removeItemFromCart,
-  clearCart
+  clearCart,
+  applyCoupon
 } = cartSlice.actions
 
 export default cartSlice.reducer

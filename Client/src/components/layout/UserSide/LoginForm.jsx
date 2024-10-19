@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import api from '../../../services/api/api'
 import { validateLoginForm } from '../../../utils/validation/FormValidation'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 import { provider, auth } from '../../../services/firebase/firebase'
@@ -27,15 +27,12 @@ function LoginForm() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
       const idToken = await user.getIdToken()
-
-      console.log(idToken, user) // You can log idToken here for debugging
       const res = await api.post('/users/google/auth', { idToken })
-      const accessToken = res.data.accessToken
-      localStorage.setItem('accessToken', accessToken)
       const data = {
         user: res.data._id,
         role: res.data.role,
-        status: res.data.status
+        status: res.data.status,
+        accessToken: res.data.accessToken
       }
       dispatch(setUser(data))
     } catch (error) {
@@ -51,20 +48,19 @@ function LoginForm() {
     e.preventDefault()
     const formData = { email, password }
     const errors = validateLoginForm(formData)
-    console.log(errors)
     if (Object.keys(errors).length > 0) {
       return setErrors(errors)
     }
 
     try {
       const res = await api.post('/users/login', formData)
-      const accessToken = res.data.accessToken
-      localStorage.setItem('accessToken', accessToken)
       const data = {
         user: res.data._id,
         role: res.data.role,
-        status: res.data.status
+        status: res.data.status,
+        accessToken: res.data.accessToken
       }
+      console.log(data)
       dispatch(setUser(data))
       console.log(res)
     } catch (error) {

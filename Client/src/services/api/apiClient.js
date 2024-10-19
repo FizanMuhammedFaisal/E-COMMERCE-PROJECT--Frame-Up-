@@ -1,11 +1,13 @@
 import axios from 'axios'
+import { setUser } from '../../redux/slices/authSlice'
+import store from '../../redux/store/store.js'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL
 })
 apiClient.interceptors.request.use(config => {
-  const accessToken = localStorage.getItem('accessToken')
-
+  const { accessToken } = store.getState().auth
+  console.log(accessToken)
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`
     console.log('sending the reqq')
@@ -15,11 +17,10 @@ apiClient.interceptors.request.use(config => {
 
 apiClient.interceptors.response.use(
   response => {
-    console.log('response was successfull')
+    console.log('response was successful')
     if (response.data.token) {
-      localStorage.setItem('accessToken', response.data.token)
+      store.dispatch(setUser({ accessToken: response.data.token }))
     }
-
     return response
   },
   async error => {
@@ -28,7 +29,7 @@ apiClient.interceptors.response.use(
     // Check if the error is an authentication error
     if (error.response.status === 401) {
       try {
-        const res = await apiClient.post(
+        const res = await apiClient.get(
           '/api/users/access',
           {},
           { withCredentials: true }
@@ -37,16 +38,14 @@ apiClient.interceptors.response.use(
         console.log(accessToken)
 
         if (accessToken) {
-          // Save the new access token in localStorage and retry original request
-          localStorage.setItem('accessToken', accessToken)
+          store.dispatch(setUser({ accessToken }))
+
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return apiClient(originalRequest)
         }
       } catch (refreshError) {
         console.error('Refresh token error:', refreshError)
-        // Dispatch sessionTimeout event when refresh token fails
-        localStorage.removeItem('accessToken')
-        // window.dispatchEvent(new Event('sessionTimeout'))
+        store.dispatch(setUser({ accessToken: null }))
       }
     }
     return Promise.reject(error)

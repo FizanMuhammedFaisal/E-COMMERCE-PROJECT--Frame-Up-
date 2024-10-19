@@ -94,7 +94,7 @@ const EmptyCart = () => {
       </p>
       <motion.button
         onClick={() => navigate('/all')}
-        className='bg-indigo-600 text-white py-3 px-6 rounded-md font-medium hover:bg-indigo-700 transition duration-150 ease-in-out'
+        className='bg-customColorTertiary text-white py-3 px-6 rounded-md font-medium hover:bg-customColorTertiaryLight transition duration-150 ease-in-out'
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >

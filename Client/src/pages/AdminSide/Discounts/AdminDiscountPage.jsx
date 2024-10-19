@@ -21,8 +21,8 @@ const AdminDiscountPage = () => {
   const tabRefs = useRef([])
 
   const tabs = [
-    { value: 'productDiscount', label: 'Product Discount' },
-    { value: 'categoryDiscount', label: 'Category Discount' }
+    { value: 'categoryDiscount', label: 'Category Discount' },
+    { value: 'productDiscount', label: 'Product Discount' }
   ]
 
   return (
@@ -71,12 +71,12 @@ const AdminDiscountPage = () => {
         <div className='p-4 '>
           {selectedTab === 'productDiscount' && (
             <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <CategoryDiscount />
+              <ProductDiscount />
             </div>
           )}
           {selectedTab === 'categoryDiscount' && (
             <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <ProductDiscount />
+              <CategoryDiscount />
             </div>
           )}
         </div>

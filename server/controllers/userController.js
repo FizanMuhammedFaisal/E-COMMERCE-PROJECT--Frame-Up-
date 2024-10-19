@@ -232,7 +232,14 @@ const makeAccess = (req, res) => {
   // Generate a new access token
   const token = generateToken(user._id)
 
-  res.json({ token })
+  setTimeout(() => {
+    res.json({
+      accessToken: token,
+      user: user._id,
+      role: user.role,
+      status: user.status
+    })
+  }, 1000)
 }
 //
 const verifyResetOTP = asyncHandler(async (req, res, next) => {

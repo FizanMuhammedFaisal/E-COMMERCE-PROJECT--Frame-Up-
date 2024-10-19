@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { CreditCard, Truck, DollarSign } from 'lucide-react'
 import apiClient from '../../../services/api/apiClient'
-import {
-  clearValidations,
-  validateOrder
-} from '../../../redux/slices/authSlice'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
 import { handleRazorPaySuccess } from '../../../services/RazorPay/razorPay'
 import { Alert, CircularProgress, Snackbar } from '@mui/material'
-
+import ApplyCouponModal from '../../../components/modals/ApplyCouponModal'
+import {
+  clearValidations,
+  validateOrder
+} from '../../../redux/slices/Users/Checkout/checkoutSlice'
 const paymentMethods = [
   { id: 'Razor Pay', name: 'Razor Pay', icon: CreditCard },
   { id: 'Cash on Delivery', name: 'Cash on Delivery', icon: DollarSign }
@@ -24,7 +24,9 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false)
   const [paymentError, setPaymentError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const { items, subtotal } = useSelector(state => state.cart)
+  const { items, subtotal, totalPrice, discount } = useSelector(
+    state => state.cart
+  )
   const address = useSelector(state => state.address.selectedAddressId)
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -33,10 +35,8 @@ export default function PaymentPage() {
     message: '',
     severity: 'success'
   })
-  const shipping = 5.99
-  const tax = subtotal * 0.03
-  const discount = 10
-  const total = Math.round(subtotal + shipping + tax - discount)
+  const shipping = 50
+  const tax = subtotal * 0.02
 
   const orderData = {
     items,
@@ -45,7 +45,7 @@ export default function PaymentPage() {
     shippingCost: shipping,
     discount,
     taxAmount: tax,
-    totalAmount: total,
+    totalAmount: totalPrice,
     subtotal
   }
 
@@ -74,6 +74,7 @@ export default function PaymentPage() {
             navigate('/order-confirmed')
           }
         } else {
+          dispatch(validateOrder())
           navigate('/order-confirmed')
         }
       } catch (error) {
@@ -145,7 +146,7 @@ export default function PaymentPage() {
             {/* Shipping Address */}
             <div>
               <h2 className='text-xl font-semibold mb-4 flex items-center'>
-                <Truck className='w-6 h-6 mr-2 text-blue-500' />
+                <Truck className='w-6 h-6 mr-2 text-customborder-customColorTertiarypop' />
                 Shipping Address
               </h2>
               <div className='bg-gray-50 p-4 rounded-md'>
@@ -157,7 +158,6 @@ export default function PaymentPage() {
                 <p className='text-gray-600'>{address.country}</p>
               </div>
             </div>
-
             {/* Payment Method */}
             <div>
               <h2 className='text-xl font-semibold mb-4'>Payment Method</h2>
@@ -167,7 +167,7 @@ export default function PaymentPage() {
                     key={method.id}
                     className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-colors cursor-pointer ${
                       selectedPaymentMethod === method.id
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-customColorTertiarypop bg-blue-50'
                         : 'border-gray-200 hover:bg-gray-50'
                     }`}
                   >
@@ -177,7 +177,7 @@ export default function PaymentPage() {
                       value={method.id}
                       checked={selectedPaymentMethod === method.id}
                       onChange={() => setSelectedPaymentMethod(method.id)}
-                      className='form-radio h-5 w-5 text-blue-600'
+                      className='form-radio h-5 w-5 text-custombg-customColorTertiary'
                     />
                     <span className='flex items-center text-gray-700 flex-grow'>
                       <method.icon className='h-6 w-6 mr-2 text-gray-500' />
@@ -186,8 +186,10 @@ export default function PaymentPage() {
                   </label>
                 ))}
               </div>
+            </div>{' '}
+            <div className='w-full'>
+              <ApplyCouponModal totalPurchaseAmount={totalPrice} />
             </div>
-
             {/* Order Summary */}
             <div>
               <h2 className='text-xl font-semibold mb-4'>Order Summary</h2>
@@ -226,7 +228,7 @@ export default function PaymentPage() {
                 <div className='border-t border-gray-200 pt-4 flex justify-between items-center'>
                   <span className='text-lg font-semibold'>Total</span>
                   <span className='text-lg font-semibold'>
-                    ${total.toFixed(2)}
+                    ${totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -249,7 +251,7 @@ export default function PaymentPage() {
               ) : (
                 <button
                   type='submit'
-                  className='w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors'
+                  className='w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customborder-customColorTertiarypop transition-colors'
                   disabled={loading}
                 >
                   {loading ? (

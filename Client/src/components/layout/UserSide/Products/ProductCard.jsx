@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiHeart } from 'react-icons/fi'
 
-function ProductCard({ product, viewMode }) {
+function ProductCard({ product, viewMode, addToWishlist }) {
   return (
     <Link
       to={`/products/${product._id}`}
@@ -26,6 +26,9 @@ function ProductCard({ product, viewMode }) {
             className='max-w-full max-h-full object-contain  transition-transform duration-300 hover:scale-105'
           />
           <motion.button
+            onClick={() => {
+              addToWishlist(product._id)
+            }}
             className='absolute top-2 right-2 p-2 z-10 bg-white rounded-full shadow-md text-gray-600 hover:text-red-500'
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

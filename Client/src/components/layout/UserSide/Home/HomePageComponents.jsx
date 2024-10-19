@@ -8,7 +8,7 @@ const MovingProductsSection = () => {
 
   const fetchProducts = async () => {
     const res = await api.get('/products/get-cards')
-    console.log(res)
+
     return res.data
   }
 
@@ -166,7 +166,7 @@ const AnimatedCarousalSection = () => {
 
   const fetchProducts = async () => {
     const res = await api.get('/products/get-cards')
-    console.log(res)
+
     return res.data
   }
 
@@ -190,7 +190,6 @@ const AnimatedCarousalSection = () => {
   if (isError) {
     return <p className='text-red-500'>Failed to load products.</p>
   }
-  console.log(products)
 
   return (
     <AnimatedCarousal

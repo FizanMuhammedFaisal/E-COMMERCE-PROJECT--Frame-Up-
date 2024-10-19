@@ -42,7 +42,7 @@ const AdminCategory = () => {
           }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
-          className='p-2 rounded-sm px-4 me-2 bg-customP2Primary text-white font-semibold  hover:bg-opacity-75  text-sm   transition-colors duration-300'
+          className='flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700'
         >
           Add New Category
         </motion.button>

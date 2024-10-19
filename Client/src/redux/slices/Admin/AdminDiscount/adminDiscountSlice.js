@@ -6,6 +6,7 @@ export const fetchProductDiscounts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-product-discounts')
+      console.log(response.data)
       return response.data.discounts
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
@@ -18,6 +19,7 @@ export const fetchCategoryDiscounts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get('/api/admin/get-category-discounts')
+      console.log(response.data)
       return response.data.discounts
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message)
@@ -108,11 +110,11 @@ const adminDiscountSlice = createSlice({
       })
       .addCase(addDiscount.fulfilled, (state, action) => {
         state.addDiscountStatus = 'succeeded'
-        // You can choose to push the newly added discount to either productDiscounts or categoryDiscounts based on its type
         const newDiscount = action.payload
-        if (newDiscount.offerType === 'Products') {
+        if (newDiscount.discountTarget === 'Products') {
           state.productDiscounts.data.push(newDiscount)
-        } else if (newDiscount.offerType === 'Category') {
+        } else if (newDiscount.discountTarget === 'Category') {
+          console.log('ading acate' + newDiscount)
           state.categoryDiscounts.data.push(newDiscount)
         }
       })

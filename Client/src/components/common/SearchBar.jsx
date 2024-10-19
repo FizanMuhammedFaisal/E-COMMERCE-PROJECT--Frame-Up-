@@ -6,18 +6,34 @@ import api from '../../services/api/api'
 import { useDebounce } from '../../hooks/useDebounce'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CircularProgress } from '@mui/material'
-const ResultCategory = React.memo(({ category }) => (
-  <li>
-    <Link
-      to={`/category/${category.id}`}
-      className='flex items-center text-sm text-gray-600 hover:text-customColorTertiarypop transition duration-150 ease-in-out'
-    >
-      <span>{category.name}</span>
-      <FiChevronRight className='ml-auto' />
-    </Link>
-  </li>
-))
 
+const ResultCategory = React.memo(({ category }) => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const handleCategorySelect = (event, category) => {
+    event.preventDefault()
+    console.log('asf')
+    console.log(category)
+    const newSearchParams = new URLSearchParams(searchParams)
+    const qname = category.type
+    const q = category.name
+    if (q) {
+      console.log('asdf')
+      newSearchParams.set(qname, q)
+      setSearchParams(newSearchParams)
+    }
+  }
+  return (
+    <li>
+      <div
+        onClick={() => handleCategorySelect(category)}
+        className='flex items-center text-sm text-gray-600 hover:text-customColorTertiarypop transition duration-150 ease-in-out'
+      >
+        <span>{category.name}</span>
+        <FiChevronRight className='ml-auto' />
+      </div>
+    </li>
+  )
+})
 const ResultProduct = React.memo(({ product }) => (
   <li>
     <Link
@@ -106,7 +122,6 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
       setSearchParams(newSearchParams)
     }
   }
-
   useEffect(() => {
     fetchSearchResults(debouncedQuery)
   }, [debouncedQuery])

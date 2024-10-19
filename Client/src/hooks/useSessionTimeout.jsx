@@ -6,7 +6,6 @@ function useSessionTimeout() {
   useEffect(() => {
     const handleSessionTimeout = () => {
       setSessionExpired(true)
-      // Optionally update Redux state or other global state here
     }
 
     window.addEventListener('sessionTimeout', handleSessionTimeout)

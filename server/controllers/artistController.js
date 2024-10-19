@@ -44,7 +44,6 @@ const checkArtist = asyncHandler(async (req, res, next) => {
     error.statusCode = 400
     return next(error)
   } else {
-    console.log('dfs')
     res.status(200).json({ message: 'verified' })
   }
 })

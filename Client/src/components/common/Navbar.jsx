@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BsCart2 } from 'react-icons/bs'
-import { FaRegUser } from 'react-icons/fa'
+
 import {
   Bars3Icon,
   XMarkIcon,
@@ -11,7 +11,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import SearchBar from './SearchBar'
 import { useSelector } from 'react-redux'
 import Logo from './Animations/Logo'
-
+import { HeartIcon } from 'lucide-react'
+import AccountNavbar from '../common/AccountNavbar'
 const products = [
   {
     name: 'Shop',
@@ -166,7 +167,7 @@ export default function Navbar() {
             whileTap={{ scale: 0.9 }}
             onClick={() => navigate('/account')}
           >
-            <FaRegUser />
+            <AccountNavbar />
           </motion.button>
           <motion.button
             className='text-2xl text-textPrimary'
@@ -194,13 +195,16 @@ export default function Navbar() {
               setIsSearchFocused={setIsSearchFocused}
               isSearchFocused={isSearchFocused}
             />
+
+            <AccountNavbar />
+
             <motion.button
-              className='text-xl text-textPrimary'
+              className='text-lg text-textPrimary'
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => navigate('/account')}
+              onClick={() => navigate('/wishlist')}
             >
-              <FaRegUser />
+              <HeartIcon size={22} />
             </motion.button>
             <motion.button
               className='text-2xl text-textPrimary'
@@ -209,7 +213,10 @@ export default function Navbar() {
               onClick={() => navigate('/cart')}
             >
               <div className='flex'>
-                <BsCart2 /> <p className='text-base'>({items.length})</p>
+                <BsCart2 />{' '}
+                {items.length > 0 && (
+                  <p className='text-base'>({items.length})</p>
+                )}
               </div>
             </motion.button>
           </div>

@@ -3,9 +3,8 @@ import { Navigate } from 'react-router-dom'
 import { Outlet } from 'react-router-dom/dist'
 
 const OrderConfirmationWrapper = () => {
-  const { isAuthenticated, status, orderConfirmed } = useSelector(
-    state => state.auth
-  )
+  const { isAuthenticated, status } = useSelector(state => state.auth)
+  const { orderConfirmed } = useSelector(state => state.checkout)
 
   if (!isAuthenticated) {
     return <Navigate to='/login' replace />
@@ -14,7 +13,7 @@ const OrderConfirmationWrapper = () => {
   if (isAuthenticated && status === 'Blocked') {
     return <Navigate to='/blocked' replace />
   }
-  console.log(orderConfirmed)
+
   if (!orderConfirmed) {
     return <Navigate to='/cart' replace />
   }

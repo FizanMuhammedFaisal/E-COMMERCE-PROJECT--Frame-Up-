@@ -14,6 +14,8 @@ import ImageZoomModal from '../../../modals/ImageZoomModal'
 import ProductRatings from '../../../common/ProductRatings'
 import ProductFeatures from './ProductFeatures'
 import { useCart } from '../../../../hooks/useCart'
+import apiClient from '../../../../services/api/apiClient'
+import Breadcrumb from '../../../common/Breadcrumb'
 
 function ProductDetails({ product }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -57,16 +59,44 @@ function ProductDetails({ product }) {
       })
     }
   }
-
+  const handleAddToWishlist = async productId => {
+    if (!isAuthenticated) {
+      return setSnackbarData({
+        open: true,
+        message: 'Login to add items to your Wishlist',
+        severity: 'error'
+      })
+    }
+    try {
+      const res = await apiClient.post('/api/wishlist/add', { productId })
+      console.log(res.data)
+      setAdded(true)
+      setSnackbarData({
+        open: true,
+        message: 'Product added to Wishlist!',
+        severity: 'success'
+      })
+    } catch (error) {
+      //handle eror
+      console.log(error)
+      setSnackbarData({
+        open: true,
+        message: error?.response?.data?.message,
+        severity: 'error'
+      })
+    }
+  }
   const handleCloseSnackbar = () =>
     setSnackbarData({ ...snackbarData, open: false })
 
   return (
     <div className='bg-slate-50 min-h-screen'>
+      <div className='mt-10'>
+        <Breadcrumb productName={product.productName} />
+      </div>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
         <section className='py-16 font-primary'>
           <div className='flex flex-col lg:flex-row items-start'>
-            {/* Left column - Image section */}
             <div className='lg:w-1/2 relative overflow-hidden'>
               <div
                 className='w-full h-96 relative overflow-hidden cursor-pointer'
@@ -194,12 +224,10 @@ function ProductDetails({ product }) {
                 )}
 
                 <div className='flex space-x-4 mb-8'>
-                  <motion.button
+                  <button
                     disabled={loading}
                     onClick={handleAddToCart}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`flex-1 bg-customColorTertiary duration-300 whitespace-nowrap text-white py-3 px-8 rounded-md font-medium ${
+                    className={`flex-1   bg-customColorTertiary duration-300 hover:bg-customColorTertiaryLight whitespace-nowrap text-white py-3 px-8 rounded-md font-medium ${
                       loading || added
                         ? ''
                         : 'hover:bg-customColorTertiaryLight'
@@ -213,8 +241,11 @@ function ProductDetails({ product }) {
                         Add to Cart
                       </>
                     )}
-                  </motion.button>
+                  </button>
                   <motion.button
+                    onClick={() => {
+                      handleAddToWishlist(product._id)
+                    }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className='flex-1 bg-gray-200 duration-300 text-gray-700 py-3 px-8 rounded-md font-medium hover:bg-gray-300'
@@ -267,6 +298,7 @@ function ProductDetails({ product }) {
         open={snackbarData.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={handleCloseSnackbar}

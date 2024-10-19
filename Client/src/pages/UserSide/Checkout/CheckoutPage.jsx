@@ -6,7 +6,8 @@ import {
   PlusIcon,
   CheckIcon,
   MapPinIcon,
-  PhoneIcon
+  PhoneIcon,
+  TagIcon
 } from '@heroicons/react/24/solid'
 import {
   ExclamationCircleIcon,
@@ -18,10 +19,11 @@ import AddressModal from '../../../components/modals/AddressModal'
 import apiClient from '../../../services/api/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
-import { Alert, Badge, Button, Snackbar } from '@mui/material'
+import { Alert, Badge, Button, Snackbar, TextField } from '@mui/material'
 import { useCart } from '../../../hooks/useCart'
 import { setSelectedAddressRedux } from '../../../redux/slices/Users/Address/addressSlice'
-import { validatePayment } from '../../../redux/slices/authSlice'
+import { validatePayment } from '../../../redux/slices/Users/Checkout/checkoutSlice'
+
 function CheckoutPage() {
   const { items, subtotal, totalPrice } = useSelector(state => state.cart)
   const navigate = useNavigate()
@@ -37,6 +39,7 @@ function CheckoutPage() {
   const dispatch = useDispatch()
   const { removeFromCart } = useCart()
   const MotionButton = motion.create(Button)
+
   const fetchData = async () => {
     const { data } = await apiClient.get('/api/users/get-address')
     return data
@@ -50,7 +53,6 @@ function CheckoutPage() {
     if (data?.address) {
       setAddresses(data.address)
       if (data.address.length > 0 && !selectedAddress) {
-        console.log(data.address)
         const selected = data.address.filter(
           (curr, i) => curr.isDefault === true
         )
@@ -58,7 +60,6 @@ function CheckoutPage() {
       }
     }
   }, [data, selectedAddress])
-  //
 
   useEffect(() => {
     if (items.length === 0) {
@@ -66,7 +67,6 @@ function CheckoutPage() {
     }
   }, [items, navigate])
 
-  //
   const handleContinue = async () => {
     const outOfStockItems = items.filter(item => item.quantity === 0)
     if (outOfStockItems.length > 0) {
@@ -96,29 +96,27 @@ function CheckoutPage() {
     sessionStorage.setItem('address', selectedAddress._id)
   }
 
-  // handlers
   const handleAddressSelect = address => {
     setSelectedAddress(address)
-    console.log(address)
     dispatch(setSelectedAddressRedux(address))
   }
+
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return
     setSnackbarData(prev => ({ ...prev, open: false }))
   }
+
   const handleAddNewAddress = newAddress => {
-    console.log(newAddress)
-    console.log(addresses)
     const newAddressWithId = { ...newAddress, _id: Date.now().toString() }
-    console.log(newAddressWithId)
     setAddresses([...addresses, newAddressWithId])
     setSelectedAddress(newAddressWithId)
   }
+
   const handleEditAddress = address => {
-    console.log(address)
     setIsModalOpen(true)
     setAddressData(address)
   }
+
   const handleRemoveItem = id => {
     removeFromCart(id)
     setSnackbarData({
@@ -195,12 +193,14 @@ function CheckoutPage() {
                   <p>Subtotal</p>
                   <p>${subtotal.toFixed(2)}</p>
                 </div>
+
                 <div className='mt-2 flex justify-between text-base font-semibold text-gray-900'>
                   <p>Total</p>
                   <p>${totalPrice.toFixed(2)}</p>
                 </div>
               </div>
             </div>
+
             <button
               onClick={() => handleContinue()}
               className='w-full bg-customColorTertiary text-white py-3 px-4 rounded-md font-medium hover:bg-customColorTertiaryLight transition duration-300 ease-in-out text-lg shadow-md'
@@ -209,7 +209,7 @@ function CheckoutPage() {
             </button>
             <button
               onClick={() => navigate('/products')}
-              className='w-full mt-4 bg-white text-customColorTertiary py-3 px-4 rounded-md font-medium border border-customtext-customColorTertiary hover:bg-indigo-50 transition duration-300 ease-in-out text-lg shadow-sm'
+              className='w-full mt-4 bg-white text-customColorTertiary py-3 px-4 rounded-md font-medium border border-customColorTertiary hover:bg-indigo-50 transition duration-300 ease-in-out text-lg shadow-sm'
             >
               Continue Shopping
             </button>
@@ -230,54 +230,51 @@ function CheckoutPage() {
                     Error: {error.message}
                   </div>
                 ) : addresses?.length > 0 ? (
-                  <ul className='divide-y divide-gray-200'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 p-4'>
                     {addresses.map(address => (
-                      <li key={address._id} className='py-4 sm:py-5 sm:px-6'>
-                        <div className='flex items-center justify-between'>
-                          <div className='flex-1 min-w-0'>
-                            <h3 className='text-lg font-medium text-gray-900 mb-1'>
-                              {address.addressName}
-                            </h3>
-                            <p className='text-sm text-gray-500 flex items-center mb-1'>
-                              <MapPinIcon className='h-4 w-4 mr-1 text-gray-400' />
-                              {address.address}, {address.city}, {address.state}{' '}
-                              {address.postalCode}
-                            </p>
-                            <p className='text-sm text-gray-500 flex items-center mb-1'>
-                              <PhoneIcon className='h-4 w-4 mr-1 text-gray-400' />
-                              {address.phoneNumber}
-                            </p>
-                          </div>
+                      <div key={address._id} className='border rounded-lg p-4'>
+                        <div className='flex justify-between items-start mb-2'>
+                          <h3 className='text-lg font-medium text-gray-900'>
+                            {address.addressName}
+                          </h3>
                           <button
                             onClick={() => handleEditAddress(address)}
-                            className='px-3 py-1 bg-black text-white rounded-3xl
-                          '
+                            className='text-sm text-customColorTertiary  hover:text-customColorTertiaryLight'
                           >
                             Edit
                           </button>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleAddressSelect(address)}
-                            className={`ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md ${
-                              selectedAddress?._id === address._id
-                                ? 'bg-customColorTertiary text-white'
-                                : 'text-customColorTertiary bg-customColorTertiaryLight/15'
-                            } hover:bg-customColorTertiaryLight hover:text-white focus:outline-none transition duration-150 ease-in-out`}
-                          >
-                            {selectedAddress?._id === address._id ? (
-                              <>
-                                <CheckIcon className='h-4 w-4 mr-1' />
-                                Selected
-                              </>
-                            ) : (
-                              'Select'
-                            )}
-                          </motion.button>
                         </div>
-                      </li>
+                        <p className='text-sm text-gray-500 flex items-center mb-1'>
+                          <MapPinIcon className='h-4 w-4 mr-1 text-gray-400' />
+                          {address.address}, {address.city}, {address.state}{' '}
+                          {address.postalCode}
+                        </p>
+                        <p className='text-sm text-gray-500 flex items-center mb-2'>
+                          <PhoneIcon className='h-4 w-4 mr-1 text-gray-400' />
+                          {address.phoneNumber}
+                        </p>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleAddressSelect(address)}
+                          className={`w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md ${
+                            selectedAddress?._id === address._id
+                              ? 'bg-customColorTertiary text-white'
+                              : 'text-customColorTertiary bg-customColorTertiaryLight/15'
+                          } hover:bg-customColorTertiaryLight hover:text-white focus:outline-none transition duration-150 ease-in-out`}
+                        >
+                          {selectedAddress?._id === address._id ? (
+                            <>
+                              <CheckIcon className='h-4 w-4 mr-1' />
+                              Selected
+                            </>
+                          ) : (
+                            'Select'
+                          )}
+                        </motion.button>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
                   <div className='text-center py-4'>
                     No addresses found. Add a new address below.

@@ -5,7 +5,7 @@ import User from '../models/userModel.js'
 const refreshTokenMiddleware = asyncHandler(async (req, res, next) => {
   const token = req.cookies.jwtrefresh
   console.log('MIddleware of refresh ' + token)
-
+  console.log('token found heyhey')
   if (!token) {
     res.status(400).json({ message: 'No refresh token found' })
     return
