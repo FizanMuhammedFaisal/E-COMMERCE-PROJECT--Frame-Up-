@@ -53,7 +53,7 @@ export default function WishlistPage() {
   return (
     <>
       <Breadcrumb />
-      <div className='min-h-screen mt-2 bg-gradient-to-b from-customColorSecondary to-white px-4 sm:px-6 lg:px-8'>
+      <div className='min-h-screen mt-2 bg-gradient-to-b font-primary from-customColorSecondary to-white px-4 sm:px-6 lg:px-8'>
         <div className='max-w-7xl mx-auto'>
           <motion.h1
             initial={{ opacity: 0, y: -20 }}

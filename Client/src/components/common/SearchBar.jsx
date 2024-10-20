@@ -141,8 +141,8 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
   }, [setIsSearchFocused])
 
   const searchInputVariants = {
-    small: { width: '130px' },
-    large: { width: '155px' }
+    small: { width: '120px' },
+    large: { width: '133px' }
   }
 
   const resultsVariants = {

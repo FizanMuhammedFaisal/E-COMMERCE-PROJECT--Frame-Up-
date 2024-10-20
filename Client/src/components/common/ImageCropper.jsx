@@ -1,12 +1,22 @@
-import React, { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
+import Spinner from './Animations/Spinner'
+import { Crop, RotateCcw, RotateCw, X, AlertCircle } from 'lucide-react'
 
-const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
+const ImageCropper = ({
+  open,
+  onClose,
+  initialImage,
+  onCropComplete,
+  imageLoading,
+  error
+}) => {
   const cropperRef = useRef(null)
   const [aspectRatio, setAspectRatio] = useState(null)
   const [rotation, setRotation] = useState(0)
   const image = initialImage || null
+
   function base64ToFile(base64String, filename) {
     const [header, data] = base64String.split(',')
     const mimeString = header.split(':')[1].split(';')[0]
@@ -35,10 +45,7 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
 
   const handleCrop = () => {
     if (cropperRef.current) {
-      // Get cropped canvas
       const croppedCanvas = cropperRef.current.cropper.getCroppedCanvas()
-
-      // Convert canvas to JPEG format with specified quality
       const croppedImageBase64 = cropperRef.current.cropper
         .getCroppedCanvas()
         .toDataURL('image/webp', 0.8)
@@ -46,7 +53,6 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
       const fileName = `cropped-image-${Date.now()}.webp`
       const file = base64ToFile(croppedImageBase64, fileName)
 
-      // Pass the cropped image to the parent component via callback
       if (onCropComplete) {
         onCropComplete({
           image: file,
@@ -56,8 +62,6 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
           id: image.id
         })
       }
-
-      onClose()
     }
   }
 
@@ -78,85 +82,109 @@ const ImageCropper = ({ open, onClose, initialImage, onCropComplete }) => {
   if (!open) return null
 
   return (
-    <div className='fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center'>
-      <div className='bg-white dark:bg-customP2ForegroundD_200 dark:text-slate-50 p-6 rounded-lg w-full max-w-3xl md:max-w-2xl sm:max-w-full'>
-        {image && (
-          <Cropper
-            src={image.url}
-            style={{ height: '400px', width: '100%' }}
-            aspectRatio={aspectRatio}
-            guides={false}
-            zoomable={true}
-            scalable={true}
-            cropBoxResizable={true}
-            cropBoxMovable={true}
-            ref={cropperRef}
-            wheelZoomRatio={0.1}
-            rotatable={true}
-          />
-        )}
-        <button
-          onClick={() => {
-            console.log(initialImage)
-          }}
-          className='text-black'
-        >
-          fasf
-        </button>
-        <div className='flex justify-center mt-4 space-x-2'>
-          <button
-            onClick={() => changeAspectRatio(1)}
-            className='px-4 py-2 bg-gray-500 text-white rounded-md'
-          >
-            1:1
-          </button>
-          <button
-            onClick={() => changeAspectRatio(16 / 9)}
-            className='px-4 py-2 bg-blue-500 text-white rounded-md'
-          >
-            16:9
-          </button>
-          <button
-            onClick={() => changeAspectRatio(4 / 3)}
-            className='px-4 py-2 bg-green-500 text-white rounded-md'
-          >
-            4:3
-          </button>
-          <button
-            onClick={() => changeAspectRatio(null)}
-            className='px-4 py-2 bg-red-500 text-white rounded-md'
-          >
-            Free
-          </button>
-        </div>
-
-        <div className='flex justify-center mt-4 space-x-2'>
-          <button
-            onClick={() => rotateImage(-90)}
-            className='px-4 py-2 bg-yellow-500 text-white rounded-md'
-          >
-            Rotate Left
-          </button>
-          <button
-            onClick={() => rotateImage(90)}
-            className='px-4 py-2 bg-yellow-500 text-white rounded-md'
-          >
-            Rotate Right
-          </button>
-        </div>
-
-        <div className='mt-4 flex justify-end space-x-2'>
+    <div className='fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4'>
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl overflow-hidden'>
+        <div className='p-6 relative'>
           <button
             onClick={onClose}
-            className='px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600'
+            className='absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-1'
           >
+            <X size={24} />
+          </button>
+          <h2 className='text-2xl font-bold mb-4 text-gray-800 dark:text-white'>
+            Crop Image
+          </h2>
+          {image && (
+            <div className='mb-6 bg-gray-100 dark:bg-gray-700 p-2 rounded-lg'>
+              <Cropper
+                src={image.url}
+                style={{ height: '400px', width: '100%' }}
+                aspectRatio={aspectRatio}
+                guides={false}
+                zoomable={true}
+                scalable={true}
+                cropBoxResizable={true}
+                cropBoxMovable={true}
+                ref={cropperRef}
+                wheelZoomRatio={0.1}
+                rotatable={true}
+              />
+            </div>
+          )}
+          <div className='space-y-4'>
+            <div className='flex flex-wrap justify-center gap-2'>
+              {[
+                { ratio: 1, label: '1:1' },
+                { ratio: 16 / 9, label: '16:9' },
+                { ratio: 4 / 3, label: '4:3' },
+                { ratio: null, label: 'Free' }
+              ].map(item => (
+                <button
+                  key={item.label}
+                  onClick={() => changeAspectRatio(item.ratio)}
+                  className='px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50'
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <div className='flex justify-center gap-2'>
+              <button
+                onClick={() => rotateImage(-90)}
+                className='px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50 flex items-center'
+              >
+                <RotateCcw size={18} className='mr-2' />
+                Rotate Left
+              </button>
+              <button
+                onClick={() => rotateImage(90)}
+                className='px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50 flex items-center'
+              >
+                <RotateCw size={18} className='mr-2' />
+                Rotate Right
+              </button>
+            </div>
+          </div>
+        </div>
+        {error && (
+          <div className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 dark:bg-red-900 dark:text-red-100 mb-4'>
+            <div className='flex items-center'>
+              <AlertCircle size={24} className='mr-2' />
+              <p>{error}</p>
+            </div>
+          </div>
+        )}
+        <div className='bg-gray-100 dark:bg-gray-700 px-6 py-4 flex justify-end gap-2'>
+          <button
+            onClick={onClose}
+            className='px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 flex items-center'
+          >
+            <X size={18} className='mr-2' />
             Cancel
           </button>
           <button
             onClick={handleCrop}
-            className='px-4 py-2 bg-customP2Primary text-white rounded-md duration-300 hover:bg-customP2BackgroundD_500'
+            disabled={imageLoading?.state}
+            className={`px-6 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-opacity-50 flex items-center ${
+              imageLoading?.state
+                ? 'bg-emerald-400 text-white cursor-not-allowed'
+                : 'bg-emerald-500 text-white hover:bg-emerald-600 focus:ring-emerald-500'
+            }`}
           >
-            Crop Image
+            {imageLoading?.state ? (
+              <div className='flex items-center justify-center space-x-2'>
+                <Spinner size={-1} />
+                <span>{imageLoading.message || 'Processing...'}</span>
+                {imageLoading.progress && (
+                  <span className='text-xs'>{imageLoading.progress}%</span>
+                )}
+              </div>
+            ) : (
+              <>
+                <Crop size={18} className='mr-2' />
+                Crop Image
+              </>
+            )}
           </button>
         </div>
       </div>

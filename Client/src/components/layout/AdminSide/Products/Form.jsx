@@ -2,6 +2,7 @@ import { CircularProgress } from '@mui/material'
 import CategorySelect from '../../../common/CategorySelect'
 import ImageCarousel from '../../../common/ImageCarousel'
 import ArtistSelect from '../../../common/ArtistSelect'
+import Spinner from '../../../common/Animations/Spinner'
 
 function Form({
   handleSubmit,
@@ -362,7 +363,7 @@ function Form({
             {/* Hidden Thumbnail Input */}
             <input
               type='file'
-              accept='image/jpeg, image/png'
+              accept='image/jpeg, image/png,image/webp'
               id='thumbnailImage'
               className='hidden'
               onChange={handleChange}
@@ -446,7 +447,7 @@ function Form({
             disabled={loadingImages || loadingThumbnail || loading}
           >
             <div className='flex gap-2'>
-              {loading ? <CircularProgress size={20} color='inherit' /> : ''}
+              {loading ? <Spinner size={1} /> : ''}
               Add Product
             </div>
           </button>

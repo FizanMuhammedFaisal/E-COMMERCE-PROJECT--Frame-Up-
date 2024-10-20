@@ -6,40 +6,34 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useCart } from '../../../../hooks/useCart'
 import { useSelector } from 'react-redux'
+import EmptyWishlistAnimation from '../../../common/Animations/EmptyWishlistAnimation'
 
 const EmptyWishlist = () => {
+  const navigate = useNavigate()
   return (
     <motion.div
       key='empty'
-      className='text-center py-16'
+      className='text-center py-9'
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
       <motion.div
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{
-          type: 'spring',
-          stiffness: 260,
-          damping: 20,
-          duration: 0.8
-        }}
-      >
-        <Heart className='mx-auto text-gray-300' size={64} />
-      </motion.div>
-      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
+        <EmptyWishlistAnimation />
         <h2 className='mt-4 text-xl font-medium text-gray-900'>
           Your wishlist is empty
         </h2>
         <p className='mt-2 text-gray-500'>Start adding items you love!</p>
         <motion.button
-          className='mt-6 px-6 py-3 bg-gray-900 text-white rounded-full text-sm hover:bg-gray-800 transition-colors duration-300'
+          onClick={() => {
+            navigate('/all')
+          }}
+          className='mt-6 px-6 py-3 bg-customColorTertiary text-white rounded-md  hover:bg-customColorTertiaryLight transition-colors duration-300'
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

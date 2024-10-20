@@ -4,8 +4,12 @@ import Artist from '../models/artistModel.js'
 import asyncHandler from 'express-async-handler'
 import generateCookie from '../utils/generateCookie.js'
 import generateToken from '../utils/generateToken.js'
-import Order from '../models/orderModel.js'
+import {
+  deleteImage,
+  deleteMultipleImages
+} from '../services/cloudinaryServices.js'
 import Discount from '../models/discoundModel.js'
+import Product from '../models/productModel.js'
 
 //@ discp   login route
 //route      api/admin/login
@@ -377,7 +381,63 @@ const updateDiscountStatus = asyncHandler(async (req, res, next) => {
     discount: updatedDiscount
   })
 })
-
+//
+const deleteCloudinaryImages = asyncHandler(async (req, res, next) => {
+  const { urls, type, index, id } = req.body
+  console.log(req.body)
+  const extractPublicIdFromUrl = url => {
+    if (typeof url !== 'string') {
+      console.error('Invalid URL:', url)
+      return null
+    }
+    const parts = url.split('/')
+    const uploadIndex = parts.indexOf('upload')
+    if (uploadIndex !== -1 && parts[uploadIndex + 1]) {
+      const publicIdWithExtension = parts.pop()
+      const publicId = publicIdWithExtension.split('.')[0]
+      return publicId
+    }
+    return null
+  }
+  const publicIds = urls.map((url, i) => {
+    return extractPublicIdFromUrl(url)
+  })
+  if (!publicIds || !publicIds.length) {
+    const error = new Error('No Id Provided')
+    error.statusCode = 400
+    return next(error)
+  }
+  try {
+    let result
+    if (publicIds.length > 1) {
+      result = await deleteMultipleImages(publicIds)
+    } else {
+      result = await deleteImage(publicIds[0])
+    }
+    console.log()
+    if (result.result === 'ok') {
+      const product = await Product.findById(id)
+      // to remove the specific index file use splice
+      if (product[type] && Array.isArray(product[type])) {
+        product[type].splice(index, 1)
+        await product.save()
+      }
+      console.log(product)
+      return res
+        .status(200)
+        .json({ message: 'Images deleted successfully', result })
+    } else {
+      const error = new Error('Image deletion Failed')
+      error.statusCode = 400
+      return next(error)
+    }
+  } catch (err) {
+    console.error('Error deleting images', err)
+    const error = new Error('Image deletion Failed')
+    error.statusCode = 400
+    return next(error)
+  }
+})
 export default updateDiscountStatus
 
 // end
@@ -398,5 +458,6 @@ export {
   getCategoryDiscounds,
   getProductDiscounds,
   addDiscount,
-  updateDiscountStatus
+  updateDiscountStatus,
+  deleteCloudinaryImages
 }

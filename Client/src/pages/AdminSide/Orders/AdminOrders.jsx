@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
+
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
@@ -10,7 +10,7 @@ import AlertDialog from '../../../components/common/AlertDialog'
 import UsersTable from '../../../components/common/ReusableTable'
 import { FaEdit } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
-
+import Spinner from '../../../components/common/Animations/Spinner'
 const OrderStatusBadge = ({ status }) => {
   const statusColors = {
     pending:
@@ -198,17 +198,16 @@ const AdminOrders = () => {
       <UsersTable columns={columns} data={ordersData} />
       <div className='mt-4 flex justify-center items-center'>
         {(isLoading || isFetching) && (
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          >
-            <ArrowPathIcon className=' h-8 w-8 text-indigo-600 dark:text-indigo-400' />
-          </motion.div>
+          <div className='flex justify-center'>
+            <Spinner size={1} />
+          </div>
         )}
       </div>
 
       {data?.hasMore && !isLoading && (
-        <div ref={lastOrder}>Scroll to load more..</div>
+        <div ref={lastOrder} className='flex justify-center'>
+          Scroll to load more..
+        </div>
       )}
       {!data?.hasMore && !isLoading && ordersData.length > 0 && (
         <div className='text-center mt-4 text-gray-600 dark:text-gray-400'>

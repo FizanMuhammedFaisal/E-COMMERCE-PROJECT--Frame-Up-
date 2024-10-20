@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import apiClient from '../../../services/api/apiClient'
 import ProductDetails from '../../../components/layout/UserSide/Products/ProductDetails'
 import api from '../../../services/api/api'
+import Spinner from '../../../components/common/Animations/Spinner'
 
 function ProductDetailPage() {
   const { productId } = useParams()
@@ -29,7 +30,7 @@ function ProductDetailPage() {
     setSelectedImageIndex(index)
   }
 
-  if (loading) return <div className='text-center py-16'>Loading...</div>
+  if (loading) return <Spinner center={true} />
   if (error) return <div className='text-center py-16'>{error}</div>
 
   const allImages = [

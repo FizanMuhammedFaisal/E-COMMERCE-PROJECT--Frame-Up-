@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import apiClient from '../../../services/api/apiClient'
 import UsersTable from '../../../components/common/ReusableTable'
 import AlertDialog from '../../../components/common/AlertDialog'
-import { CircularProgress } from '@mui/material'
+
+import Spinner from '../../../components/common/Animations/Spinner'
 
 const AdminCouponsPage = () => {
   const [coupons, setCoupons] = useState([])
@@ -154,8 +155,9 @@ const AdminCouponsPage = () => {
   const renderContent = () => {
     if (isLoading || isFetching) {
       return (
-        <div className='text-center my-auto'>
-          <CircularProgress size={30} color='inherit' />
+        <div className='flex items-center flex-col'>
+          <Spinner size={1} />
+
           <p className='mt-2 text-gray-600'>Loading coupons...</p>
         </div>
       )

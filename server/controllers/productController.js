@@ -251,17 +251,44 @@ const updateProduct = async (req, res) => {
     dimensions,
     weight,
     productYear,
-    productStock
+    productStock,
+    thumbnailImage,
+    productImages
   } = req.body
-  console.log(req.body)
   const getCategoryIds = categories => {
     return categories.map(category => category._id)
   }
 
   const categoriesIds = getCategoryIds(productCategories)
+  console.log(categoriesIds)
   try {
-    // Find the product and update it
-    const product = await Product.findByIdAndUpdate(
+    const product = await Product.findById(id)
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+
+    // for cheking if there is alredy this present(needed this for upating images on admin side)
+    const addNewURLs = (existingUrls, newUrls) => {
+      const updatedUrls = [...existingUrls]
+      newUrls.forEach(url => {
+        if (!existingUrls.includes(url)) {
+          updatedUrls.push(url)
+        }
+      })
+      return updatedUrls
+    }
+
+    // to add them if they only exist
+    const updatedThumbnailImage = thumbnailImage
+      ? addNewURLs(product.thumbnailImage, thumbnailImage)
+      : product.thumbnailImage
+
+    const updatedProductImages = productImages
+      ? addNewURLs(product.productImages, productImages)
+      : product.productImages
+
+    const updatedProduct = await Product.findByIdAndUpdate(
       { _id: id },
       {
         productName,
@@ -271,18 +298,16 @@ const updateProduct = async (req, res) => {
         dimensions,
         weight,
         productYear,
-        productStock
+        productStock,
+        thumbnailImage: updatedThumbnailImage,
+        productImages: updatedProductImages
       },
-      { new: true, runValidators: true }
+      { new: true }
     )
+      .populate('productCategories')
+      .exec()
 
-    // Check if the product was found
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' })
-    }
-
-    // Send the updated product as the response
-    res.status(200).json(product)
+    res.status(200).json({ updatedProduct })
   } catch (error) {
     console.error('Error updating product:', error)
     res
@@ -290,6 +315,7 @@ const updateProduct = async (req, res) => {
       .json({ message: 'Failed to update product. Please try again.' })
   }
 }
+
 //
 const updateProductStatus = asyncHandler(async (req, res) => {
   const productId = req.params.id

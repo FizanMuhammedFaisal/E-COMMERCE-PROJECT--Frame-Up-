@@ -2,14 +2,29 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { getImageFromDB } from '../../utils/indexedDB/adminImageDB'
 
-const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
+const ImageCarousel = ({
+  imageIds,
+  onDelete,
+  onEdit,
+  type,
+  DBError,
+  cloudinaryMode
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchImages = async () => {
-      if (!DBError) {
+      if (cloudinaryMode) {
+        // If cloudinaryMode is true, assume imageIds are Cloudinary URLs
+        const cloudinaryImages = imageIds.map((url, index) => ({
+          id: index,
+          url
+        }))
+        setImages(cloudinaryImages)
+        setLoading(false)
+      } else if (!DBError) {
         // If no DBError, imageIds contains IDs, fetch from IndexedDB
         try {
           const imagePromises = imageIds.map(async id => {
@@ -21,21 +36,20 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
           const fetchedImages = await Promise.all(imagePromises)
           setImages(fetchedImages)
         } catch (error) {
+          console.log(error)
         } finally {
           setLoading(false)
         }
       } else {
         // If DBError is true, imageIds contains the actual image files
 
-        const fileUrls = imageIds
-          .map((file, index) => {
-            if (!file) {
-              return null // Skip invalid files
-            }
-            const url = URL.createObjectURL(file)
-            return { id: index, url }
-          })
-          .filter(Boolean) // Filter out null values
+        const fileUrls = imageIds.map((file, index) => {
+          if (!file) {
+            return null // Skip invalid files
+          }
+          const url = URL.createObjectURL(file)
+          return { id: index, url }
+        })
         setImages(fileUrls)
         setLoading(false)
       }
@@ -60,7 +74,7 @@ const ImageCarousel = ({ imageIds, onDelete, onEdit, type, DBError }) => {
 
   useEffect(() => {
     if (images.length > 0) {
-      const timer = setInterval(handleNext, 7000) // Auto-advance every 7 seconds
+      const timer = setInterval(handleNext, 7000)
       return () => clearInterval(timer)
     }
   }, [handleNext, images.length])

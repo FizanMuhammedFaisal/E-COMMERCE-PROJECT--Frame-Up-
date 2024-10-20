@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import UsersTable from '../../../components/common/ReusableTable'
-import { ToastContainer } from 'react-toastify'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import CircularProgress from '@mui/material/CircularProgress'
 import { Select } from '@headlessui/react'
 import AlertDialog from '../../../components/common/AlertDialog'
 import { useDispatch, useSelector } from 'react-redux'
@@ -12,6 +10,7 @@ import {
   setPage,
   updateUserStatus
 } from '../../../redux/slices/adminUsersSlice'
+import Spinner from '../../../components/common/Animations/Spinner.jsx'
 const AdminUsers = () => {
   const dispatch = useDispatch()
   const users = useSelector(state => state.adminUsers.data)
@@ -128,16 +127,8 @@ const AdminUsers = () => {
     <div className='p-4 dark:bg-customP2BackgroundD_darkest  dark:text-slate-50'>
       <h1 className='text-2xl font-semibold mb-4'>User Management</h1>
       <UsersTable columns={columns} data={data} />
-      <div className='text-center mt-4 "'>
-        {loading && (
-          <CircularProgress
-            thickness={7}
-            sx={{
-              color: 'currentColor'
-            }}
-            size={30}
-          />
-        )}
+      <div className='flex justify-center'>
+        {loading && <Spinner size={1} />}
       </div>
 
       {hasMore && !loading && (

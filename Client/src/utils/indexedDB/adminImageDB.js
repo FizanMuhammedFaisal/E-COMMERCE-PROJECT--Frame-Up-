@@ -23,13 +23,13 @@ export const addImageToDB = async file => {
   try {
     const db = await initDB() // Open the database
     const transaction = db.transaction(OBJECT_STORE_NAME, 'readwrite')
-    const store = transaction.objectStore(OBJECT_STORE_NAME)
+    // const store = transaction.objectStore(OBJECT_STORE_NAME)
 
-    // Generate a unique id for the file
-    const id = `${Date.now()}-${file.name}`
+    // // Generate a unique id for the file
+    // const id = `${Date.now()}-${file.name}`
 
-    store.put(file, id)
-    await transaction.done // Wait for the transaction to complete
+    // store.put(file, id)
+    // await transaction.done // Wait for the transaction to complete
 
     return id
   } catch (error) {
@@ -43,18 +43,18 @@ export const addImagesToDB = async files => {
   try {
     const db = await initDB() // Open the database
     const transaction = db.transaction(OBJECT_STORE_NAME, 'readwrite')
-    const store = transaction.objectStore(OBJECT_STORE_NAME)
+    // const store = transaction.objectStore(OBJECT_STORE_NAME)
 
-    const ids = []
+    // const ids = []
 
-    // Add each file to the store
-    for (const file of files) {
-      const id = `${Date.now()}-${file.name}`
-      store.put(file, id)
-      ids.push(id) // Collect the id
-    }
+    // // Add each file to the store
+    // for (const file of files) {
+    //   const id = `${Date.now()}-${file.name}`
+    //   store.put(file, id)
+    //   ids.push(id) // Collect the id
+    // }
 
-    await transaction.done // Wait for the transaction to complete
+    // await transaction.done // Wait for the transaction to complete
 
     return ids // Return the array of unique ids
   } catch (error) {

@@ -1,13 +1,13 @@
 import axios from 'axios'
 import { setUser } from '../../redux/slices/authSlice'
 import store from '../../redux/store/store.js'
+import api from './api.js'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL
 })
 apiClient.interceptors.request.use(config => {
   const { accessToken } = store.getState().auth
-  console.log(accessToken)
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`
     console.log('sending the reqq')
@@ -29,7 +29,7 @@ apiClient.interceptors.response.use(
     // Check if the error is an authentication error
     if (error.response.status === 401) {
       try {
-        const res = await apiClient.get(
+        const res = await api.get(
           '/api/users/access',
           {},
           { withCredentials: true }

@@ -21,8 +21,8 @@ const AdminDiscountPage = () => {
   const tabRefs = useRef([])
 
   const tabs = [
-    { value: 'categoryDiscount', label: 'Category Discount' },
-    { value: 'productDiscount', label: 'Product Discount' }
+    { value: 'productDiscount', label: 'Product Discount' },
+    { value: 'categoryDiscount', label: 'Category Discount' }
   ]
 
   return (

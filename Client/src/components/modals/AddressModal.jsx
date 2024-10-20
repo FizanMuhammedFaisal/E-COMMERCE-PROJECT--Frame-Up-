@@ -7,6 +7,7 @@ import apiClient from '../../services/api/apiClient'
 import { useMutation } from '@tanstack/react-query'
 import { validateAddressForm } from '../../utils/validation/FormValidation'
 import { CircularProgress } from '@mui/material'
+import Spinner from '../common/Animations/Spinner'
 
 Modal.setAppElement('#root')
 
@@ -354,7 +355,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
             className='w-full flex justify-center duration-300 min-w-8 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
           >
             {loading ? (
-              <CircularProgress color='inherit' size={25} />
+              <Spinner size={1} />
             ) : mode ? (
               'Edit Address'
             ) : (

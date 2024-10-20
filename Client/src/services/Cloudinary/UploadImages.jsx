@@ -1,5 +1,6 @@
 import axios from 'axios'
-
+import apiClient from '../api/apiClient'
+apiClient
 // Cloudinary configuration
 const cloudinaryPreset = import.meta.env.VITE_CLOUDINARY_PRESET
 const cloudinaryURL = import.meta.env.VITE_CLOUDINARY_URL
@@ -28,4 +29,24 @@ export const uploadImagesToCloudinary = async files => {
     console.error('Error uploading images:', error)
     throw new Error('Images could not be uploaded')
   }
+}
+
+export const delteImagesFromCloudinary = async (files, type, index, id) => {
+  //files will be array of urls
+  console.log(id)
+  const deleteViaServer = async urls => {
+    try {
+      const result = await apiClient.post('/api/admin/delete-Images', {
+        urls,
+        type,
+        index,
+        id
+      })
+      return result
+    } catch (error) {
+      console.log(error)
+      throw new Error('Images could not be deleted')
+    }
+  }
+  return await deleteViaServer(files)
 }

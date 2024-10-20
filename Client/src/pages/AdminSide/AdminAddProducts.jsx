@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Form from '../../components/layout/AdminSide/addProducts/Form'
+import Form from '../../components/layout/AdminSide/Products/Form'
 import api from '../../services/api/api'
 import validataImages from '../../utils/validation/ImageValidation'
 import { uploadImagesToCloudinary } from '../../services/Cloudinary/UploadImages'
@@ -219,6 +219,7 @@ const AdminAddProducts = () => {
   }
   const handleImageEdit = (image, type, currentIndex, DBError) => {
     setCropperOpen(true)
+    console.log(image)
     const img = { url: image.url, type, currentIndex, DBError, id: image.id }
 
     setImageForCrop(img)
@@ -252,6 +253,7 @@ const AdminAddProducts = () => {
         updateReduxState(croppedimage)
       }
     }
+    handleCropperClose()
   }
   return (
     <div className='max-w-5xl mx-auto p-1 font-primary  dark:text-slate-50'>

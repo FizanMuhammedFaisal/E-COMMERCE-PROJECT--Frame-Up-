@@ -6,12 +6,13 @@ import { CreditCard, Truck, DollarSign } from 'lucide-react'
 import apiClient from '../../../services/api/apiClient'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
 import { handleRazorPaySuccess } from '../../../services/RazorPay/razorPay'
-import { Alert, CircularProgress, Snackbar } from '@mui/material'
+import { Alert, Snackbar } from '@mui/material'
 import ApplyCouponModal from '../../../components/modals/ApplyCouponModal'
 import {
   clearValidations,
   validateOrder
 } from '../../../redux/slices/Users/Checkout/checkoutSlice'
+import Spinner from '../../../components/common/Animations/Spinner'
 const paymentMethods = [
   { id: 'Razor Pay', name: 'Razor Pay', icon: CreditCard },
   { id: 'Cash on Delivery', name: 'Cash on Delivery', icon: DollarSign }
@@ -256,13 +257,8 @@ export default function PaymentPage() {
                 >
                   {loading ? (
                     <span className='flex items-center justify-center'>
-                      <CircularProgress
-                        color='inherit'
-                        size={20}
-                        thickness={10}
-                        className='mr-2'
-                      />
-                      Processing...
+                      <Spinner size={-1} />
+                      <p className='ml-2'> Processing...</p>
                     </span>
                   ) : (
                     'Place Order'

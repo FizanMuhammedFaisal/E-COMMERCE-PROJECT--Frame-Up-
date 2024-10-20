@@ -46,7 +46,7 @@ const getAllCoupons = asyncHandler(async (req, res, next) => {
   if (coupons) {
     setTimeout(() => {
       res.status(200).json({ coupons })
-    }, 1000)
+    }, 2000)
   }
 })
 //
