@@ -73,7 +73,7 @@ function AddCategoryForm() {
             value={categoryName}
             onChange={e => setCategoryName(e.target.value)}
             placeholder='Enter category name'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -89,7 +89,7 @@ function AddCategoryForm() {
             id='categoryType'
             value={categoryType}
             onChange={e => setCategoryType(e.target.value)}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           >
             <option value=''>Select type</option>
             <option value='Theme'>Theme</option>
@@ -111,7 +111,7 @@ function AddCategoryForm() {
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder='Enter category description'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           ></textarea>
         </div>
 
@@ -119,7 +119,7 @@ function AddCategoryForm() {
         <div className=' text-center'>
           <button
             type='submit'
-            className='  bg-customP2Primary text-white px-4 py-2 rounded-md  hover:bg-customP2ForegroundD_600 transition'
+            className='   bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white px-4 py-2 rounded-md   transition'
           >
             Add Category
           </button>

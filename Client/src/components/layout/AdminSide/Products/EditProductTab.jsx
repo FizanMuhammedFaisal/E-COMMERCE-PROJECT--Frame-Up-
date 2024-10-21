@@ -175,7 +175,7 @@ function EditProductTab({
     }))
   }
   return (
-    <div className='bg-white dark:bg-customP2ForegroundD_300 shadow-md rounded-lg overflow-hidden'>
+    <div className='bg-white dark:bg-customP2BackgroundD shadow-md rounded-lg overflow-hidden'>
       <div className='p-6'>
         <h2 className='text-2xl font-bold mb-4'>Edit Product</h2>
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -193,7 +193,7 @@ function EditProductTab({
               value={product.productName}
               onChange={handleInputChange}
               required
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
@@ -210,7 +210,7 @@ function EditProductTab({
               onChange={handleInputChange}
               required
               rows={3}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
@@ -227,7 +227,7 @@ function EditProductTab({
               value={product.productPrice}
               onChange={handleInputChange}
               required
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
@@ -237,7 +237,7 @@ function EditProductTab({
             >
               Categories
             </label>
-            <div className='flex flex-col dark:bg-customP2ForegroundD_100 gap-3 xl:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
+            <div className='flex flex-col  gap-3 xl:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
               {['Theme', 'Style', 'Technique'].map(type => (
                 <div
                   key={type}
@@ -269,7 +269,7 @@ function EditProductTab({
                 onClick={() => {
                   document.getElementById('thumbnailImage').click()
                 }}
-                className='bg-customP2Primary hover:bg-customP2BackgroundD_600 text-white px-4 py-2 rounded-md font-medium transition-all'
+                className=' bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white px-4 py-2 rounded-md font-medium transition-all'
               >
                 {product.thumbnailImage.length > 0
                   ? ' Update Thumbnail'
@@ -322,7 +322,7 @@ function EditProductTab({
               </label>
               <button
                 type='button'
-                className='bg-customP2Primary hover:bg-customP2BackgroundD_600 text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed'
+                className=' bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                 onClick={() => document.getElementById('productImages').click()}
               >
                 {product.productImages?.length > 0
@@ -373,7 +373,7 @@ function EditProductTab({
               name='dimensions'
               value={product.dimensions || ''}
               onChange={handleInputChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
@@ -389,7 +389,7 @@ function EditProductTab({
               name='weight'
               value={product.weight || ''}
               onChange={handleInputChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
@@ -405,7 +405,7 @@ function EditProductTab({
               name='productYear'
               value={product.productYear || ''}
               onChange={handleInputChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
@@ -421,13 +421,13 @@ function EditProductTab({
               name='productStock'
               value={product.productStock}
               onChange={handleInputChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <button
             type='submit'
             disabled={isLoading}
-            className='w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-customP2Primary duration-300 hover:bg-customP2BackgroundD_600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 '
+            className='w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 '
           >
             {isLoading ? (
               <div className=' flex justify-center'>

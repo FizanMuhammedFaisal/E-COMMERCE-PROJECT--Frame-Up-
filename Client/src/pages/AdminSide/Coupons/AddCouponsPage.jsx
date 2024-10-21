@@ -105,7 +105,7 @@ export default function AddCouponForm() {
             value={formData.code}
             onChange={handleChange}
             placeholder='Enter coupon code'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
           <div className='pt-2 font-tertiary'>
             {errors && (
@@ -126,7 +126,7 @@ export default function AddCouponForm() {
             name='discountType'
             value={formData.discountType}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           >
             <option value=''>Select discount type</option>
             <option value='percentage'>Percentage</option>
@@ -155,7 +155,7 @@ export default function AddCouponForm() {
             value={formData.discountAmount}
             onChange={handleChange}
             placeholder='Enter discount amount'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
           <div className='pt-2 font-tertiary'>
             {errors && (
@@ -180,7 +180,7 @@ export default function AddCouponForm() {
             value={formData.minPurchaseAmount}
             onChange={handleChange}
             placeholder='Enter minimum purchase amount'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
           <div className='pt-2 font-tertiary'>
             {errors && (
@@ -205,7 +205,7 @@ export default function AddCouponForm() {
             value={formData.maxDiscountAmount}
             onChange={handleChange}
             placeholder='Enter maximum discount amount'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
           <div className='pt-2 font-tertiary'>
             {errors && (
@@ -230,7 +230,7 @@ export default function AddCouponForm() {
               name='validFrom'
               value={formData.validFrom}
               onChange={handleChange}
-              className='p-2 pr-10 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50 [color-scheme:light]'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
             <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' />
           </div>
@@ -257,7 +257,7 @@ export default function AddCouponForm() {
               name='validTill'
               value={formData.validTill}
               onChange={handleChange}
-              className='p-2 pr-10 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50 [color-scheme:light]'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
             <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' />
           </div>
@@ -288,7 +288,7 @@ export default function AddCouponForm() {
         <div className='text-center'>
           <button
             type='submit'
-            className='bg-customP2Primary text-white px-4 py-2 rounded-md hover:bg-customP2ForegroundD_600 transition'
+            className=' bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white px-4 py-2 rounded-md  transition'
           >
             Add Coupon
           </button>

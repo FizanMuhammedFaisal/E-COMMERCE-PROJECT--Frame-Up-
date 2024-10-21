@@ -33,17 +33,17 @@ const AdminDiscountPage = () => {
         </h1>
       </div>
 
-      <div className='bg-white dark:bg-gray-900  mt-4 pt-7 px-4'>
+      <div className='bg-white dark:bg-customP2BackgroundD_darkest mt-4 pt-7 px-4'>
         <div className='relative'>
-          <ul className='flex list-none rounded-md  bg-customP2ForeGroundW_300  dark:bg-customP2ForegroundD_600 dark:border-customP2ForegroundD_200 border border-customP2ForeGroundW_400 relative p-1'>
+          <ul className='flex list-none rounded-md  bg-customP2BackgroundW_400  dark:bg-customP2ForegroundD_600 dark:border-customP2ForegroundD_600 border border-customP2BackgroundW_400 relative p-1'>
             {tabs.map((tab, index) => (
               <li key={tab.value} className='flex-1 relative'>
                 <a
                   onClick={() => setSelectedTab(tab.value)}
                   className={`relative flex items-center justify-center w-full px-4 py-2 text-sm transition-colors duration-500 ease-in-out cursor-pointer rounded-md z-10 ${
                     selectedTab === tab.value
-                      ? 'text-customP2ForegroundD_300 font-semibold  dark:text-customP2Button shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-customP2BackgroundW'
+                      ? 'text-black font-semibold  dark:text-black shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 font-medium dark:text-customP2BackgroundW'
                   }`}
                   ref={el => (tabRefs.current[index] = el)}
                   role='tab'
@@ -53,7 +53,7 @@ const AdminDiscountPage = () => {
                 </a>
                 {selectedTab === tab.value && (
                   <motion.div
-                    className='absolute inset-0 bg-customP2BackgroundW_500 dark:bg-customP2BackgroundD_200 rounded-md z-0 overflow-hidden'
+                    className='absolute inset-0 bg-customP2BackgroundW_700 dark:bg-customP2ForegroundD_200 rounded-md z-0 overflow-hidden'
                     layoutId='  highlight'
                     initial={false}
                     transition={{
@@ -68,17 +68,9 @@ const AdminDiscountPage = () => {
           </ul>
         </div>
         {/* Tab Content */}
-        <div className='p-4 '>
-          {selectedTab === 'productDiscount' && (
-            <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <ProductDiscount />
-            </div>
-          )}
-          {selectedTab === 'categoryDiscount' && (
-            <div className='bg-white dark:bg-gray-900 p-4 rounded-lg'>
-              <CategoryDiscount />
-            </div>
-          )}
+        <div className='p-5 '>
+          {selectedTab === 'productDiscount' && <ProductDiscount />}
+          {selectedTab === 'categoryDiscount' && <CategoryDiscount />}
         </div>
       </div>
     </div>

@@ -171,7 +171,7 @@ const AdminCouponsPage = () => {
   }
 
   return (
-    <div className='p-6 bg-gray-50 dark:bg-gray-800 mt-10 min-h-screen'>
+    <div className='p-6 bg-gray-50 dark:bg-customP2BackgroundD_darkest mt-10 min-h-screen'>
       <div className='mb-6 flex justify-between items-center'>
         <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
           Coupons Management
@@ -180,7 +180,7 @@ const AdminCouponsPage = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/dashboard/coupons/add-coupons')}
-          className='flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700'
+          className='flex items-center px-4 py-2  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
         >
           Add Coupon
         </motion.button>

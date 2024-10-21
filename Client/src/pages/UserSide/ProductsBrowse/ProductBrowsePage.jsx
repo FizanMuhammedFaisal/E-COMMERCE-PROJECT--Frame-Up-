@@ -95,7 +95,7 @@ const ProductBrowsePage = () => {
       setSearchParams(params)
     }
   }
-
+  console.log(products)
   return (
     <div className='min-h-screen bg-white  w-full font-primary'>
       <div className='mt-10'>

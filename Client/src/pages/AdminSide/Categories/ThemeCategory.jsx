@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 import CategoriesTable from '../../../components/layout/AdminSide/category/CategoryTable'
 import { CircularProgress } from '@mui/material'
 
-function ThemeCategory() {
+function ThemeCategory({ AddButton }) {
   const { themes } = useSelector(state => state.categoryFetch)
   const status = themes.status
   const error = themes.error
@@ -17,7 +17,10 @@ function ThemeCategory() {
 
   return (
     <div>
-      <h2 className='text-2xl text-center font-bold'>Themes</h2>
+      <div className='flex justify-between'>
+        <h2 className='text-2xl ml-4 font-bold'>Themes</h2>
+        <AddButton />
+      </div>
 
       <div className='mt-6'>
         <CategoriesTable type={'themes'} data={themes.data} />

@@ -30,15 +30,20 @@ apiClient.interceptors.response.use(
     if (error.response.status === 401) {
       try {
         const res = await api.get(
-          '/api/users/access',
+          '/users/access',
           {},
           { withCredentials: true }
         )
-        const accessToken = res.data.token
-        console.log(accessToken)
-
+        const accessToken = res.data.accessToken
+        console.log(res.data)
+        const data = {
+          accessToken,
+          user: res.data.user,
+          role: res.data.role,
+          status: res.data.status
+        }
         if (accessToken) {
-          store.dispatch(setUser({ accessToken }))
+          store.dispatch(setUser(data))
 
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return apiClient(originalRequest)

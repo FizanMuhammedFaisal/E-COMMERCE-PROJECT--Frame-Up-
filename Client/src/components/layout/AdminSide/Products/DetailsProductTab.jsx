@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle } from 'lucide-react'
 
 function DetailsProductTab({ product }) {
   return (
-    <div className='bg-white dark:bg-customP2ForegroundD_300 shadow-md rounded-lg overflow-hidden'>
+    <div className='bg-white dark:bg-customP2BackgroundD shadow-md rounded-lg overflow-hidden'>
       <div className='p-6'>
         <h2 className='text-2xl font-bold mb-4'>Product Details</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>

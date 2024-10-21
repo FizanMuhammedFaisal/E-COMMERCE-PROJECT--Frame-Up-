@@ -64,7 +64,7 @@ const addProducts = asyncHandler(async (req, res) => {
   }
 })
 
-// @dec for listing products
+// @dec for listing products-/filtered/discounted
 const getProducts = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const limit = parseInt(req.query.limit) || 10
@@ -112,30 +112,121 @@ const getProducts = asyncHandler(async (req, res) => {
     filter.$or = [
       { productName: { $regex: searchRegex } },
       { productDescription: { $regex: searchRegex } }
-      // Add more fields here if needed
     ]
   }
 
   let sortOption = {}
   if (sortBy === 'priceLowToHigh') {
-    sortOption.productPrice = 1 // Ascending
+    sortOption.productPrice = 1
   } else if (sortBy === 'priceHighToLow') {
-    sortOption.productPrice = -1 // Descending
+    sortOption.productPrice = -1
   }
   if (aA_zZ === 'true') {
-    sortOption.productName = 1 // Ascending
+    sortOption.productName = 1
   } else if (zZ_aA === 'true') {
-    sortOption.productName = -1 // Descending
+    sortOption.productName = -1
   }
-
+  if (Object.keys(sortOption).length === 0) {
+    sortOption.createdAt = -1
+  }
+  console.log(sortOption)
   try {
     // Fetch filtered, paginated, and sorted products
-    const productsQuery = Product.find(filter)
-      .skip(skip)
-      .limit(limit)
-      .sort(sortOption)
-      .collation({ locale: 'en', strength: 2 })
-      .populate('productCategories')
+    const productsQuery = Product.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'discounts',
+          let: { productId: '$_id', categoryIds: '$productCategories' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ['$targetId', '$$productId'] },
+                    { $in: ['$targetId', '$$categoryIds'] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'discounts'
+        }
+      },
+      {
+        $unwind: {
+          path: '$discounts',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $match: {
+          $or: [
+            { 'discounts.status': 'Active' },
+            {
+              'discounts.startDate': { $lte: new Date() },
+              'discounts.endDate': { $gte: new Date() }
+            },
+            { discounts: { $exists: false } }
+          ]
+        }
+      },
+      {
+        $addFields: {
+          discountPrice: {
+            $cond: {
+              if: { $ne: ['$discounts', null] },
+              then: {
+                $cond: {
+                  if: { $eq: ['$discounts.discountType', 'percentage'] },
+                  then: {
+                    $subtract: [
+                      '$productPrice',
+                      {
+                        $multiply: [
+                          '$productPrice',
+                          { $divide: ['$discounts.discountValue', 100] }
+                        ]
+                      }
+                    ]
+                  },
+                  else: {
+                    $subtract: ['$productPrice', '$discounts.discountValue']
+                  }
+                }
+              },
+              else: '$productPrice' //no discounts applied
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          mergedProduct: { $mergeObjects: '$$ROOT' }, // Merge all original product fields
+          discounts: { $push: '$discounts' } // Collect discounts into an array
+        }
+      },
+      // Reformatting the final output
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ['$mergedProduct', { discounts: '$discounts' }]
+          }
+        }
+      },
+      { $sort: sortOption },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'productCategories',
+          foreignField: '_id',
+          as: 'productCategories'
+        }
+      }
+    ]).collation({ locale: 'en', strength: 2 })
 
     // Total number of items after applying filters (for pagination purposes)
     const countQuery = Product.countDocuments(filter)
@@ -183,7 +274,7 @@ const getProducts = asyncHandler(async (req, res) => {
       countQuery,
       categoriesQuery
     ])
-
+    // console.log(products)
     const availableCategories = {
       Themes: [],
       Styles: [],
@@ -255,19 +346,20 @@ const updateProduct = async (req, res) => {
     thumbnailImage,
     productImages
   } = req.body
+  console.log(req.body)
   const getCategoryIds = categories => {
     return categories.map(category => category._id)
   }
 
-  const categoriesIds = getCategoryIds(productCategories)
-  console.log(categoriesIds)
   try {
     const product = await Product.findById(id)
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })
     }
-
+    const categoriesIds = productCategories
+      ? getCategoryIds(productCategories)
+      : product.productCategories
     // for cheking if there is alredy this present(needed this for upating images on admin side)
     const addNewURLs = (existingUrls, newUrls) => {
       const updatedUrls = [...existingUrls]

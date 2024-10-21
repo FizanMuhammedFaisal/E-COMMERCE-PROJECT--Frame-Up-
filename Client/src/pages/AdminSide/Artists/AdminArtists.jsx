@@ -146,7 +146,7 @@ const AdminArtists = () => {
           }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
-          className='flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700'
+          className='flex items-center px-4 py-2  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
         >
           Add New Artist
         </motion.button>

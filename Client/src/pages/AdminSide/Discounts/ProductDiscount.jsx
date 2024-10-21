@@ -20,15 +20,15 @@ function ProductDiscount() {
 
   return (
     <div className=''>
-      <h2 className='text-2xl text-center font-bold'>Product Discount</h2>
-      <div className='flex justify-end'>
+      <div className='flex justify-between'>
+        <h2 className='text-2xl text-center font-bold'>Product Discount</h2>
         <motion.button
           onClick={() => {
             navigate('/dashboard/discounts/add', { state: { type: 'product' } })
           }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
-          className='flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700'
+          className='flex items-center px-4 py-2  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
         >
           Add Product Discount
         </motion.button>

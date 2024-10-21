@@ -120,7 +120,7 @@ export default function AddDiscountForm() {
             name='name'
             value={discountData.name}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             placeholder='Enter discount name'
           />
         </div>
@@ -137,7 +137,7 @@ export default function AddDiscountForm() {
             name='discountTarget'
             value={discountData.discountTarget}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           >
             <option value=''>Select offer type</option>
             <option value='Category'>Category</option>
@@ -163,7 +163,7 @@ export default function AddDiscountForm() {
                 name='targetId'
                 value={discountData.targetId}
                 onChange={handleChange}
-                className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+                className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
               >
                 <option value=''>Select a category</option>
                 {categories.map(category => (
@@ -188,7 +188,7 @@ export default function AddDiscountForm() {
             name='discountType'
             value={discountData.discountType}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           >
             <option value=''>Select type</option>
             <option value='percentage'>Percentage</option>
@@ -215,7 +215,7 @@ export default function AddDiscountForm() {
                 ? 'Enter percentage (0-100)'
                 : 'Enter fixed amount'
             }
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -232,7 +232,7 @@ export default function AddDiscountForm() {
             name='startDate'
             value={discountData.startDate}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -249,7 +249,7 @@ export default function AddDiscountForm() {
             name='endDate'
             value={discountData.endDate}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -265,7 +265,7 @@ export default function AddDiscountForm() {
             name='status'
             value={discountData.status}
             onChange={handleChange}
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           >
             <option value='Active'>Active</option>
             <option value='Expired'>Expired</option>
@@ -276,7 +276,7 @@ export default function AddDiscountForm() {
         <div className='text-center'>
           <button
             type='submit'
-            className='bg-customP2Primary text-white px-4 py-2 rounded-md hover:bg-customP2ForegroundD_600 transition'
+            className=' bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white px-4 py-2 rounded-md  transition'
           >
             Add Discount
           </button>

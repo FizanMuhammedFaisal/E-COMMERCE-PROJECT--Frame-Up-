@@ -196,6 +196,10 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
 //
 //
 //for razor pay order intiating
+const razorpay = new Razorpay({
+  key_id: process.env.RAZOR_PAY_KEY_ID,
+  key_secret: process.env.RAZOR_PAY_KEY_SECRET
+})
 
 const createOrder = asyncHandler(async (req, res, next) => {
   const {
@@ -210,10 +214,7 @@ const createOrder = asyncHandler(async (req, res, next) => {
   } = req.body.data
 
   const user = req.user
-  const razorpay = new Razorpay({
-    key_id: process.env.RAZOR_PAY_KEY_ID,
-    key_secret: process.env.RAZOR_PAY_KEY_SECRET
-  })
+
   if (!totalAmount || isNaN(totalAmount)) {
     return res.status(400).json({ message: 'Invalid total amount' })
   }
@@ -291,6 +292,7 @@ const createOrder = asyncHandler(async (req, res, next) => {
     }
 
     if (paymentMethod === 'Razor Pay') {
+      console.log(razorpay)
       try {
         const options = {
           amount: totalAmount * 100,

@@ -107,7 +107,7 @@ function AddArtistForm() {
             value={artistName}
             onChange={e => setArtistName(e.target.value)}
             placeholder='Enter artist name'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           />
         </div>
 
@@ -124,7 +124,7 @@ function AddArtistForm() {
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder='Enter artist description'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           ></textarea>
         </div>
 
@@ -138,7 +138,7 @@ function AddArtistForm() {
             className={`mt-1 flex justify-center items-center px-6 py-4 border-2 border-dashed rounded-md transition-all ${
               isDragActive
                 ? 'border-customP2Primary bg-customP2ForegroundD_50'
-                : 'border-gray-300 dark:bg-customP2ForegroundD_100'
+                : 'border-gray-300 dark:bg-customP2BackgroundD_darkest'
             }`}
           >
             <input {...getInputProps()} />
@@ -158,9 +158,9 @@ function AddArtistForm() {
           <button
             type='submit'
             disabled={loading}
-            className={`bg-customP2Primary ${
+            className={` bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 ${
               loading ? 'bg-opacity-60' : ''
-            } text-white px-4 py-2 rounded-md hover:bg-customP2ForegroundD_600 transition`}
+            } text-white px-4 py-2 rounded-md  transition`}
           >
             {loading ? 'Submitting...' : ' Add Artist'}
           </button>

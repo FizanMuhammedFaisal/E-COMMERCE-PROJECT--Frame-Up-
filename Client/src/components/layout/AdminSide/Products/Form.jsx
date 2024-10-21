@@ -41,7 +41,7 @@ function Form({
               id='productName'
               value={formData.productName}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
               placeholder='Enter product name'
             />
             <div className='pt-2 font-tertiary'>
@@ -66,7 +66,7 @@ function Form({
               id='productPrice'
               value={formData.productPrice}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
               placeholder='Enter product price'
             />
             <div className='pt-2 font-tertiary'>
@@ -90,8 +90,8 @@ function Form({
               id='discountPrice'
               value={formData.discountPrice}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
-              placeholder='Enter product price'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
+              placeholder='Enter product Discount price'
             />
             <div className='pt-2 font-tertiary'>
               {errorMessages && (
@@ -113,8 +113,8 @@ function Form({
               id='productYear'
               value={formData.productYear}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
-              placeholder='Enter product price'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
+              placeholder='Enter product year'
             />
             <div className='pt-2 font-tertiary'>
               {errorMessages && (
@@ -136,8 +136,8 @@ function Form({
               id='productStock'
               value={formData.productStock}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
-              placeholder='Enter product price'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
+              placeholder='Enter product Stock'
             />
             <div className='pt-2 font-tertiary'>
               {errorMessages && (
@@ -156,7 +156,7 @@ function Form({
             >
               Product Category
             </label>
-            <div className='flex flex-col dark:bg-customP2ForegroundD_100 gap-3 lg:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
+            <div className='flex flex-col  gap-3 lg:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
               <div className='flex-1 dark:text-slate-200 text-slate-900 '>
                 <p className='mb-2'>Themes</p>
                 <CategorySelect
@@ -208,7 +208,7 @@ function Form({
             >
               Product Artist
             </label>
-            <div className='flex flex-col dark:bg-customP2ForegroundD_100 gap-3 lg:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
+            <div className='flex flex-col  gap-3 lg:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
               <div className='flex-1 dark:text-slate-200 text-slate-900 '>
                 <p className='mb-2'>Select Artist</p>
                 <ArtistSelect />
@@ -233,7 +233,7 @@ function Form({
             value={formData.productDescription}
             onChange={handleChange}
             rows='5'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             placeholder='Enter product description'
           ></textarea>
           <div className='pt-2 font-tertiary'>
@@ -251,7 +251,7 @@ function Form({
             value={formData.productInformation}
             onChange={handleChange}
             rows='5'
-            className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+            className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             placeholder='About the Art'
           ></textarea>
           {errorMessages && (
@@ -284,7 +284,7 @@ function Form({
                 className={`${
                   loadingImages
                     ? 'bg-gray-400'
-                    : 'bg-customP2Primary hover:bg-customP2BackgroundD_600'
+                    : 'bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
                 } text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 onClick={() => document.getElementById('productImages').click()}
               >
@@ -342,7 +342,7 @@ function Form({
                 className={`${
                   loadingThumbnail
                     ? 'bg-gray-400'
-                    : 'bg-customP2Primary hover:bg-customP2BackgroundD_600'
+                    : 'bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
                 } text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 onClick={() =>
                   document.getElementById('thumbnailImage').click()
@@ -399,7 +399,7 @@ function Form({
               id='weight'
               value={formData.weight}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
               placeholder='Enter product weight'
             />
             <div className='pt-2 font-tertiary'>
@@ -426,7 +426,7 @@ function Form({
               id='dimensions'
               value={formData.dimensions}
               onChange={handleChange}
-              className='p-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2ForegroundD_100 sm:text-sm dark:text-slate-50'
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
               placeholder='Enter product dimensions'
             />
             <div className='pt-2 font-tertiary'>
@@ -443,7 +443,7 @@ function Form({
         <div className='mt-8 text-center'>
           <button
             type='submit'
-            className={`${'bg-customP2Primary  hover:bg-customP2BackgroundD_600'} text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-95 disabled:cursor-not-allowed`}
+            className={`${': bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'} text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-95 disabled:cursor-not-allowed`}
             disabled={loadingImages || loadingThumbnail || loading}
           >
             <div className='flex gap-2'>
