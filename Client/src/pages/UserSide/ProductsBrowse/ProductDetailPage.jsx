@@ -16,7 +16,8 @@ function ProductDetailPage() {
     api
       .get(`/products/${productId}`)
       .then(response => {
-        setProduct(response.data)
+        console.log(response.data)
+        setProduct(response.data[0])
         setLoading(false)
       })
       .catch(error => {

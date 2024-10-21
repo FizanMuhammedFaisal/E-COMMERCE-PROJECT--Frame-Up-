@@ -17,7 +17,7 @@ import { useCart } from '../../../../hooks/useCart'
 import apiClient from '../../../../services/api/apiClient'
 import Breadcrumb from '../../../common/Breadcrumb'
 
-function ProductDetails({ product }) {
+function ProductDetails({ product, discount }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -43,7 +43,8 @@ function ProductDetails({ product }) {
         severity: 'error'
       })
     }
-    const result = await addToCart(product._id, product.productPrice, 1)
+    const price = product.discountPrice || product.productPrice
+    const result = await addToCart(product._id, price, 1)
     if (result.success) {
       setAdded(true)
       setSnackbarData({
@@ -59,6 +60,7 @@ function ProductDetails({ product }) {
       })
     }
   }
+
   const handleAddToWishlist = async productId => {
     if (!isAuthenticated) {
       return setSnackbarData({
@@ -77,7 +79,6 @@ function ProductDetails({ product }) {
         severity: 'success'
       })
     } catch (error) {
-      //handle eror
       console.log(error)
       setSnackbarData({
         open: true,
@@ -86,8 +87,14 @@ function ProductDetails({ product }) {
       })
     }
   }
+
   const handleCloseSnackbar = () =>
     setSnackbarData({ ...snackbarData, open: false })
+
+  const formatDate = dateString => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' }
+    return new Date(dateString).toLocaleDateString(undefined, options)
+  }
 
   return (
     <div className='bg-slate-50 min-h-screen'>
@@ -122,7 +129,6 @@ function ProductDetails({ product }) {
                 </motion.div>
               </div>
 
-              {/* Thumbnail Gallery */}
               <div className='mt-8'>
                 <h2 className='text-xl font-semibold mb-4'>Product Images</h2>
                 <div className='flex space-x-4 overflow-x-auto'>
@@ -157,7 +163,6 @@ function ProductDetails({ product }) {
               </div>
             </div>
 
-            {/* Right column - Product Details */}
             <div className='lg:w-1/2 lg:pl-12 mt-8 lg:mt-0'>
               <h1 className='text-4xl mb-3 font-primary tracking-tighter leading-tight font-semibold text-customColorTertiaryDark'>
                 {product.productName}
@@ -165,11 +170,40 @@ function ProductDetails({ product }) {
               <p className='text-xl mb-8 text-gray-600'>
                 {product.productDescription}
               </p>
-              <p className='text-3xl mt-10 font-bold mb-4'>
-                ${product.productPrice.toFixed(2)}
-              </p>
 
-              {/* Reviews placeholder */}
+              <div className='mt-10 mb-4'>
+                <div className='mt-10 mb-4'>
+                  {product.discountPrice ? (
+                    <>
+                      <p className='text-3xl font-bold text-red-600'>
+                        ${product.discountPrice.toFixed(2)}
+                        <span className='ml-2 text-lg line-through text-gray-500'>
+                          ${product.productPrice.toFixed(2)}
+                        </span>
+                      </p>
+                      {product.appliedDiscount && (
+                        <p className='text-sm text-green-600 mt-1'>
+                          Discount ( {product.appliedDiscount.name} )- Ends on{' '}
+                          {new Date(
+                            product.appliedDiscount.endDate
+                          ).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className='text-3xl font-bold'>
+                      ${product.productPrice.toFixed(2)}
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className='mb-6'>
                 <div className='flex items-center'>
                   {[0, 1, 2, 3, 4].map(rating => (
@@ -227,7 +261,7 @@ function ProductDetails({ product }) {
                   <button
                     disabled={loading}
                     onClick={handleAddToCart}
-                    className={`flex-1   bg-customColorTertiary duration-300 hover:bg-customColorTertiaryLight whitespace-nowrap text-white py-3 px-8 rounded-md font-medium ${
+                    className={`flex-1 bg-customColorTertiary duration-300 hover:bg-customColorTertiaryLight whitespace-nowrap text-white py-3 px-8 rounded-md font-medium ${
                       loading || added
                         ? ''
                         : 'hover:bg-customColorTertiaryLight'
@@ -274,18 +308,15 @@ function ProductDetails({ product }) {
       )}
 
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        {/* Reviews and ratings */}
         <section className='mt-16'>
           <ProductRatings />
         </section>
 
-        {/* Product features */}
         <section className='mt-16'>
           <ProductFeatures features={product} />
         </section>
       </div>
 
-      {/* Image zoom modal */}
       <ImageZoomModal
         isOpen={isModalOpen}
         onRequestClose={closeModal}
@@ -293,7 +324,6 @@ function ProductDetails({ product }) {
         selectedImageIndex={selectedImageIndex}
       />
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbarData.open}
         autoHideDuration={6000}

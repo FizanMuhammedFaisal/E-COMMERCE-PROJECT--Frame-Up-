@@ -143,10 +143,21 @@ const getProducts = asyncHandler(async (req, res) => {
               $match: {
                 $expr: {
                   $or: [
-                    { $eq: ['$targetId', '$$productId'] },
-                    { $in: ['$targetId', '$$categoryIds'] }
+                    { $eq: ['$targetId', '$$productId'] }, //product dicount
+                    { $in: ['$targetId', '$$categoryIds'] } // category discount
                   ]
                 }
+              }
+            },
+            {
+              $match: {
+                $or: [
+                  { status: 'Active' },
+                  {
+                    startDate: { $lte: new Date() },
+                    endDate: { $gte: new Date() }
+                  }
+                ]
               }
             }
           ],
@@ -160,58 +171,92 @@ const getProducts = asyncHandler(async (req, res) => {
         }
       },
       {
-        $match: {
-          $or: [
-            { 'discounts.status': 'Active' },
-            {
-              'discounts.startDate': { $lte: new Date() },
-              'discounts.endDate': { $gte: new Date() }
-            },
-            { discounts: { $exists: false } }
-          ]
+        $addFields: {
+          productDiscount: {
+            $cond: [
+              { $eq: ['$discounts.targetId', '$_id'] },
+              {
+                $cond: [
+                  { $eq: ['$discounts.discountType', 'percentage'] },
+                  {
+                    $multiply: [
+                      '$productPrice',
+                      { $divide: ['$discounts.discountValue', 100] }
+                    ]
+                  },
+                  '$discounts.discountValue'
+                ]
+              },
+              0
+            ]
+          },
+          categoryDiscount: {
+            $cond: [
+              { $in: ['$discounts.targetId', '$productCategories'] },
+              {
+                $cond: [
+                  { $eq: ['$discounts.discountType', 'percentage'] },
+                  {
+                    $multiply: [
+                      '$productPrice',
+                      { $divide: ['$discounts.discountValue', 100] }
+                    ]
+                  },
+                  '$discounts.discountValue'
+                ]
+              },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          maxDiscount: {
+            $cond: [
+              { $gt: ['$productDiscount', '$categoryDiscount'] },
+              '$productDiscount',
+              '$categoryDiscount'
+            ]
+          },
+          // add applied to the array
+          appliedDiscount: {
+            $cond: [
+              { $gt: ['$productDiscount', '$categoryDiscount'] },
+              '$discounts',
+              '$discounts'
+            ]
+          }
         }
       },
       {
         $addFields: {
           discountPrice: {
-            $cond: {
-              if: { $ne: ['$discounts', null] },
-              then: {
-                $cond: {
-                  if: { $eq: ['$discounts.discountType', 'percentage'] },
-                  then: {
-                    $subtract: [
-                      '$productPrice',
-                      {
-                        $multiply: [
-                          '$productPrice',
-                          { $divide: ['$discounts.discountValue', 100] }
-                        ]
-                      }
-                    ]
-                  },
-                  else: {
-                    $subtract: ['$productPrice', '$discounts.discountValue']
-                  }
-                }
-              },
-              else: '$productPrice' //no discounts applied
-            }
+            $cond: [
+              { $gt: ['$maxDiscount', 0] },
+              { $subtract: ['$productPrice', '$maxDiscount'] },
+              null
+            ]
           }
         }
       },
       {
         $group: {
           _id: '$_id',
-          mergedProduct: { $mergeObjects: '$$ROOT' }, // Merge all original product fields
-          discounts: { $push: '$discounts' } // Collect discounts into an array
+          mergedProduct: { $mergeObjects: '$$ROOT' }, //merge everything
+          maxDiscount: { $first: '$maxDiscount' },
+          appliedDiscount: { $first: '$appliedDiscount' }
         }
       },
-      // Reformatting the final output
       {
         $replaceRoot: {
           newRoot: {
-            $mergeObjects: ['$mergedProduct', { discounts: '$discounts' }]
+            $mergeObjects: [
+              '$mergedProduct',
+              {
+                discountPrice: '$discountPrice'
+              }
+            ]
           }
         }
       },
@@ -311,16 +356,150 @@ const getProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params
-
+    const ObjectId = mongoose.Types.ObjectId
     // Check if the id is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Invalid product ID' })
     }
 
-    const product = await Product.findById(id)
-      .populate('productCategories')
-      .exec()
-
+    const product = await Product.aggregate([
+      { $match: { _id: new ObjectId(id) } },
+      {
+        $lookup: {
+          from: 'discounts',
+          let: { productId: '$_id', categoryIds: '$productCategories' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ['$targetId', '$$productId'] }, //product dicount
+                    { $in: ['$targetId', '$$categoryIds'] } // category discount
+                  ]
+                }
+              }
+            },
+            {
+              $match: {
+                $or: [
+                  { status: 'Active' },
+                  {
+                    startDate: { $lte: new Date() },
+                    endDate: { $gte: new Date() }
+                  }
+                ]
+              }
+            }
+          ],
+          as: 'discounts'
+        }
+      },
+      {
+        $unwind: {
+          path: '$discounts',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          productDiscount: {
+            $cond: [
+              { $eq: ['$discounts.targetId', '$_id'] },
+              {
+                $cond: [
+                  { $eq: ['$discounts.discountType', 'percentage'] },
+                  {
+                    $multiply: [
+                      '$productPrice',
+                      { $divide: ['$discounts.discountValue', 100] }
+                    ]
+                  },
+                  '$discounts.discountValue'
+                ]
+              },
+              0
+            ]
+          },
+          categoryDiscount: {
+            $cond: [
+              { $in: ['$discounts.targetId', '$productCategories'] },
+              {
+                $cond: [
+                  { $eq: ['$discounts.discountType', 'percentage'] },
+                  {
+                    $multiply: [
+                      '$productPrice',
+                      { $divide: ['$discounts.discountValue', 100] }
+                    ]
+                  },
+                  '$discounts.discountValue'
+                ]
+              },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          maxDiscount: {
+            $cond: [
+              { $gt: ['$productDiscount', '$categoryDiscount'] },
+              '$productDiscount',
+              '$categoryDiscount'
+            ]
+          },
+          // add applied to the array
+          appliedDiscount: {
+            $cond: [
+              { $gt: ['$productDiscount', '$categoryDiscount'] },
+              '$discounts',
+              '$discounts'
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          discountPrice: {
+            $cond: [
+              { $gt: ['$maxDiscount', 0] },
+              { $subtract: ['$productPrice', '$maxDiscount'] },
+              null
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          mergedProduct: { $mergeObjects: '$$ROOT' }, //merge everything
+          maxDiscount: { $first: '$maxDiscount' },
+          appliedDiscount: { $first: '$appliedDiscount' }
+        }
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              '$mergedProduct',
+              {
+                discountPrice: '$discountPrice'
+              }
+            ]
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'productCategories',
+          foreignField: '_id',
+          as: 'productCategories'
+        }
+      }
+    ]).exec()
+    console.log(product)
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })
     }
