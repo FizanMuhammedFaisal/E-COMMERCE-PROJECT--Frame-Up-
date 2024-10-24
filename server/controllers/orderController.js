@@ -5,97 +5,9 @@ import Order from '../models/orderModel.js'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
+import { getCartDetails, applyCoupon } from '../utils/cartUtils.js'
+import Wallet from '../models/walletModel.js'
 
-const initiateOrder = asyncHandler(async (req, res, next) => {
-  const {
-    items,
-    shippingAddress,
-    paymentMethod,
-    shippingCost,
-    discount,
-    taxAmount,
-    totalAmount,
-    subtotal
-  } = req.body.data
-  const user = req.user
-
-  try {
-    let outOfStock = false
-    const productIds = items.map(item => item.productId)
-
-    const products = await Product.find({ _id: { $in: productIds } }).lean()
-
-    const updatedCart = items.map(item => {
-      const product = products.find(p => p._id.equals(item.productId))
-
-      if (!product || product.productStock === 0) {
-        outOfStock = true
-        return { ...item, quantity: 0 }
-      }
-
-      const updatedQuantity =
-        product.productStock < item.quantity
-          ? product.productStock
-          : item.quantity
-      return {
-        ...item,
-        quantity: updatedQuantity
-      }
-    })
-    console.log('asdfdasdfasdfa')
-    console.log(updatedCart)
-    console.log('asdfdasdfasdfa')
-
-    if (outOfStock) {
-      return res.status(400).json({
-        updatedCart,
-        message: 'Some items are out of stock',
-        outOfStock
-      })
-    }
-
-    // Create a new Order
-    const newOrder = new Order({
-      userId: user._id,
-      items: updatedCart,
-      shippingAddress,
-      paymentMethod,
-      shippingCost,
-      discount,
-      taxAmount,
-      totalAmount,
-      orderStatus: 'Pending',
-      paymentStatus: 'Pending',
-      subtotal
-    })
-
-    await newOrder.save()
-    // Deduct stock
-    for (const item of updatedCart) {
-      const product = await Product.findByIdAndUpdate(item.productId, {
-        $inc: { productStock: -item.quantity }
-      })
-    }
-
-    // Clear the user's cart
-    await Cart.findOneAndUpdate({ userId: user._id }, { items: [] })
-    console.log(paymentMethod)
-    if (paymentMethod === 'Razor Pay') {
-      req.orderDetails = newOrder
-      next()
-    } else {
-      res.status(200).json({
-        order: newOrder,
-        message: 'Order placed successfully and cart cleared!'
-      })
-    }
-  } catch (error) {
-    console.error('Error placing order:', error)
-    res
-      .status(500)
-      .json({ message: 'An error occurred while placing the order', error })
-  }
-})
 ///
 //
 const getOrdersAdmin = asyncHandler(async (req, res) => {
@@ -118,8 +30,74 @@ const getOrdersAdmin = asyncHandler(async (req, res) => {
 })
 //
 const cancelOrder = asyncHandler(async (req, res, next) => {
-  console.log('order cancellled')
+  const { orderId } = req.body
+  const userId = req.user.id
+  if (!orderId) {
+    const error = new Error('Order ID is required for cancellation.')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const order = await Order.findById(orderId)
+
+  if (!order) {
+    const error = new Error('Order not found.')
+    error.statusCode = 404
+    return next(error)
+  }
+
+  if (order.userId.toString() !== userId) {
+    const error = new Error('You are not authorized to cancel this order.')
+    error.statusCode = 403
+    return next(error)
+  }
+
+  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+    const error = new Error(
+      'Order cannot be cancelled. It has already been shipped or delivered.'
+    )
+    error.statusCode = 400
+    return next(error)
+  }
+
+  if (order.paymentStatus !== 'Paid') {
+    const error = new Error(
+      'Cancellation not possible. Payment has not been made.'
+    )
+    error.statusCode = 400
+    return next(error)
+  }
+
+  let wallet = await Wallet.findOne({ userId: order.userId })
+
+  if (!wallet) {
+    wallet = new Wallet({
+      userId: order.userId,
+      balance: 0,
+      transactions: []
+    })
+  }
+
+  wallet.balance += order.subtotal
+
+  wallet.transactions.push({
+    type: 'refund',
+    amount: order.subtotal,
+    description: `Refund for order ${order._id}`
+  })
+
+  await wallet.save()
+
+  order.orderStatus = 'Cancelled'
+  await order.save()
+
+  return res.status(200).json({
+    message: 'Cancellation successful and amount refunded to  wallet.',
+    order,
+    walletBalance: wallet.balance
+  })
 })
+
 //
 //
 const getOrderDetails = asyncHandler(async (req, res) => {
@@ -169,14 +147,20 @@ const getOrders = asyncHandler(async (req, res) => {
 const updateOrderStatus = asyncHandler(async (req, res, next) => {
   const { orderId, newStatus } = req.body
   console.log(orderId, newStatus)
-
+  if (newStatus === 'Delivered') {
+  }
   try {
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { orderStatus: newStatus },
-      { new: true }
-    )
-
+    const order = await Order.findById(orderId)
+    if (
+      order.paymentMethod === 'Cash on Delivery' &&
+      newStatus === 'Delivered'
+    ) {
+      order.paymentStatus = 'Paid'
+      order.orderStatus = newStatus
+    } else {
+      order.orderStatus = newStatus
+    }
+    const updatedOrder = await order.save()
     if (!updatedOrder) {
       const error = new Error('order not found')
       error.statusCode = 404
@@ -194,57 +178,59 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
   }
 })
 //
-//
-//for razor pay order intiating
-const razorpay = new Razorpay({
-  key_id: process.env.RAZOR_PAY_KEY_ID,
-  key_secret: process.env.RAZOR_PAY_KEY_SECRET
-})
+const updateProductStock = async updatedCart => {
+  for (const item of updatedCart) {
+    if (item.quantity > 0) {
+      const result = await Product.findByIdAndUpdate(item.productId, {
+        $inc: { productStock: -item.quantity }
+      })
+      if (!result) {
+        throw new Error(`Stock update failed for product ${item.productId}`)
+      }
+    }
+  }
+}
 
-const createOrder = asyncHandler(async (req, res, next) => {
+const clearCart = async userId => {
+  const result = await Cart.findOneAndUpdate({ userId }, { items: [] })
+  if (!result) {
+    throw new Error('Failed to clear cart')
+  }
+}
+const initiateOrder = asyncHandler(async (req, res, next) => {
   const {
     items,
     shippingAddress,
     paymentMethod,
     shippingCost,
-    discount,
     taxAmount,
-    totalAmount,
-    subtotal
+    appliedCoupon
   } = req.body.data
-
   const user = req.user
 
-  if (!totalAmount || isNaN(totalAmount)) {
-    return res.status(400).json({ message: 'Invalid total amount' })
-  }
-
-  let newOrder = null
-  let updatedCart = []
-  let originalCartItems = []
   try {
-    const originalCart = await Cart.findOne({ userId: user._id })
-    if (originalCart) {
-      originalCartItems = originalCart.items
-    }
+    let outOfStock = false
     const productIds = items.map(item => item.productId)
+
     const products = await Product.find({ _id: { $in: productIds } }).lean()
 
-    let outOfStock = false
-    updatedCart = items.map(item => {
+    const updatedCart = items.map(item => {
       const product = products.find(p => p._id.equals(item.productId))
 
       if (!product || product.productStock === 0) {
         outOfStock = true
-        return { ...item, quantity: 0 }
+        return {
+          ...item,
+          quantity: 0,
+          price: product ? product.productPrice : 0
+        } // Out of stock
       }
 
       const updatedQuantity =
         product.productStock < item.quantity
           ? product.productStock
           : item.quantity
-
-      return { ...item, quantity: updatedQuantity }
+      return { ...item, quantity: updatedQuantity, price: product.productPrice }
     })
 
     if (outOfStock) {
@@ -255,53 +241,175 @@ const createOrder = asyncHandler(async (req, res, next) => {
       })
     }
 
-    newOrder = new Order({
+    const cartDetails = await getCartDetails(user._id)
+
+    if (!cartDetails) {
+      const error = new Error('order creation Failed')
+      error.statusCode = 400
+      return next(error)
+    }
+
+    const subtotal = cartDetails[0].subtotal
+    const totalDiscount = cartDetails[0].totalDiscount
+    const totalPrice = cartDetails[0].totalPrice
+    let totalAmount = totalPrice
+    let couponDiscount = 0
+    if (appliedCoupon) {
+      try {
+        couponDiscount = await applyCoupon(appliedCoupon, totalPrice)
+        totalAmount -= couponDiscount
+      } catch (err) {
+        const error = new Error(err)
+        error.statusCode = 400
+        return next(error)
+      }
+    }
+
+    // Create a new Order
+    const newOrder = await Order.create({
       userId: user._id,
       items: updatedCart,
       shippingAddress,
       paymentMethod,
       shippingCost,
-      discount,
+      discount: totalDiscount,
       taxAmount,
       totalAmount,
       orderStatus: 'Pending',
       paymentStatus: 'Pending',
-      subtotal
+      subtotal,
+      couponCode: appliedCoupon,
+      couponAmount: couponDiscount
     })
 
-    await newOrder.save()
+    // Deduct stock
+    // Clear the user's cart
+    await clearCart(user._id)
+    await updateProductStock(updatedCart)
 
-    for (const item of updatedCart) {
-      if (item.quantity > 0) {
-        const result = await Product.findByIdAndUpdate(item.productId, {
-          $inc: { productStock: -item.quantity }
-        })
+    res.status(200).json({
+      order: newOrder,
+      message: 'Order placed successfully and cart cleared!'
+    })
+  } catch (error) {
+    console.error('Error placing order:', error)
+    res
+      .status(500)
+      .json({ message: 'An error occurred while placing the order', error })
+  }
+})
+//
+//for razor pay order intiating
+const razorpay = new Razorpay({
+  key_id: process.env.RAZOR_PAY_KEY_ID,
+  key_secret: process.env.RAZOR_PAY_KEY_SECRET
+})
 
-        if (!result) {
-          throw new Error(`Stock update failed for product ${item.productId}`)
-        }
+const createRazorpayOrder = asyncHandler(async (req, res, next) => {
+  const {
+    items,
+    shippingAddress,
+    paymentMethod,
+    shippingCost,
+    taxAmount,
+    appliedCoupon
+  } = req.body.data
+
+  const user = req.user
+
+  let updatedCart = []
+  let originalCartItems = []
+
+  try {
+    const originalCart = await Cart.findOne({ userId: user._id })
+    if (originalCart) {
+      originalCartItems = originalCart.items
+    }
+
+    const productIds = items.map(item => item.productId)
+    const products = await Product.find({ _id: { $in: productIds } }).lean()
+
+    let outOfStock = false
+    updatedCart = items.map(item => {
+      const product = products.find(p => p._id.equals(item.productId))
+      if (!product || product.productStock === 0) {
+        outOfStock = true
+        return {
+          ...item,
+          quantity: 0,
+          price: product ? product.productPrice : 0
+        } // Out of stock
+      }
+      const updatedQuantity =
+        product.productStock < item.quantity
+          ? product.productStock
+          : item.quantity
+      return { ...item, quantity: updatedQuantity, price: product.productPrice }
+    })
+
+    if (outOfStock) {
+      return res.status(400).json({
+        updatedCart,
+        message: 'Some items are out of stock',
+        outOfStock
+      })
+    }
+
+    const cartDetails = await getCartDetails(user._id)
+
+    if (!cartDetails) {
+      const error = new Error('order creation Failed')
+      error.statusCode = 400
+      return next(error)
+    }
+    console.log(cartDetails)
+    const subtotal = cartDetails[0].subtotal
+    const totalDiscount = cartDetails[0].totalDiscount
+    const totalPrice = cartDetails[0].totalPrice
+    let totalAmount = Math.floor(totalPrice + taxAmount + shippingCost)
+    let couponDiscount = 0
+    if (appliedCoupon) {
+      try {
+        couponDiscount = await applyCoupon(appliedCoupon, totalPrice)
+        totalAmount -= couponDiscount
+      } catch (err) {
+        const error = new Error(err)
+        error.statusCode = 400
+        return next(error)
       }
     }
 
-    const cartUpdateResult = await Cart.findOneAndUpdate(
-      { userId: user._id },
-      { items: [] }
-    )
-    if (!cartUpdateResult) {
-      throw new Error('Failed to clear cart')
-    }
+    const newOrder = await Order.create({
+      userId: user._id,
+      items: updatedCart,
+      shippingAddress,
+      paymentMethod,
+      shippingCost,
+      discount: totalDiscount,
+      taxAmount,
+      totalAmount,
+      orderStatus: 'Pending',
+      paymentStatus: 'Pending',
+      subtotal,
+      couponCode: appliedCoupon,
+      couponAmount: couponDiscount
+    })
+
+    await updateProductStock(updatedCart)
+    await clearCart(user._id)
 
     if (paymentMethod === 'Razor Pay') {
-      console.log(razorpay)
       try {
         const options = {
-          amount: totalAmount * 100,
+          amount: newOrder.totalAmount * 100,
           currency: 'INR',
           receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
           payment_capture: 1
         }
         console.log(options)
+        console.log(razorpay)
         const razorpayOrder = await razorpay.orders.create(options)
+        console.log(newOrder)
         const orderData = {
           razorpayOrderId: razorpayOrder.id,
           amount: razorpayOrder.amount,
@@ -309,16 +417,13 @@ const createOrder = asyncHandler(async (req, res, next) => {
           name: newOrder.shippingAddress.name,
           contact: newOrder.shippingAddress.phoneNumber
         }
-        console.log(orderData)
-        res.status(200).json({ orderData })
+        return res.status(200).json({ orderData })
       } catch (err) {
-        console.log(err)
-        const error = new Error('razor pay order failed')
-        error.statusCode = 500
-        return next(error)
+        console.error(err)
+        return next(new Error('Razor Pay order failed'))
       }
     } else {
-      res.status(200).json({
+      return res.status(200).json({
         order: newOrder,
         message: 'Order placed successfully and cart cleared!'
       })
@@ -343,7 +448,7 @@ const createOrder = asyncHandler(async (req, res, next) => {
       { items: originalCartItems }
     )
 
-    res.status(500).json({
+    return res.status(500).json({
       message: 'An error occurred while placing the order. Rollback completed.',
       error
     })
@@ -356,7 +461,12 @@ const verifyPayment = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
     req.body.paymentResponse
   const { orderId } = req.body
-
+  console.log(orderId)
+  console.log(orderId)
+  console.log(orderId)
+  console.log(orderId)
+  console.log(orderId)
+  console.log(orderId)
   console.log('Payment Response:', req.body)
   console.log('Secret Key:', process.env.RAZOR_PAY_KEY_SECRET)
 
@@ -377,13 +487,17 @@ const verifyPayment = async (req, res) => {
   // Update order status in your database
   try {
     console.log(orderId)
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      { paymentStatus: 'Paid' },
-      { new: true }
-    )
+    try {
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        { paymentStatus: 'Paid' },
+        { new: true }
+      )
+      console.log(order)
+    } catch (error) {
+      console.log(error)
+    }
 
-    console.log(order)
     return res
       .status(200)
       .json({ success: true, message: 'Payment verified successfully' })
@@ -393,6 +507,68 @@ const verifyPayment = async (req, res) => {
       .json({ success: false, message: 'Failed to update order' })
   }
 }
+//
+const retryPayment = asyncHandler(async (req, res, next) => {
+  const { orderId } = req.body
+
+  try {
+    const order = await Order.findById(orderId)
+
+    if (!order || order.paymentStatus === 'Paid') {
+      return res.status(400).json({ message: 'Invalid or already paid order' })
+    }
+
+    let razorpayOrderId = order.razorpayOrderId
+
+    if (!razorpayOrderId) {
+      const options = {
+        amount: order.totalAmount * 100,
+        currency: 'INR',
+        receipt: `retry_rcptid_${order._id}`,
+        payment_capture: 1
+      }
+
+      const razorpayOrder = await razorpay.orders.create(options)
+      razorpayOrderId = razorpayOrder.id
+
+      order.razorpayOrderId = razorpayOrderId
+      await order.save()
+    }
+
+    // Send the Razorpay order ID and other details to the frontend
+    const orderData = {
+      razorpayOrderId,
+      amount: order.totalAmount * 100,
+      orderId: order._id,
+      name: order.shippingAddress.name,
+      contact: order.shippingAddress.phoneNumber
+    }
+
+    res.status(200).json({ orderData })
+  } catch (error) {
+    console.error('Error in retrying payment:', error)
+    return res.status(500).json({ message: 'Retry payment failed', error })
+  }
+})
+//
+//
+const cancelOrderAdmin = asyncHandler(async (req, res, next) => {
+  const { orderId } = req.params
+  console.log(orderId)
+  if (!orderId) {
+    const error = new Error('id Required for cancelling')
+    error.statusCode = 400
+    return next(error)
+  }
+  const order = await Order.findByIdAndUpdate(
+    orderId,
+    { orderStatus: 'Cancelled' },
+    { new: true }
+  )
+  if (order) {
+    res.status(200).json({ message: 'cancellation successfull', order })
+  }
+})
 export {
   initiateOrder,
   getOrdersAdmin,
@@ -400,6 +576,8 @@ export {
   getOrderDetails,
   getOrders,
   updateOrderStatus,
-  createOrder,
-  verifyPayment
+  createRazorpayOrder,
+  verifyPayment,
+  retryPayment,
+  cancelOrderAdmin
 }

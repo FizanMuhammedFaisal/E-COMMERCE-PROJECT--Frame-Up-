@@ -12,23 +12,22 @@ const useCart = () => {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const addToCart = async (productId, price, quantity = 0) => {
+  const addToCart = async (productId, quantity = 0) => {
     setLoading(true)
     setError(null)
 
     try {
       const res = await apiClient.post('/api/cart/add-to-cart', {
         productId,
-        price,
         quantity
       })
-      if (!res.data.items) {
+      if (!res.data?.cart?.items) {
         setError('Failed to add items to cart')
         return { success: false, error: 'Failed to add items to cart' }
       }
 
-      dispatch(addToCartd(res.data.items))
-      return { success: true, cart: res.data.items }
+      dispatch(addToCartd(res.data.cart))
+      return { success: true, cart: res.data.cart.items }
     } catch (error) {
       console.log(error)
       console.log(error.response.data.message)

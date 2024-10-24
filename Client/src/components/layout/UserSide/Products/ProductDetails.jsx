@@ -43,8 +43,7 @@ function ProductDetails({ product, discount }) {
         severity: 'error'
       })
     }
-    const price = product.discountPrice || product.productPrice
-    const result = await addToCart(product._id, price, 1)
+    const result = await addToCart(product._id, 1)
     if (result.success) {
       setAdded(true)
       setSnackbarData({

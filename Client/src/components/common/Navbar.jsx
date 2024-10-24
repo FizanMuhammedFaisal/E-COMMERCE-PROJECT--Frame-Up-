@@ -42,7 +42,7 @@ const products = [
 ]
 
 const navbarData = [
-  { name: 'Collections', href: '/collections' },
+  { name: 'Collections', href: '/all' },
   { name: 'Home', href: '/' },
   { name: 'About Us', href: '/about-us' }
 ]

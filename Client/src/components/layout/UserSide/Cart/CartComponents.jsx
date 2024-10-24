@@ -104,6 +104,7 @@ const EmptyCart = () => {
   )
 }
 const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
+  console.log(items)
   return (
     <div className='space-y-4'>
       {items.map(item => (
@@ -125,9 +126,15 @@ const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
                   <h2 className='text-lg font-semibold text-gray-900 mb-1'>
                     {item.productName}
                   </h2>
-                  <p className='text-xl text-customColorTertiaryDark font-bold'>
-                    ${item.price.toFixed(2)}
-                  </p>
+                  {item.discountPrice ? (
+                    <p className='text-xl text-customColorTertiaryDark font-bold'>
+                      ${item.discountPrice.toFixed(2)}
+                    </p>
+                  ) : (
+                    <p className='text-xl text-customColorTertiaryDark  font-bold'>
+                      ${item.productPrice.toFixed(2)}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className='flex items-center justify-between w-full sm:w-auto mt-4 sm:mt-0'>

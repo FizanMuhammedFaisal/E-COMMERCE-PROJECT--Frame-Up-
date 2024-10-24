@@ -12,10 +12,6 @@ const cartItemSchema = new Schema(
       type: Number,
       required: true,
       min: 1
-    },
-    price: {
-      type: Number,
-      required: true
     }
   },
   { _id: false }
@@ -55,16 +51,6 @@ const cartSchema = new Schema({
     type: Date,
     default: Date.now
   }
-})
-
-// for caluculating sub total
-cartSchema.pre('save', function (next) {
-  this.subtotal = this.items.reduce(
-    (acc, item) => acc + item.quantity * item.price,
-    0
-  )
-  this.totalPrice = this.subtotal - this.discount
-  next()
 })
 
 const Cart = mongoose.model('Cart', cartSchema)

@@ -16,6 +16,7 @@ const useFetchCart = () => {
         setLoading(true)
         try {
           const res = await apiClient.get('/api/cart')
+          console.log(res.data.cart)
           dispatch(setCart(res.data.cart))
         } catch (error) {
           setError('Failed to fetch cart data')

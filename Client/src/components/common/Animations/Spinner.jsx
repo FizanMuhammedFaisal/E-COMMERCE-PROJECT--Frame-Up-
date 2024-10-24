@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-export default function Spinner({ size, center }) {
+export default function Spinner({ size, center, speed }) {
   const getSizeClass = () => {
     switch (size) {
       case 1:
@@ -14,6 +14,7 @@ export default function Spinner({ size, center }) {
     }
   }
   const sizeClass = getSizeClass()
+  const SPEED = speed === 1 ? 1.2 : speed === 2 ? 1 : 1.8
   const Center = center
     ? 'flex justify-center items-center  h-screen w-full'
     : ''
@@ -27,7 +28,7 @@ export default function Spinner({ size, center }) {
           borderRadius: ['50%', '30%', '10%', '30%', '50%']
         }}
         transition={{
-          duration: 1.8,
+          duration: SPEED,
           ease: 'easeInOut',
           times: [0, 0.2, 0.5, 0.8, 1],
           repeat: Infinity,

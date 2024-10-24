@@ -54,7 +54,6 @@ const AdminAddProducts = () => {
   const [DBError, setDBError] = useState(false)
 
   const handleChange = async e => {
-    console.log('triggering')
     const { id, value, files } = e.target
 
     if (files) {

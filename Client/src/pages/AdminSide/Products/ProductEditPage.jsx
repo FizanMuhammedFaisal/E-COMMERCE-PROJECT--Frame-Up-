@@ -29,7 +29,7 @@ export default function ProductEditPage() {
       setError(null)
       try {
         const res = await apiClient.get(`/api/products/${productId}`)
-        setProduct(res.data)
+        setProduct(res.data.product[0])
       } catch (error) {
         setError('Failed to load product details.')
       } finally {

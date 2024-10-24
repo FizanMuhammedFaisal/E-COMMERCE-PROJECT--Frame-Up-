@@ -1,6 +1,7 @@
 import apiClient from '../api/apiClient'
 
 export const handleRazorPaySuccess = async orderData => {
+  console.log(orderData)
   return new Promise((resolve, reject) => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -35,6 +36,7 @@ export const handleRazorPaySuccess = async orderData => {
 }
 
 const verifyPayment = async (paymentResponse, orderId) => {
+  console.log(orderId)
   const res = await apiClient.post('/api/order/verify-payment', {
     paymentResponse,
     orderId

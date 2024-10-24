@@ -6,13 +6,15 @@ import {
   updateStatus,
   getCoupons,
   applyCoupon,
-  removeCoupon
+  removeCoupon,
+  deleteCoupon
 } from '../controllers/couponController.js'
 import { protect } from '../middlewares/authMiddleware.js'
 import admin from '../middlewares/authAdminMiddleware.js'
 router.post('/add-coupon', protect, admin, addCoupon)
 router.get('/all', protect, admin, getAllCoupons)
 router.put('/update-status', protect, admin, updateStatus)
+router.delete('/:id', deleteCoupon)
 //users
 router.get('/', getCoupons)
 router.post('/apply-coupon', applyCoupon)

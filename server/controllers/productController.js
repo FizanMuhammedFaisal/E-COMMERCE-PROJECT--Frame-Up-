@@ -151,11 +151,19 @@ const getProducts = asyncHandler(async (req, res) => {
             },
             {
               $match: {
-                $or: [
+                $and: [
                   { status: 'Active' },
                   {
-                    startDate: { $lte: new Date() },
-                    endDate: { $gte: new Date() }
+                    $or: [
+                      {
+                        startDate: { $lte: new Date() },
+                        endDate: { $gte: new Date() }
+                      },
+                      {
+                        startDate: { $exists: false },
+                        endDate: { $exists: false }
+                      }
+                    ]
                   }
                 ]
               }
@@ -381,11 +389,19 @@ const getProductById = asyncHandler(async (req, res) => {
             },
             {
               $match: {
-                $or: [
+                $and: [
                   { status: 'Active' },
                   {
-                    startDate: { $lte: new Date() },
-                    endDate: { $gte: new Date() }
+                    $or: [
+                      {
+                        startDate: { $lte: new Date() },
+                        endDate: { $gte: new Date() }
+                      },
+                      {
+                        startDate: { $exists: false },
+                        endDate: { $exists: false }
+                      }
+                    ]
                   }
                 ]
               }
@@ -504,7 +520,7 @@ const getProductById = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: 'Product not found' })
     }
 
-    res.json(product)
+    res.json({ product })
   } catch (error) {
     console.error('Error fetching product:', error)
     res.status(500).json({ message: 'Server error' })

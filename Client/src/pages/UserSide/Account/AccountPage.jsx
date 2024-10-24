@@ -13,15 +13,18 @@ import {
   AccountSettings,
   ChangePassword,
   EditProfile,
-  ManageAddress,
-  OrderHistory
+  ManageAddress
 } from '../../../components/layout/UserSide/Account/AccountComponents'
+import OrderHistory from '../../../components/layout/UserSide/Account/OrderHistory'
+import Wallet from '../../../components/layout/UserSide/Account/Wallet'
+import { Wallet2 } from 'lucide-react'
 
 const menuItems = [
   { name: 'Edit Profile', icon: UserCircleIcon, path: 'edit-profile' },
   { name: 'Change Password', icon: KeyIcon, path: 'change-password' },
   { name: 'Manage Addresses', icon: MapPinIcon, path: 'manage-address' },
   { name: 'Order History', icon: ShoppingBagIcon, path: 'order-history' },
+  { name: 'Wallet', icon: Wallet2, path: 'wallet' },
   { name: 'Account Settings', icon: CogIcon, path: 'account-settings' }
 ]
 
@@ -56,6 +59,8 @@ function UserAccountPage() {
         return <OrderHistory />
       case 'Account Settings':
         return <AccountSettings />
+      case 'Wallet':
+        return <Wallet />
       default:
         return null
     }

@@ -17,7 +17,7 @@ function ProductDetailPage() {
       .get(`/products/${productId}`)
       .then(response => {
         console.log(response.data)
-        setProduct(response.data[0])
+        setProduct(response.data.product[0])
         setLoading(false)
       })
       .catch(error => {

@@ -18,6 +18,10 @@ const userSchema = mongoose.Schema({
     type: Number,
     default: null
   },
+  profile: {
+    type: String,
+    required: true
+  },
   status: {
     type: String,
     enum: ['Active', 'Blocked', 'Pending'],

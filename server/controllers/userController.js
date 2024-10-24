@@ -467,7 +467,8 @@ const getUserDetails = asyncHandler(async (req, res, next) => {
     userData: {
       name: userData.username,
       email: userData.email,
-      phone: userData.phoneNumber
+      phone: userData.phoneNumber,
+      profile: userData.profile
     }
   })
 })
@@ -622,7 +623,26 @@ const updateAddress = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ message: 'Address updated successfully' })
 })
-
+//
+const uploadProfile = asyncHandler(async (req, res, next) => {
+  const { url } = req.body
+  const userId = req.user._id
+  if (!url) {
+    const error = new Error('No url')
+    error.statusCode = 400
+    return next(error)
+  }
+  const image = url[0]
+  console.log(image)
+  console.log(userId)
+  const user = await User.findOneAndUpdate({ _id: userId }, { profile: image })
+  if (user) {
+    res.status(200).json({ message: 'user image uploaded' })
+  }
+  const error = new Error('Cannot update profile')
+  error.statusCode = 400
+  return next(error)
+})
 export {
   checkUser,
   userlogin,
@@ -642,5 +662,6 @@ export {
   updateUser,
   updatePassword,
   deleteAddress,
-  updateAddress
+  updateAddress,
+  uploadProfile
 }

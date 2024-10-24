@@ -13,6 +13,7 @@ import { Alert, Button, Snackbar } from '@mui/material'
 import apiClient from '../../../services/api/apiClient'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
 import { validateChekout } from '../../../redux/slices/Users/Checkout/checkoutSlice'
+import { useFetchCart } from '../../../hooks/useFetchCart'
 
 const MotionButton = motion.create(Button)
 
@@ -20,7 +21,9 @@ export default function CartPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { isAuthenticated } = useSelector(state => state.auth)
-  const { items, subtotal, totalPrice } = useSelector(state => state.cart)
+  const { items, subtotal, totalPrice, totalDiscount } = useSelector(
+    state => state.cart
+  )
   const { updateCartQuantity, removeFromCart } = useCart()
   const [error, setError] = useState({ productId: null, message: '' })
   const [snackbarData, setSnackbarData] = useState({
@@ -28,7 +31,7 @@ export default function CartPage() {
     message: '',
     severity: 'success'
   })
-
+  useFetchCart()
   useEffect(() => {
     validateCart(items)
   }, [items])
@@ -154,6 +157,10 @@ export default function CartPage() {
                 <div className='flex justify-between text-lg font-medium text-gray-900 mb-4'>
                   <p>Subtotal</p>
                   <p>${subtotal.toFixed(2)}</p>
+                </div>
+                <div className='flex justify-between text-lg font-medium text-gray-900 mb-4'>
+                  <p>Total Discount</p>
+                  <p>${totalDiscount.toFixed(2)}</p>
                 </div>
                 <div className='flex justify-between text-xl font-bold text-gray-900 mb-6'>
                   <p>Total</p>

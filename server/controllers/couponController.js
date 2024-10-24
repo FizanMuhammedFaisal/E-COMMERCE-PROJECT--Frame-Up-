@@ -91,9 +91,7 @@ const getCoupons = asyncHandler(async (req, res, next) => {
   )
 
   if (coupons) {
-    setTimeout(() => {
-      res.status(200).json({ coupons })
-    }, 1000)
+    res.status(200).json({ coupons })
   }
 })
 //
@@ -109,18 +107,13 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
   if (!(await coupon.isValid(totalPurchaseAmount))) {
     let errorMessage = 'Coupon is not valid.'
-    console.log('not valid')
     if (!coupon.status === 'Active') {
       errorMessage = 'Coupon is inactive.'
-      console.log('coupons not ')
     } else if (!(await coupon.isValidPeriod())) {
       errorMessage = 'Coupon is not within the valid period.'
-      console.log('coupons notas vasd ')
     } else if (totalPurchaseAmount < coupon.minPurchaseAmount) {
       errorMessage = `Minimum purchase amount of ${coupon.minPurchaseAmount} is required to apply this coupon.`
-      console.log('coupons notas vas masofud ' + errorMessage)
     }
-    console.log('asdf')
     return res.status(400).json({ message: errorMessage })
   }
 
@@ -151,11 +144,27 @@ const removeCoupon = asyncHandler(async (req, res, next) => {
   // remove coupon
   res.status(200).json({ message: 'done', success: true })
 })
+const deleteCoupon = asyncHandler(async (req, res, next) => {
+  const id = req.params.id
+  console.log('asdfasfasfasfad')
+  if (!id) {
+    const error = new Error('id Required for deltetion')
+    error.statusCode = 400
+    return next(error)
+  }
+  const coupon = await Coupon.findByIdAndDelete(id)
+  if (coupon) {
+    res.status(200).json({
+      message: 'Coupon deleted successfully'
+    })
+  }
+})
 export {
   addCoupon,
   getAllCoupons,
   updateStatus,
   getCoupons,
   applyCoupon,
-  removeCoupon
+  removeCoupon,
+  deleteCoupon
 }

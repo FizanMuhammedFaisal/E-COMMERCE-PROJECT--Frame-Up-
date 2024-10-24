@@ -24,6 +24,7 @@ const itemsSchema = {
     required: false
   }
 }
+
 const orderSchema = new mongoose.Schema(
   {
     userId: {
@@ -59,7 +60,16 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['Pending', 'Paid', 'Shipped', 'Delivered', 'Canceled'],
+      enum: [
+        'Pending',
+        'Paid',
+        'Shipped',
+        'Delivered',
+        'Cancelled',
+        'Return Initialized',
+        'Return Accepted',
+        'Return Rejected'
+      ],
       default: 'Pending',
       required: true
     },
@@ -85,24 +95,22 @@ const orderSchema = new mongoose.Schema(
       default: 0
     },
 
-    // trackingNumber: {
-    //   type: String,
-    //   required: false
-    // },
-    // carrierName: {
-    //   type: String,
-    //   required: false
-    // },
-    // estimatedDelivery: {
-    //   type: Date,
-    //   required: false
-    // },
+    couponCode: {
+      type: String
+    },
+    couponAmount: {
+      type: Number,
+      default: 0
+    },
+
+    razorpayOrderId: {
+      type: String
+    },
+    transactionId: {
+      type: String
+    },
 
     createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    updatedAt: {
       type: Date,
       default: Date.now
     }

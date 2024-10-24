@@ -27,6 +27,7 @@ function LoginForm() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
       const idToken = await user.getIdToken()
+      console.log(idToken)
       const res = await api.post('/users/google/auth', { idToken })
       const data = {
         user: res.data._id,

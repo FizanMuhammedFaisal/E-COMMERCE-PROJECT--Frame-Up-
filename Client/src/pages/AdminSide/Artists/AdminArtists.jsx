@@ -14,6 +14,7 @@ import {
 } from '../../../redux/slices/Admin/AdminArtists/adminArtists'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import Spinner from '../../../components/common/Animations/Spinner'
 
 const AdminArtists = () => {
   const navigate = useNavigate()
@@ -155,16 +156,8 @@ const AdminArtists = () => {
       <div className='mt-4'>
         <ArtistsTable columns={columns} data={data} />
       </div>
-      <div className='text-center mt-4 "'>
-        {loading && (
-          <CircularProgress
-            thickness={7}
-            sx={{
-              color: 'currentColor'
-            }}
-            size={30}
-          />
-        )}
+      <div className='mt-10 justify-center flex'>
+        {loading && <Spinner size={1} />}
       </div>
 
       {hasMore && !loading && (

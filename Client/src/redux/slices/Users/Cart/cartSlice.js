@@ -7,7 +7,7 @@ const initialState = {
   subtotal: 0,
   totalPrice: 0,
   updatedAt: '',
-  discount: 0,
+  totalDiscount: 0,
   status: 'active',
   loading: false,
   error: null
@@ -23,23 +23,20 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     setCart: (state, action) => {
-      const { userId, items, subtotal, totalPrice, discount, updatedAt } =
+      const { userId, items, subtotal, totalPrice, totalDiscount, updatedAt } =
         action.payload
       state.userId = userId
       state.items = items
       state.subtotal = subtotal
       state.totalPrice = totalPrice
-      state.discount = discount
+      state.totalDiscount = totalDiscount
       state.updatedAt = updatedAt
     },
 
     addToCartd: (state, action) => {
-      const items = action.payload
-      console.log(items)
-      state.items = items
-      // Recalculate subtotal and total price
-      state.subtotal = calculateSubtotal(state.items)
-      state.totalPrice = calculateTotalPrice(state.items, state.discount)
+      const cart = action.payload
+      state.items = cart.items
+      state.subtotal = cart.subtotal
     },
     // Decrement the quantity of a product in the cart
     updateQuantity: (state, action) => {
@@ -57,34 +54,22 @@ const cartSlice = createSlice({
         //   state.items = state.items.filter(item => item.productId !== productId)
         // }
       }
-      // Recalculate subtotal and total price
-      state.subtotal = calculateSubtotal(state.items)
-      state.totalPrice = calculateTotalPrice(state.items, state.discount)
     },
     applyCoupon: (state, action) => {
       const { discount } = action.payload
-      state.discount += discount
-      state.subtotal = calculateSubtotal(state.items)
-      state.totalPrice = calculateTotalPrice(state.items, state.discount)
+      state.totalDiscount += discount
     },
 
     removeItemFromCart: (state, action) => {
       const { productId } = action.payload
       state.items = state.items.filter(item => item.productId !== productId)
-      // Recalculate subtotal and total price
-      state.subtotal = calculateSubtotal(state.items)
-      state.totalPrice = calculateTotalPrice(state.items, state.discount)
     },
     clearCart: state => {
       state.items = []
       state.subtotal = 0
       state.totalPrice = 0
-      state.discount = 0
+      state.totalDiscount = 0
     }
-    // applyDiscount: (state, action) => {
-    //   // state.discount = action.payload
-    //   // state.totalPrice = calculateTotalPrice(state.items, state.discount)
-    // }
   },
   extraReducers: builder => {
     builder
@@ -97,7 +82,7 @@ const cartSlice = createSlice({
         state.items = action.payload.items
         state.subtotal = action.payload.subtotal
         state.totalPrice = action.payload.totalPrice
-        state.discount = action.payload.discount
+        state.totalDiscount = action.payload.discount
         state.updatedAt = action.payload.updatedAt
       })
       .addCase(fetchCart.rejected, (state, action) => {
@@ -106,15 +91,6 @@ const cartSlice = createSlice({
       })
   }
 })
-
-const calculateSubtotal = items => {
-  return items.reduce((total, item) => total + item.price * item.quantity, 0)
-}
-
-const calculateTotalPrice = (items, discount) => {
-  const subtotal = calculateSubtotal(items)
-  return subtotal - discount
-}
 
 export const {
   setCart,

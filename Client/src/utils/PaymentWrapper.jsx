@@ -10,6 +10,7 @@ const PaymentWrapper = () => {
     return <Navigate to='/login' replace />
   }
 
+  console.log(paymentValidated)
   if (isAuthenticated && status === 'Blocked') {
     return <Navigate to='/blocked' replace />
   }

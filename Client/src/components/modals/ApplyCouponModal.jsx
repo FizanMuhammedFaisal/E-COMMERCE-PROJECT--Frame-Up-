@@ -12,7 +12,7 @@ import apiClient from '../../services/api/apiClient'
 import { useDispatch } from 'react-redux'
 import { applyCoupon } from '../../redux/slices/Users/Cart/cartSlice'
 
-const ApplyCouponMenu = ({ totalPurchaseAmount }) => {
+const ApplyCouponMenu = ({ totalPurchaseAmount, setAppliedCoupon }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [applied, setApplied] = useState({ code: null, discountAmount: null })
   const [loading, setLoading] = useState(false)
@@ -50,7 +50,7 @@ const ApplyCouponMenu = ({ totalPurchaseAmount }) => {
         })
         if (res.data.success) {
           dispatch(applyCoupon({ discount: -applied.discountAmount }))
-
+          setAppliedCoupon(null)
           setApplied({ code: null, discountAmount: null })
         }
       } else {
@@ -60,6 +60,7 @@ const ApplyCouponMenu = ({ totalPurchaseAmount }) => {
           })
           if (res.data.success) {
             dispatch(applyCoupon({ discount: -applied.discountAmount }))
+            setAppliedCoupon(null)
             setApplied({ code: null, discountAmount: null })
           }
         }
@@ -69,6 +70,7 @@ const ApplyCouponMenu = ({ totalPurchaseAmount }) => {
           totalPurchaseAmount
         })
         if (res.data.success) {
+          setAppliedCoupon(code)
           setApplied({ code: code, discountAmount: res.data.discountAmount })
           dispatch(applyCoupon({ discount: res.data.discountAmount }))
         }

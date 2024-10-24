@@ -232,7 +232,7 @@ export default function AddCouponForm() {
               onChange={handleChange}
               className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
-            <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' />
+            {/* <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' /> */}
           </div>
           <div className='pt-2 font-tertiary'>
             {errors && (
@@ -259,7 +259,7 @@ export default function AddCouponForm() {
               onChange={handleChange}
               className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
-            <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' />
+            {/* <CalendarIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-300' /> */}
           </div>
           <div className='pt-2 font-tertiary'>
             {errors && (

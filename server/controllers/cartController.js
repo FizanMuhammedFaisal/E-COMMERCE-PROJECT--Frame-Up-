@@ -1,49 +1,55 @@
 import asyncHandler from 'express-async-handler'
 import Cart from '../models/cartModel.js'
 import Product from '../models/productModel.js'
-
+import { getCartDetails } from '../utils/cartUtils.js'
 const addToCart = asyncHandler(async (req, res, next) => {
   const user = req.user
-  console.log(user._id)
-  const { productId, price, quantity } = req.body
+  const { productId, quantity } = req.body
 
-  // Validate input
-  if (!productId || !quantity || quantity < 1 || !price) {
+  if (!productId || !quantity || quantity < 1) {
     const error = new Error('Invalid product data')
     error.statusCode = 400
     return next(error)
   }
 
-  // Check if the product exists
-  const product = await Product.findById(productId)
-  if (!product) {
+  // cart fetch
+  let cart = await Cart.findOne({ userId: req.user.id })
+  if (!cart) {
+    cart = new Cart({
+      userId: req.user.id,
+      items: [],
+      subtotal: 0,
+      discount: 0,
+      totalPrice: 0
+    })
+  }
+
+  const productIds = cart.items.map(item => item.productId.toString())
+  productIds.push(productId)
+
+  //fetching all products needed
+  const products = await Product.find({ _id: { $in: productIds } })
+
+  const requestedProduct = products.find(
+    product => product._id.toString() === productId
+  )
+  if (!requestedProduct) {
     const error = new Error('Product not found')
     error.statusCode = 404
     return next(error)
   }
 
-  console.log(`Product stock: ${product.productStock}`)
-  console.log(`Requested quantity: ${quantity}`)
-
-  // Fetch the cart for the user
-  let cart = await Cart.findOne({ userId: req.user.id })
-  if (!cart) {
-    cart = new Cart({ userId: req.user.id, items: [] })
-  }
-
-  // Find the item in the cart
+  // check stock for the requested product
+  let totalQuantityInCart = quantity
   const existingItemIndex = cart.items.findIndex(
     item => item.productId.toString() === productId
   )
 
-  let totalQuantityInCart = quantity
   if (existingItemIndex > -1) {
-    // Add the quantity already in the cart to the requested quantity
     totalQuantityInCart += cart.items[existingItemIndex].quantity
   }
 
-  // Check if the combined quantity exceeds the stock
-  if (totalQuantityInCart > product.productStock) {
+  if (totalQuantityInCart > requestedProduct.productStock) {
     const error = new Error(
       'Not enough stock available for the total quantity requested'
     )
@@ -53,32 +59,39 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
   // Update the cart
   if (existingItemIndex > -1) {
-    // If the product is already in the cart, just update the quantity
     cart.items[existingItemIndex].quantity += quantity
   } else {
-    // If the product is not in the cart, add it
-    cart.items.push({ productId, price, quantity })
+    cart.items.push({ productId, quantity })
   }
+
+  // recalcuate the subtotal
+  cart.subtotal = cart.items.reduce((acc, item) => {
+    const product = products.find(
+      p => p._id.toString() === item.productId.toString()
+    )
+    return acc + item.quantity * product.productPrice
+  }, 0)
 
   // Save the cart
   await cart.save()
 
-  // Populate the product details
-  await cart.populate('items.productId', 'productName thumbnailImage')
-
-  const populatedItems = cart.items.map(item => ({
-    productId: item.productId._id,
+  await cart.populate(
+    'items.productId',
+    'productName productPrice thumbnailImage'
+  )
+  const data = cart.items.map((item, i) => ({
+    productPrice: item.productId.productPrice,
     productName: item.productId.productName,
     thumbnailImage: item.productId.thumbnailImage,
     quantity: item.quantity,
-    price: item.price
+    productId: item.productId._id
   }))
-
-  console.log(cart.items)
-
   return res.status(200).json({
     message: 'Product added to cart successfully',
-    items: populatedItems
+    cart: {
+      items: data,
+      subtotal: cart.subtotal
+    }
   })
 })
 
@@ -87,56 +100,19 @@ const addToCart = asyncHandler(async (req, res, next) => {
 const fetchCart = asyncHandler(async (req, res, next) => {
   const user = req.user
   if (!user) {
-    const error = new Error('invalid user')
+    const error = new Error('Invalid user')
     error.statusCode = 400
     return next(error)
   }
-  console.log(user)
-  const cart = await Cart.findOne({ userId: user._id })
-    .populate('items.productId', 'productName thumbnailImage')
-    .lean()
-
-  if (!cart) {
+  const cart = await getCartDetails(user._id)
+  console.log(cart)
+  if (!cart || cart.length === 0) {
     return res.status(404).json({ message: 'Cart not found' })
   }
 
-  let outofstock = false
-  const productIds = cart.items.map(item => item.productId._id)
-  const products = await Product.find({ _id: { $in: productIds } }).lean()
-
-  const updatedCart = cart.items.map(item => {
-    const product = products.find(p => p._id.equals(item.productId._id))
-
-    if (!product || product.productStock === 0) {
-      outofstock = true
-      return { ...item, quantity: 0 }
-    }
-
-    const updatedQuantity =
-      product.stock < item.quantity ? product.stock : item.quantity
-    return { ...item, quantity: updatedQuantity }
-  })
-
-  cart.items = updatedCart.map(item => ({
-    productId: item.productId._id,
-    productName: item.productId.productName,
-    thumbnailImage: item.productId.thumbnailImage,
-    quantity: item.quantity,
-    price: item.price
-  }))
-
   res.status(200).json({
-    cart: {
-      userId: cart.userId,
-      items: cart.items,
-      subtotal: cart.subtotal,
-      totalPrice: cart.totalPrice,
-      updatedAt: cart.updatedAt,
-      status: cart.status,
-      discount: cart.discount
-    },
-    success: true,
-    outofstock
+    cart: cart[0],
+    success: true
   })
 })
 
@@ -178,7 +154,6 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
 //@descp for updaiting the quantity of product
 const updateQuantity = asyncHandler(async (req, res, next) => {
   const { productId, quantityChange } = req.body
-  console.log(req.body)
 
   if (!productId || quantityChange === undefined) {
     const error = new Error('No valid fields')
@@ -187,9 +162,6 @@ const updateQuantity = asyncHandler(async (req, res, next) => {
   }
 
   const user = req.user
-  console.log(typeof quantityChange)
-  console.log(user)
-
   // if not cart
   const cart = await Cart.findOne({ userId: user._id })
   console.log(cart)

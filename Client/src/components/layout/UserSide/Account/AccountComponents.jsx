@@ -3,13 +3,15 @@ import { useState } from 'react'
 import apiClient from '../../../../services/api/apiClient'
 import { useEffect } from 'react'
 import { CircularProgress } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
+  AlertCircle,
+  Calendar,
   CheckCircleIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CreditCardIcon,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
   EyeIcon,
   EyeOffIcon,
   PencilIcon,
@@ -20,7 +22,8 @@ import {
 import AlertDialog from '../../../common/AlertDialog'
 
 import AddressModal from '../../../modals/AddressModal'
-import { IoCash } from 'react-icons/io5'
+import { uploadImagesToCloudinary } from '../../../../services/Cloudinary/UploadImages'
+import Spinner from '../../../common/Animations/Spinner'
 const EditProfile = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [userData, setUserData] = useState({})
@@ -86,10 +89,24 @@ const EditProfile = () => {
   })
   useEffect(() => {
     if (data?.userData) {
+      console.log(data)
       setUserData(data.userData)
       setEditedUser(data.userData)
     }
   }, [data])
+  const handleImageUpload = async e => {
+    const { id, value, files } = e.target
+    setloading(true)
+    const image = Array.from(files)
+    try {
+      //maybe incoperate this i one api for now wring anothe noe
+      const url = await uploadImagesToCloudinary(image)
+      const res = await apiClient.post('/api/users/upload-profile', { url })
+    } catch (error) {
+      console.error(error)
+    }
+    setloading(false)
+  }
   return (
     <div className='space-y-6'>
       <h2 className='text-2xl font-semibold text-gray-900'>Edit Profile</h2>
@@ -201,6 +218,31 @@ const EditProfile = () => {
               Personal details and application.
             </p>
           </div>
+          {userData.profile ? (
+            <div className='ml-5 m-6'>
+              <img
+                src={userData.profile}
+                className='w-20 rounded-full'
+                alt=''
+              />
+            </div>
+          ) : (
+            <div className='ml-5 m-4'>
+              <button
+                onClick={e => document.getElementById('profile').click()}
+                className='p-3 bg-customColorTertiary rounded-md flex-nowrap  w-32 hover:bg-customColorTertiaryLight text-white'
+              >
+                {loading ? <Spinner size={-1} speed={2} /> : 'Upload Profile'}
+              </button>
+              <input
+                type='file'
+                accept='image/jpeg, image/png,image/webp'
+                id='profile'
+                className='hidden'
+                onChange={handleImageUpload}
+              />
+            </div>
+          )}
           {isLoading ? (
             <div>Loading...</div>
           ) : (
@@ -246,8 +288,6 @@ const EditProfile = () => {
     </div>
   )
 }
-
-//
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
@@ -447,7 +487,6 @@ const ChangePassword = () => {
 export default ChangePassword
 //
 //
-///
 
 const AddressCard = ({ address, onEdit, onDelete }) => (
   <div className='bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden'>
@@ -614,231 +653,6 @@ function ManageAddress() {
 }
 //
 
-const OrderCard = ({ order }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
-
-  const formatDate = dateString => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const getStatusColor = status => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'processing':
-        return 'bg-blue-100 text-blue-800'
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800'
-      case 'delivered':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className='bg-white border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'
-    >
-      <div
-        className='p-4 cursor-pointer bg-gradient-to-r from-gray-50 to-white'
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className='flex justify-between items-center'>
-          <h3 className='text-lg font-semibold text-gray-900'>
-            Order #{order._id.slice(-6).toUpperCase()}
-          </h3>
-          <div className='flex items-center space-x-2'>
-            <span
-              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                order.orderStatus
-              )}`}
-            >
-              {order.orderStatus}
-            </span>
-            <span
-              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                order.paymentStatus
-              )}`}
-            >
-              {order.paymentStatus}
-            </span>
-          </div>
-        </div>
-        <div className='mt-2 flex justify-between items-center text-sm text-gray-600'>
-          <p>Placed on: {formatDate(order.createdAt)}</p>
-          <p className='font-medium text-gray-900'>
-            Total: ${order.totalAmount.toFixed(2)}
-          </p>
-        </div>
-        <div className='mt-2 flex justify-between items-center'>
-          <div className='flex items-center space-x-2'>
-            {order.paymentMethod === 'Cash on Delivery' ? (
-              <IoCash className='h-5 w-5 text-gray-400' />
-            ) : (
-              <CreditCardIcon className='h-5 w-5 text-gray-400' />
-            )}
-            <p className='text-sm text-gray-600'>{order.paymentMethod}</p>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className='text-customColorTertiary hover:text-customColorTertiaryLight flex items-center'
-          >
-            {isExpanded ? (
-              <>
-                <span className='mr-1'>Hide Details</span>
-                <ChevronUpIcon className='h-4 w-4' />
-              </>
-            ) : (
-              <>
-                <span className='mr-1'>View Details</span>
-                <ChevronDownIcon className='h-4 w-4' />
-              </>
-            )}
-          </motion.button>
-        </div>
-      </div>
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className='px-4 pb-4 border-t'
-          >
-            <div className='mt-4 space-y-4'>
-              <div>
-                <h4 className='font-medium text-gray-900'>Items</h4>
-                <ul className='mt-2 space-y-2'>
-                  {order.items.map((item, index) => (
-                    <li
-                      key={index}
-                      className='flex justify-between items-center text-sm'
-                    >
-                      <div className='flex items-center space-x-2'>
-                        {item.thumbnailImage &&
-                          item.thumbnailImage.length > 0 && (
-                            <img
-                              src={item.thumbnailImage[0]}
-                              alt={item.productName}
-                              className='w-10 h-10 object-cover rounded'
-                            />
-                          )}
-                        <span>
-                          {item.productName} x{item.quantity}
-                        </span>
-                      </div>
-                      <span>${item.price.toFixed(2)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className='bg-gray-50 p-4 rounded-lg'>
-                <h4 className='font-medium text-gray-900 mb-2'>
-                  Order Summary
-                </h4>
-                <div className='space-y-1 text-sm'>
-                  <div className='flex justify-between'>
-                    <span>Subtotal:</span>
-                    <span>${order.subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span>Shipping:</span>
-                    <span>${order.shippingCost.toFixed(2)}</span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span>Tax:</span>
-                    <span>${order.taxAmount.toFixed(2)}</span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span>Discount:</span>
-                    <span>-${order.discount.toFixed(2)}</span>
-                  </div>
-                  <div className='flex justify-between font-medium text-gray-900 pt-2 border-t border-gray-200 mt-2'>
-                    <span>Total:</span>
-                    <span>${order.totalAmount.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className='font-medium text-gray-900 mb-2'>
-                  Shipping Address
-                </h4>
-                <address className='text-sm not-italic bg-gray-50 p-3 rounded-lg'>
-                  <strong>{order.shippingAddress.name}</strong>
-                  <br />
-                  {order.shippingAddress.address}
-                  <br />
-                  {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
-                  {order.shippingAddress.postalCode}
-                  <br />
-                  <span className='text-gray-600'>Phone:</span>{' '}
-                  {order.shippingAddress.phoneNumber}
-                </address>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  )
-}
-
-const OrderHistory = () => {
-  const {
-    data: orders,
-    isLoading,
-    isError
-  } = useQuery({
-    queryKey: ['orders'],
-    queryFn: async () => {
-      const response = await apiClient.get('/api/order/')
-      console.log(response)
-      return response.data.orders
-    }
-  })
-
-  if (isLoading) {
-    return <div className='text-center py-8'>Loading your order history...</div>
-  }
-
-  if (isError) {
-    return (
-      <div className='text-center py-8 text-red-600'>
-        Error loading orders. Please try again later.
-      </div>
-    )
-  }
-
-  return (
-    <div className='space-y-6'>
-      <h2 className='text-2xl font-semibold text-gray-900'>Order History</h2>
-      {orders && orders.length > 0 ? (
-        <div className='space-y-4'>
-          {orders.map(order => (
-            <OrderCard key={order._id} order={order} />
-          ))}
-        </div>
-      ) : (
-        <div className='text-center py-8 text-gray-500'>
-          You haven't placed any orders yet.
-        </div>
-      )}
-    </div>
-  )
-}
-
 //
 const AccountSettings = () => {
   return (
@@ -886,10 +700,5 @@ const AccountSettings = () => {
     </div>
   )
 }
-export {
-  EditProfile,
-  ChangePassword,
-  ManageAddress,
-  OrderHistory,
-  AccountSettings
-}
+
+export { EditProfile, ChangePassword, ManageAddress, AccountSettings }

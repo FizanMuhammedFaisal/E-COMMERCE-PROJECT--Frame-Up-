@@ -47,6 +47,7 @@ const AdminCouponsPage = () => {
 
   const deleteCoupon = async () => {
     try {
+      console.log(currentCouponId)
       await apiClient.delete(`/api/coupons/${currentCouponId}`)
       toast.success('Coupon deleted successfully!')
       refetch()

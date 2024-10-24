@@ -174,6 +174,7 @@ function EditProductTab({
       [type]: prev[type].filter((_, idx) => idx !== image.id)
     }))
   }
+  console.log(product)
   return (
     <div className='bg-white dark:bg-customP2BackgroundD shadow-md rounded-lg overflow-hidden'>
       <div className='p-6'>
@@ -338,6 +339,7 @@ function EditProductTab({
               className='hidden'
               onChange={handleFileInput}
             />
+            {console.log(product.productImages)}
             <ImageCarousel
               imageIds={product.productImages}
               cloudinaryMode={true}

@@ -25,7 +25,9 @@ import { setSelectedAddressRedux } from '../../../redux/slices/Users/Address/add
 import { validatePayment } from '../../../redux/slices/Users/Checkout/checkoutSlice'
 
 function CheckoutPage() {
-  const { items, subtotal, totalPrice } = useSelector(state => state.cart)
+  const { items, subtotal, totalPrice, totalDiscount } = useSelector(
+    state => state.cart
+  )
   const navigate = useNavigate()
   const [addresses, setAddresses] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
@@ -125,7 +127,7 @@ function CheckoutPage() {
       severity: 'success'
     })
   }
-
+  console.log(items)
   return (
     <div className='min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-7xl mx-auto'>
@@ -159,9 +161,21 @@ function CheckoutPage() {
                             </p>
                           </div>
                         </div>
-                        <p className='text-sm font-medium text-gray-900'>
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </p>
+                        {item.discountPrice ? (
+                          <div>
+                            {' '}
+                            <p className='text-sm font-medium text-gray-900'>
+                              ${(item.discountPrice * item.quantity).toFixed(2)}
+                            </p>
+                            <p className='text-sm font-medium line-through text-gray-900'>
+                              ${(item.productPrice * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className='text-sm font-medium text-gray-900'>
+                            ${(item.productPrice * item.quantity).toFixed(2)}
+                          </p>
+                        )}
                         {item.quantity === 0 && (
                           <div>
                             <Badge
@@ -192,6 +206,10 @@ function CheckoutPage() {
                 <div className='flex justify-between text-sm font-medium text-gray-900'>
                   <p>Subtotal</p>
                   <p>${subtotal.toFixed(2)}</p>
+                </div>
+                <div className='flex justify-between text-sm font-medium text-gray-900'>
+                  <p>Total Discount</p>
+                  <p>-${totalDiscount.toFixed(2)}</p>
                 </div>
 
                 <div className='mt-2 flex justify-between text-base font-semibold text-gray-900'>
