@@ -24,16 +24,16 @@ const cartSchema = new Schema({
     required: true
   },
   items: [cartItemSchema],
-  subtotal: {
-    type: Number,
-    required: true,
-    default: 0.0
-  },
-  totalPrice: {
-    type: Number,
-    required: true,
-    default: 0.0
-  },
+  // subtotal: {
+  //   type: Number,
+  //   required: true,
+  //   default: 0.0
+  // },
+  // totalPrice: {
+  //   type: Number,
+  //   required: true,
+  //   default: 0.0
+  // },
   discount: {
     type: Number,
     default: 0.0

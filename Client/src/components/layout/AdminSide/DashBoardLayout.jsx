@@ -1,26 +1,27 @@
-// src/components/AdminLayout.jsx
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Sidebar from '../../modals/DashBoardSidebar'
 import { Outlet } from 'react-router-dom'
 import Breadcrumb from '../../common/Breadcrumb'
-const DashboardLayout = data => {
-  const [isCompact, setIsCompact] = useState(false)
-  const handleset = data => {
-    setIsCompact(data)
-  }
-  return (
-    <div className='dark:bg-customP2BackgroundD_darkest font-primary'>
-      <Sidebar setData={handleset} />
-      {/* Main content area */}
-      <div
-        className={`flex-1 p-6 transition-all duration-700 ease-in-out mt-16 ${
-          isCompact ? 'md:ml-24' : 'md:ml-80'
-        } `}
-      >
-        {/* This will render the matching child route */}
-        <Breadcrumb showHome={false} type='admin' />
 
-        <Outlet />
+const DashboardLayout = () => {
+  const [isCompact, setIsCompact] = useState(false)
+
+  const handleSidebarCompact = compact => {
+    setIsCompact(compact)
+  }
+
+  return (
+    <div className='flex h-screen bg-gray-100 dark:bg-customP2BackgroundD_darkest font-primary'>
+      <Sidebar setData={handleSidebarCompact} />
+      <div className='flex-1 flex flex-col overflow-hidden'>
+        <main className='flex-1 overflow-x-hidden overflow-y-auto'>
+          <div
+            className={`p-6 ${isCompact ? 'md:ml-20' : 'md:ml-72'} transition-all duration-300 ease-in-out`}
+          >
+            <Breadcrumb showHome={false} type='admin' />
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   )

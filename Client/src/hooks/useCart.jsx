@@ -65,8 +65,16 @@ const useCart = () => {
         productId,
         quantityChange
       })
-      const quantity = res.data.quantity
-      dispatch(updateQuantity({ productId, quantity }))
+      const {
+        quantity = 0,
+        subtotal = 0,
+        discount = 0,
+        totalPrice = 0
+      } = res.data.data
+
+      dispatch(
+        updateQuantity({ productId, quantity, subtotal, discount, totalPrice })
+      )
       return { success: true, cart: res.data.quantity }
     } catch (error) {
       setError('Failed to update cart quantity')

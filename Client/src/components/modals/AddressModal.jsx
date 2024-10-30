@@ -173,7 +173,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
               name='addressName'
               value={newAddress.addressName}
               onChange={handleInputChange}
-              className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+              className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               placeholder='e.g., Home, Work'
             />
             {errorMessages && (
@@ -195,7 +195,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
               name='name'
               value={newAddress.name}
               onChange={handleInputChange}
-              className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+              className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               placeholder='Name'
             />
             {errorMessages && (
@@ -217,7 +217,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
               name='phoneNumber'
               value={newAddress.phoneNumber}
               onChange={handleInputChange}
-              className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+              className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               placeholder='phoneNumber'
             />
             {errorMessages && (
@@ -239,7 +239,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
               name='address'
               value={newAddress.address}
               onChange={handleInputChange}
-              className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+              className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
             />
             {errorMessages && (
               <p className='text-red-500 hover:text-red-300'>
@@ -260,7 +260,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
               name='locality'
               value={newAddress.locality}
               onChange={handleInputChange}
-              className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+              className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
             />
             {errorMessages && (
               <p className='text-red-500 hover:text-red-300'>
@@ -282,7 +282,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
                 name='city'
                 value={newAddress.city}
                 onChange={handleInputChange}
-                className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+                className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               />
               {errorMessages && (
                 <p className='text-red-500 hover:text-red-300'>
@@ -303,7 +303,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
                 name='state'
                 value={newAddress.state}
                 onChange={handleInputChange}
-                className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+                className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
               />
               {errorMessages && (
                 <p className='text-red-500 hover:text-red-300'>
@@ -325,7 +325,7 @@ function AddressModal({ isOpen, onClose, onAddAddress, editData }) {
               name='postalCode'
               value={newAddress.postalCode}
               onChange={handleInputChange}
-              className='mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
+              className='block w-full px-3 py-2 border mt-2 border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
             />
             {errorMessages && (
               <p className='text-red-500 hover:text-red-300'>

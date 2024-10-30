@@ -25,7 +25,7 @@ import { setSelectedAddressRedux } from '../../../redux/slices/Users/Address/add
 import { validatePayment } from '../../../redux/slices/Users/Checkout/checkoutSlice'
 
 function CheckoutPage() {
-  const { items, subtotal, totalPrice, totalDiscount } = useSelector(
+  const { items, subtotal, totalPrice, discount } = useSelector(
     state => state.cart
   )
   const navigate = useNavigate()
@@ -209,7 +209,7 @@ function CheckoutPage() {
                 </div>
                 <div className='flex justify-between text-sm font-medium text-gray-900'>
                   <p>Total Discount</p>
-                  <p>-${totalDiscount.toFixed(2)}</p>
+                  <p>-${discount.toFixed(2)}</p>
                 </div>
 
                 <div className='mt-2 flex justify-between text-base font-semibold text-gray-900'>

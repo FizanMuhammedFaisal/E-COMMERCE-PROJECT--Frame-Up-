@@ -7,7 +7,8 @@ const initialState = {
   subtotal: 0,
   totalPrice: 0,
   updatedAt: '',
-  totalDiscount: 0,
+  discount: 0,
+  appliedCoupon: 0,
   status: 'active',
   loading: false,
   error: null
@@ -23,13 +24,13 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     setCart: (state, action) => {
-      const { userId, items, subtotal, totalPrice, totalDiscount, updatedAt } =
+      const { userId, items, subtotal, totalPrice, discount, updatedAt } =
         action.payload
       state.userId = userId
       state.items = items
       state.subtotal = subtotal
       state.totalPrice = totalPrice
-      state.totalDiscount = totalDiscount
+      state.discount = discount
       state.updatedAt = updatedAt
     },
 
@@ -40,24 +41,34 @@ const cartSlice = createSlice({
     },
     // Decrement the quantity of a product in the cart
     updateQuantity: (state, action) => {
-      const { productId, quantity = 0 } = action.payload
+      const {
+        productId,
+        quantity = 0,
+        subtotal,
+        discount,
+        totalPrice
+      } = action.payload
       console.log(productId, quantity)
       console.log(action.payload)
       const existingProduct = state.items.find(
         item => item.productId === productId
       )
+      console.log(existingProduct)
 
       if (existingProduct) {
         existingProduct.quantity = quantity
-        // Remove the product if quantity reaches zero
-        // if (existingProduct.quantity <= 0) {
-        //   state.items = state.items.filter(item => item.productId !== productId)
-        // }
+
+        if (existingProduct.quantity <= 0) {
+          state.items = state.items.filter(item => item.productId !== productId)
+        }
       }
+      state.discount = discount
+      state.subtotal = subtotal
+      state.totalPrice = totalPrice
     },
     applyCoupon: (state, action) => {
       const { discount } = action.payload
-      state.totalDiscount += discount
+      state.appliedCoupon += discount
     },
 
     removeItemFromCart: (state, action) => {
@@ -68,7 +79,7 @@ const cartSlice = createSlice({
       state.items = []
       state.subtotal = 0
       state.totalPrice = 0
-      state.totalDiscount = 0
+      state.discount = 0
     }
   },
   extraReducers: builder => {
@@ -82,7 +93,7 @@ const cartSlice = createSlice({
         state.items = action.payload.items
         state.subtotal = action.payload.subtotal
         state.totalPrice = action.payload.totalPrice
-        state.totalDiscount = action.payload.discount
+        state.discount = action.payload.discount
         state.updatedAt = action.payload.updatedAt
       })
       .addCase(fetchCart.rejected, (state, action) => {

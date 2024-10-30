@@ -154,7 +154,6 @@ const removeFromCart = asyncHandler(async (req, res, next) => {
 //@descp for updaiting the quantity of product
 const updateQuantity = asyncHandler(async (req, res, next) => {
   const { productId, quantityChange } = req.body
-
   if (!productId || quantityChange === undefined) {
     const error = new Error('No valid fields')
     error.statusCode = 400
@@ -164,8 +163,6 @@ const updateQuantity = asyncHandler(async (req, res, next) => {
   const user = req.user
   // if not cart
   const cart = await Cart.findOne({ userId: user._id })
-  console.log(cart)
-
   if (!cart) {
     const error = new Error('User has no cart')
     error.statusCode = 400
@@ -207,11 +204,17 @@ const updateQuantity = asyncHandler(async (req, res, next) => {
 
   cart.items[productIndex].quantity = newQuantity
   await cart.save()
-
+  const cartDetails = await getCartDetails(user._id)
+  console.log(cartDetails)
   const quantity = cart.items[productIndex].quantity
   res.status(200).json({
-    message: 'Product quantity updated successfully',
-    quantity: quantity
+    success: true,
+    data: {
+      quantity: quantity,
+      subtotal: cartDetails[0].subtotal,
+      discount: cartDetails[0].discount,
+      totalPrice: cartDetails[0].totalPrice
+    }
   })
 })
 //

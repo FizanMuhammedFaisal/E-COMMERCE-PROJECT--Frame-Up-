@@ -1,14 +1,9 @@
 import Cart from '../models/cartModel.js'
 import Coupon from '../models/couponModel.js'
 const getCartDetails = async userId => {
-  console.log(userId)
   const cart = await Cart.aggregate([
-    {
-      $match: { userId: userId }
-    },
-    {
-      $unwind: '$items'
-    },
+    { $match: { userId: userId } },
+    { $unwind: '$items' },
     {
       $lookup: {
         from: 'products',
@@ -27,24 +22,16 @@ const getCartDetails = async userId => {
                         { $eq: ['$targetId', '$$productId'] },
                         { $in: ['$targetId', '$$categoryIds'] }
                       ]
-                    }
-                  }
-                },
-                {
-                  $match: {
-                    $and: [
-                      { status: 'Active' },
+                    },
+                    status: 'Active',
+                    $or: [
                       {
-                        $or: [
-                          {
-                            startDate: { $lte: new Date() },
-                            endDate: { $gte: new Date() }
-                          },
-                          {
-                            startDate: { $exists: false },
-                            endDate: { $exists: false }
-                          }
-                        ]
+                        startDate: { $lte: new Date() },
+                        endDate: { $gte: new Date() }
+                      },
+                      {
+                        startDate: { $exists: false },
+                        endDate: { $exists: false }
                       }
                     ]
                   }
@@ -53,60 +40,31 @@ const getCartDetails = async userId => {
               as: 'discounts'
             }
           },
-          {
-            $unwind: {
-              path: '$discounts',
-              preserveNullAndEmptyArrays: true
-            }
-          },
-          {
-            $addFields: {
-              productDiscount: {
-                $cond: [
-                  { $eq: ['$discounts.targetId', '$_id'] },
-                  {
-                    $cond: [
-                      { $eq: ['$discounts.discountType', 'percentage'] },
-                      {
-                        $multiply: [
-                          '$productPrice',
-                          { $divide: ['$discounts.discountValue', 100] }
-                        ]
-                      },
-                      '$discounts.discountValue'
-                    ]
-                  },
-                  0
-                ]
-              },
-              categoryDiscount: {
-                $cond: [
-                  { $in: ['$discounts.targetId', '$productCategories'] },
-                  {
-                    $cond: [
-                      { $eq: ['$discounts.discountType', 'percentage'] },
-                      {
-                        $multiply: [
-                          '$productPrice',
-                          { $divide: ['$discounts.discountValue', 100] }
-                        ]
-                      },
-                      '$discounts.discountValue'
-                    ]
-                  },
-                  0
-                ]
-              }
-            }
-          },
+
           {
             $addFields: {
               maxDiscount: {
-                $cond: [
-                  { $gt: ['$productDiscount', '$categoryDiscount'] },
-                  '$productDiscount',
-                  '$categoryDiscount'
-                ]
+                $reduce: {
+                  input: '$discounts',
+                  initialValue: 0,
+                  in: {
+                    $max: [
+                      '$$value',
+                      {
+                        $cond: {
+                          if: { $eq: ['$$this.discountType', 'percentage'] },
+                          then: {
+                            $multiply: [
+                              '$productPrice',
+                              { $divide: ['$$this.discountValue', 100] }
+                            ]
+                          },
+                          else: '$$this.discountValue'
+                        }
+                      }
+                    ]
+                  }
+                }
               }
             }
           },
@@ -125,9 +83,7 @@ const getCartDetails = async userId => {
         as: 'productDetails'
       }
     },
-    {
-      $unwind: '$productDetails'
-    },
+    { $unwind: '$productDetails' },
     {
       $group: {
         _id: '$_id',
@@ -148,7 +104,7 @@ const getCartDetails = async userId => {
             $multiply: ['$items.quantity', '$productDetails.productPrice']
           }
         },
-        totalDiscount: {
+        discount: {
           $sum: {
             $multiply: [
               '$items.quantity',
@@ -172,6 +128,7 @@ const getCartDetails = async userId => {
 
   return cart
 }
+
 const applyCoupon = async (code, totalPurchaseAmount) => {
   try {
     const coupon = await Coupon.findOne({ code })

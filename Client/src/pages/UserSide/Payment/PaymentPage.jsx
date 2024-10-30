@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import { useMutation } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import apiClient from '../../../services/api/apiClient'
-import { clearCart, setCart } from '../../../redux/slices/Users/Cart/cartSlice'
+import { clearCart } from '../../../redux/slices/Users/Cart/cartSlice'
 import { handleRazorPaySuccess } from '../../../services/RazorPay/razorPay'
 import { Alert, Snackbar } from '@mui/material'
 import PaymentError from '../../../components/layout/UserSide/Payment/PaymentError'
 import RetryPayment from '../../../components/layout/UserSide/Payment/RetryPayment'
 import NewOrderPayment from '../../../components/layout/UserSide/Payment/NewOrderPayment'
-import {
-  clearValidations,
-  validateOrder
-} from '../../../redux/slices/Users/Checkout/checkoutSlice'
+import { validateOrder } from '../../../redux/slices/Users/Checkout/checkoutSlice'
 
 export default function PaymentPage() {
   const navigate = useNavigate()

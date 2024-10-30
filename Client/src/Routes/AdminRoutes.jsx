@@ -1,10 +1,10 @@
-import React from 'react'
 import AdminLoginPage from '../pages/AdminSide/AdminLoginPage'
 import AdminLayout from '../components/layout/AdminSide/AdminLayout'
 import AuthenticationRouter from '../utils/AuthenticationRouter'
 import ProtectedRoute from '../utils/ProtectedRoute'
 import { ThemeProvider } from '../context/ThemeContext'
-import AdminDashboard from '../pages/AdminSide/AdminDashboard'
+import AdminDashboard from '../pages/AdminSide/Dashboard/AdminDashboard'
+import BestSellers from '../pages/AdminSide/Dashboard/BestSellers'
 import AdminProducts from '../pages/AdminSide/Products/AdminProducts'
 import AdminUsers from '../pages/AdminSide/Users/AdminUsers'
 import DashboardLayout from '../components/layout/AdminSide/DashBoardLayout'
@@ -21,6 +21,7 @@ import AdminDiscountPage from '../pages/AdminSide/Discounts/AdminDiscountPage'
 import AddDiscountPage from '../pages/AdminSide/Discounts/AddDiscountPage'
 import AdminCouponsPage from '../pages/AdminSide/Coupons/AdminCouponsPage'
 import AddCouponsPage from '../pages/AdminSide/Coupons/AddCouponsPage'
+
 const AdminRoutes = [
   {
     path: '/admin/login',
@@ -45,6 +46,10 @@ const AdminRoutes = [
           {
             path: '',
             element: <AdminDashboard />
+          },
+          {
+            path: 'best-sellers',
+            element: <BestSellers />
           },
           {
             path: 'products',

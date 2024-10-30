@@ -2,10 +2,18 @@ import express from 'express'
 const router = express.Router()
 import {
   getSalesReport,
-  getDownloadURL
+  getDownloadURL,
+  getSalesTrendsData,
+  getTopProductsData,
+  getSalesDistributionData,
+  getOrderStatusData
 } from '../controllers/salesReportController.js'
 import { protect } from '../middlewares/authMiddleware.js'
 import admin from '../middlewares/authAdminMiddleware.js'
 router.get('/', protect, admin, getSalesReport)
 router.get('/download-report', protect, admin, getDownloadURL)
+router.get('/sales-trends-data', getSalesTrendsData)
+router.get('/top-products-data', getTopProductsData)
+router.get('/sales-distribution-data', getSalesDistributionData)
+router.get('/order-status-data', getOrderStatusData)
 export default router

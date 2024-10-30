@@ -30,15 +30,16 @@ export default function NewOrderPayment({
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     paymentMethods[0].id
   )
-  const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const [appliedCouponCode, setAppliedCouponCode] = useState(null)
   const address = useSelector(state => state.address.selectedAddressId)
-  const { items, subtotal, totalPrice, totalDiscount } = useSelector(
+  const { items, subtotal, totalPrice, discount, appliedCoupon } = useSelector(
     state => state.cart
   )
-
+  console.log(appliedCoupon)
+  const totalDiscount = Math.floor(discount + appliedCoupon)
   const shipping = 50
   const tax = Math.floor(subtotal * 0.02)
-  const TotalAfterTax = Math.floor(totalPrice + shipping + tax)
+  const TotalAfterTax = Math.floor(totalPrice + shipping + tax - appliedCoupon)
 
   const orderData = {
     items,
@@ -46,7 +47,7 @@ export default function NewOrderPayment({
     paymentMethod: selectedPaymentMethod,
     shippingCost: shipping,
     taxAmount: tax,
-    appliedCoupon
+    appliedCouponCode
   }
 
   const { mutate: placeOrder } = useMutation({
@@ -171,7 +172,7 @@ export default function NewOrderPayment({
         <div className='w-full'>
           <ApplyCouponModal
             totalPurchaseAmount={totalPrice}
-            setAppliedCoupon={setAppliedCoupon}
+            setAppliedCouponCode={setAppliedCouponCode}
           />
         </div>
         <div>

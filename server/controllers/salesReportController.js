@@ -10,9 +10,9 @@ import {
 } from 'date-fns'
 import asyncHandler from 'express-async-handler'
 import Order from '../models/orderModel.js'
-
 import ExcelJS from 'exceljs'
 import PDFDocument from 'pdfkit'
+
 const generateSalesReport = async (startDate, endDate, period) => {
   let start, end
 
@@ -312,4 +312,191 @@ function drawTableBackground(doc, y, width, height, color) {
   doc.rect(50, y, width, height).fill(color).fillColor('#000')
 }
 
-export { getSalesReport, getDownloadURL }
+const getSalesTrendsData = asyncHandler(async (req, res) => {
+  const year = new Date().getFullYear()
+
+  const currentMonth = new Date().getMonth() + 1
+  const monthlySalesData = await Order.aggregate([
+    {
+      $addFields: {
+        year: { $year: '$createdAt' },
+        month: { $month: '$createdAt' }
+      }
+    },
+    {
+      $match: {
+        year: year,
+        month: { $lte: currentMonth }
+      }
+    },
+    {
+      $group: {
+        _id: { month: '$month' },
+        totalSales: { $sum: '$subtotal' }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        month: '$_id.month',
+        totalSales: 1
+      }
+    },
+    {
+      $sort: { month: 1 }
+    }
+  ])
+
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ]
+  ///data upto curent month
+  const monthlySales = Array.from({ length: currentMonth }, (_, i) => {
+    const month = i + 1
+    const salesData = monthlySalesData.find(data => data.month === month)
+    return {
+      month: monthNames[i],
+      sales: salesData ? salesData.totalSales : 0
+    }
+  })
+  if (monthlySales) {
+    return res.json({ succees: true, data: monthlySales })
+  }
+  const error = new Error('Cannot get Data.')
+  error.statusCode = 400
+  return next(error)
+})
+//
+const getTopProductsData = asyncHandler(async (req, res, next) => {
+  const productData = await Order.aggregate([
+    { $unwind: '$items' },
+    {
+      $group: {
+        _id: '$items.productId',
+        name: { $first: '$items.productName' },
+        totalSold: { $sum: '$items.quantity' },
+        sales: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
+      }
+    },
+    {
+      $sort: { sales: -1 }
+    },
+    {
+      $limit: 5
+    },
+
+    {
+      $project: {
+        // totalSold: 1,
+        name: 1,
+        sales: 1,
+        _id: 0
+      }
+    }
+  ])
+  if (productData) {
+    return res.status(200).json({ success: true, data: productData })
+  }
+  const error = new Error('Cannot get Data.')
+  error.statusCode = 400
+  return next(error)
+})
+//
+//
+const getSalesDistributionData = asyncHandler(async (req, res, next) => {
+  const categoryData = await Order.aggregate([
+    { $unwind: '$items' },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'items.productId',
+        foreignField: '_id',
+        as: 'productDetails'
+      }
+    },
+    { $unwind: '$productDetails' },
+    { $unwind: '$productDetails.productCategories' },
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'productDetails.productCategories',
+        foreignField: '_id',
+        as: 'categoryDetails'
+      }
+    },
+    { $unwind: '$categoryDetails' },
+    {
+      $group: {
+        _id: '$categoryDetails._id',
+        name: { $first: '$categoryDetails.name' },
+        totalSold: { $sum: '$items.quantity' },
+        value: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
+      }
+    },
+    {
+      $sort: { sales: -1 }
+    },
+    {
+      $limit: 5
+    },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        value: 1
+      }
+    }
+  ])
+
+  if (categoryData) {
+    return res.status(200).json({ success: true, data: categoryData })
+  }
+  const error = new Error('Cannot get Data.')
+  error.statusCode = 400
+  return next(error)
+})
+//
+//
+const getOrderStatusData = asyncHandler(async (req, res) => {
+  const orderData = await Order.aggregate([
+    {
+      $group: {
+        _id: '$orderStatus', // Group by `orderStatus` to get the unique status values
+        count: { $sum: 1 } // Count each occurrence of each status
+      }
+    },
+    {
+      $project: {
+        _id: 0, // Exclude `_id` in the final output
+        name: '$_id', // Rename `_id` to `name` for readability
+        value: '$count' // Assign `count` to `value` for clarity in the output
+      }
+    }
+  ])
+
+  if (orderData) {
+    return res.status(200).json({ success: true, data: orderData })
+  }
+  const error = new Error('Cannot get Data.')
+  error.statusCode = 400
+  return next(error)
+})
+export {
+  getSalesReport,
+  getDownloadURL,
+  getSalesTrendsData,
+  getTopProductsData,
+  getSalesDistributionData,
+  getOrderStatusData
+}

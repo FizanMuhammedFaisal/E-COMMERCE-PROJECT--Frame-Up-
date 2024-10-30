@@ -6,6 +6,7 @@ import EmptyCartAnimation from '../../../common/Animations/EmptyCartAnimation'
 import { Badge, Button, Card, CardContent } from '@mui/material'
 import { ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { MinusIcon, PlusIcon } from 'lucide-react'
+import { useDebounceFn } from '../../../../hooks/UseDebounceFn'
 const MotionButton = motion.create(Button)
 function NotLoggedIn() {
   const navigate = useNavigate()
@@ -104,7 +105,9 @@ const EmptyCart = () => {
   )
 }
 const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
-  console.log(items)
+  const debouncedUpdateQuantity = useDebounceFn((productId, quantity) => {
+    handleUpdateQuantity(productId, quantity)
+  }, 500) // 500ms debounce
   return (
     <div className='space-y-4'>
       {items.map(item => (
@@ -153,7 +156,9 @@ const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
                       size='small'
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => handleUpdateQuantity(item.productId, -1)}
+                      onClick={() =>
+                        debouncedUpdateQuantity(item.productId, -1)
+                      }
                       disabled={item.quantity === 1}
                     >
                       <MinusIcon className='h-4 w-4' />
@@ -166,7 +171,7 @@ const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
                       size='small'
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => handleUpdateQuantity(item.productId, 1)}
+                      onClick={() => debouncedUpdateQuantity(item.productId, 1)}
                     >
                       <PlusIcon className='h-4 w-4' />
                     </MotionButton>

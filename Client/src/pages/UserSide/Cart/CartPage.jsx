@@ -21,7 +21,7 @@ export default function CartPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { isAuthenticated } = useSelector(state => state.auth)
-  const { items, subtotal, totalPrice, totalDiscount } = useSelector(
+  const { items, subtotal, totalPrice, discount } = useSelector(
     state => state.cart
   )
   const { updateCartQuantity, removeFromCart } = useCart()
@@ -160,7 +160,7 @@ export default function CartPage() {
                 </div>
                 <div className='flex justify-between text-lg font-medium text-gray-900 mb-4'>
                   <p>Total Discount</p>
-                  <p>${totalDiscount.toFixed(2)}</p>
+                  <p>${discount.toFixed(2)}</p>
                 </div>
                 <div className='flex justify-between text-xl font-bold text-gray-900 mb-6'>
                   <p>Total</p>

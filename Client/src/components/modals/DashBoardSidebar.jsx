@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { sideBarData } from '../../constants/sideBarData'
-import { FaCaretSquareRight } from 'react-icons/fa'
-import { motion } from 'framer-motion'
-import AdminNavbar from '../layout/AdminSide/AdminNavbar'
 
+import { motion, AnimatePresence } from 'framer-motion'
+import AdminNavbar from '../layout/AdminSide/AdminNavbar'
+import { Tooltip } from 'react-tooltip'
+import { FiSidebar } from 'react-icons/fi'
 const Sidebar = ({ setData }) => {
   const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
@@ -34,27 +35,37 @@ const Sidebar = ({ setData }) => {
   }, [])
 
   const baseClasses = 'transition-all duration-500 ease-in-out'
-  const sidebarClasses = `fixed top-0 left-0 h-full bg-customP2BackgroundW dark:bg-customP2BackgroundD p-2 z-40 md:translate-x-0 md:block ${baseClasses}`
+  const sidebarClasses = `fixed top-0 left-0 h-full bg-customP2BackgroundW dark:bg-customP2BackgroundD z-40 md:translate-x-0 md:block ${baseClasses}`
   const listItemClasses = `mb-4 items-center font-primary text-lg font-bold duration-300 ${baseClasses}`
 
   return (
     <div className='relative'>
       <aside
         className={`${sidebarClasses} ${
-          isCompact ? 'w-24' : 'w-72'
+          isCompact ? 'w-28' : 'w-72'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <nav>
+        <div className='sticky top-0 z-10 bg-customP2BackgroundW dark:bg-customP2BackgroundD p-4 border-b border-customP2ForeGroundw_200 dark:border-customP2ForegroundD_600'>
           <motion.div
-            className='text-center mt-2 overflow-hidden'
+            className='text-center overflow-hidden'
             animate={{ x: isCompact ? '100%' : 0 }}
             transition={{ type: 'spring', stiffness: 1000, damping: 45 }}
           >
-            <motion.span className='font-bold justify-center font-secondary whitespace-nowrap dark:text-slate-50 text-3xl'>
-              {isCompact ? '' : 'Frame Up'}
-            </motion.span>
+            {isCompact ? (
+              <img
+                src='/path-to-your-logo.png'
+                alt='Frame Up'
+                className='w-10 h-10 mx-auto'
+              />
+            ) : (
+              <motion.span className='font-bold justify-center font-secondary whitespace-nowrap dark:text-slate-50 text-3xl'>
+                Frame Up
+              </motion.span>
+            )}
           </motion.div>
-          <ul className='pt-11'>
+        </div>
+        <nav className='overflow-y-auto h-[calc(100vh-80px)]'>
+          <ul className='pt-4 px-2'>
             {sideBarData.map((item, index) => (
               <li
                 key={index}
@@ -72,14 +83,13 @@ const Sidebar = ({ setData }) => {
                 <Link
                   to={item.link}
                   className={`flex items-center justify-center w-full h-full p-4`}
+                  data-tooltip-id={`tooltip-${index}`}
+                  data-tooltip-content={item.title}
                 >
                   {isCompact ? (
                     <div className='flex flex-col justify-center items-center'>
                       <span className='material-icons-outlined text-lg'>
                         {item.icon}
-                      </span>
-                      <span className='text-xs text-center pt-1'>
-                        {item.title}
                       </span>
                     </div>
                   ) : (
@@ -89,28 +99,26 @@ const Sidebar = ({ setData }) => {
                     </div>
                   )}
                 </Link>
+                {isCompact && (
+                  <Tooltip
+                    id={`tooltip-${index}`}
+                    place='right'
+                    className='!gray-800 !text-white dark:!bg-white  dark:!text-gray-800 !px-3 !py-2 !rounded-md !shadow-lg !text-sm !font-medium !z-50'
+                    arrowClassName='!border-white dark:!border-gray-800'
+                  />
+                )}
               </li>
             ))}
           </ul>
+          <div className='p-4 border-t border-gray-200 dark:border-gray-700'>
+            <button
+              onClick={toggleSidebarMode}
+              className='w-full py-2 px-4 rounded-lg bg-customP2BackgroundW_500 dark:bg-customP2ForegroundD_600 text-gray-800 dark:text-gray-200 hover:text-customP2BackgroundD_100 hover:bg-customP2BackgroundW_700 hover:dark:bg-customP2ForegroundD_200 hover:dark:text-customP2ForegroundD_100  focus:outline-none'
+            >
+              {isCompact ? <FiSidebar className='ml-3' size={20} /> : 'Shrink'}
+            </button>
+          </div>
         </nav>
-        <button
-          onClick={toggleSidebarMode}
-          className={`absolute bottom-6 left-6 bg-gray-300 dark:bg-gray-700 rounded-full ${
-            isCompact
-              ? 'text-gray-800 dark:text-gray-200'
-              : 'text-gray-600 dark:text-gray-400'
-          } focus:outline-none`}
-        >
-          {isCompact ? (
-            <span>
-              <FaCaretSquareRight className='mx-3 my-3' />
-            </span>
-          ) : (
-            <div className='flex flex-1'>
-              <span className='mx-3 my-3 w-full'>Shrink</span>
-            </div>
-          )}
-        </button>
       </aside>
 
       <AdminNavbar

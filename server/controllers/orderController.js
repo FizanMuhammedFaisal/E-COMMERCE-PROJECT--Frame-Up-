@@ -78,11 +78,11 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
     })
   }
 
-  wallet.balance += order.subtotal
+  wallet.balance += order.totalAmount
 
   wallet.transactions.push({
     type: 'refund',
-    amount: order.subtotal,
+    amount: order.totalAmount,
     description: `Refund for order ${order._id}`
   })
 
@@ -204,7 +204,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     paymentMethod,
     shippingCost,
     taxAmount,
-    appliedCoupon
+    appliedCouponCode
   } = req.body.data
   const user = req.user
 
@@ -252,11 +252,13 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     const subtotal = cartDetails[0].subtotal
     const totalDiscount = cartDetails[0].totalDiscount
     const totalPrice = cartDetails[0].totalPrice
-    let totalAmount = totalPrice
+    let totalAmount = Math.floor(totalPrice + taxAmount + shippingCost)
     let couponDiscount = 0
-    if (appliedCoupon) {
+    console.log(appliedCouponCode)
+    if (appliedCouponCode) {
       try {
-        couponDiscount = await applyCoupon(appliedCoupon, totalPrice)
+        couponDiscount = await applyCoupon(appliedCouponCode, totalPrice)
+        console.log(couponDiscount)
         totalAmount -= couponDiscount
       } catch (err) {
         const error = new Error(err)
@@ -278,7 +280,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       orderStatus: 'Pending',
       paymentStatus: 'Pending',
       subtotal,
-      couponCode: appliedCoupon,
+      couponCode: appliedCouponCode,
       couponAmount: couponDiscount
     })
 
@@ -312,9 +314,9 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     paymentMethod,
     shippingCost,
     taxAmount,
-    appliedCoupon
+    appliedCouponCode
   } = req.body.data
-
+  console.log(req.body.data)
   const user = req.user
 
   let updatedCart = []
@@ -362,15 +364,18 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       error.statusCode = 400
       return next(error)
     }
-    console.log(cartDetails)
+
     const subtotal = cartDetails[0].subtotal
     const totalDiscount = cartDetails[0].totalDiscount
     const totalPrice = cartDetails[0].totalPrice
     let totalAmount = Math.floor(totalPrice + taxAmount + shippingCost)
+    console.log(totalAmount)
     let couponDiscount = 0
-    if (appliedCoupon) {
+    console.log(appliedCouponCode)
+    if (appliedCouponCode) {
       try {
-        couponDiscount = await applyCoupon(appliedCoupon, totalPrice)
+        couponDiscount = await applyCoupon(appliedCouponCode, totalPrice)
+        console.log(couponDiscount)
         totalAmount -= couponDiscount
       } catch (err) {
         const error = new Error(err)
@@ -378,7 +383,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
         return next(error)
       }
     }
-
+    console.log(totalAmount)
     const newOrder = await Order.create({
       userId: user._id,
       items: updatedCart,
@@ -391,7 +396,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       orderStatus: 'Pending',
       paymentStatus: 'Pending',
       subtotal,
-      couponCode: appliedCoupon,
+      couponCode: appliedCouponCode,
       couponAmount: couponDiscount
     })
 
@@ -406,8 +411,6 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
           receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
           payment_capture: 1
         }
-        console.log(options)
-        console.log(razorpay)
         const razorpayOrder = await razorpay.orders.create(options)
         console.log(newOrder)
         const orderData = {
@@ -510,7 +513,7 @@ const verifyPayment = async (req, res) => {
 //
 const retryPayment = asyncHandler(async (req, res, next) => {
   const { orderId } = req.body
-
+  console.log(orderId)
   try {
     const order = await Order.findById(orderId)
 

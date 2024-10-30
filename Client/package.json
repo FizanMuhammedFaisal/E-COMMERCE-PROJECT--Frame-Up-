@@ -39,7 +39,9 @@
     "react-router-dom": "^6.26.1",
     "react-select": "^5.8.1",
     "react-toastify": "^10.0.5",
+    "react-tooltip": "^5.28.0",
     "react-zoom-pan-pinch": "^3.6.1",
+    "recharts": "^2.13.0",
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
