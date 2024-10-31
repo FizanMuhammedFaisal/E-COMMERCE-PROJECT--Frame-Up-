@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import api from '../../../../services/api/api'
 import apiClient from '../../../../services/api/apiClient'
 import Spinner from '../../../common/Animations/Spinner'
+import Pagination from '../../../common/Pagination'
 
 function ProductBrowseLayout({
   sortedProducts,
@@ -19,25 +20,6 @@ function ProductBrowseLayout({
 }) {
   const [viewMode, setViewMode] = useState('grid')
 
-  const renderPaginationButtons = () => {
-    const buttons = []
-    for (let i = 1; i <= totalPages; i++) {
-      buttons.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`mx-1 px-4 py-2 rounded-md transition-colors duration-200 ${
-            currentPage === i
-              ? 'bg-customColorTertiary text-white'
-              : 'bg-white text-custombg-customColorTertiary border border-custombg-customColorTertiary hover:bg-customColorTertiary/15'
-          }`}
-        >
-          {i}
-        </button>
-      )
-    }
-    return buttons
-  }
   const handleAddToWishlist = async productId => {
     try {
       const res = await apiClient.post('/api/wishlist/add', { productId })
@@ -126,7 +108,11 @@ function ProductBrowseLayout({
             )}
           </div>
           <div className='flex justify-center mt-8'>
-            {renderPaginationButtons()}
+            <Pagination
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              totalPages={totalPages}
+            />
           </div>
         </div>
       )}

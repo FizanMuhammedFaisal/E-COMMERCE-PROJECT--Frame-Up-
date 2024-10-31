@@ -45,18 +45,14 @@ const Sidebar = ({ setData }) => {
           isCompact ? 'w-28' : 'w-72'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className='sticky top-0 z-10 bg-customP2BackgroundW dark:bg-customP2BackgroundD p-4 border-b border-customP2ForeGroundw_200 dark:border-customP2ForegroundD_600'>
+        <div className='sticky top-0 z-10 bg-customP2BackgroundW dark:bg-customP2BackgroundD p-4  border-customP2ForeGroundw_200 dark:border-customP2ForegroundD_600'>
           <motion.div
             className='text-center overflow-hidden'
             animate={{ x: isCompact ? '100%' : 0 }}
             transition={{ type: 'spring', stiffness: 1000, damping: 45 }}
           >
             {isCompact ? (
-              <img
-                src='/path-to-your-logo.png'
-                alt='Frame Up'
-                className='w-10 h-10 mx-auto'
-              />
+              ''
             ) : (
               <motion.span className='font-bold justify-center font-secondary whitespace-nowrap dark:text-slate-50 text-3xl'>
                 Frame Up
@@ -64,6 +60,7 @@ const Sidebar = ({ setData }) => {
             )}
           </motion.div>
         </div>
+
         <nav className='overflow-y-auto h-[calc(100vh-80px)]'>
           <ul className='pt-4 px-2'>
             {sideBarData.map((item, index) => (
@@ -82,13 +79,13 @@ const Sidebar = ({ setData }) => {
               >
                 <Link
                   to={item.link}
-                  className={`flex items-center justify-center w-full h-full p-4`}
+                  className={`flex items-center justify-center w-full h-full p-4 ${isCompact ? 'scale-110' : ''}`}
                   data-tooltip-id={`tooltip-${index}`}
                   data-tooltip-content={item.title}
                 >
                   {isCompact ? (
-                    <div className='flex flex-col justify-center items-center'>
-                      <span className='material-icons-outlined text-lg'>
+                    <div className='flex flex-col justify-center items-center '>
+                      <span className='material-icons-outlined text-xl'>
                         {item.icon}
                       </span>
                     </div>
@@ -99,11 +96,12 @@ const Sidebar = ({ setData }) => {
                     </div>
                   )}
                 </Link>
+
                 {isCompact && (
                   <Tooltip
                     id={`tooltip-${index}`}
                     place='right'
-                    className='!gray-800 !text-white dark:!bg-white  dark:!text-gray-800 !px-3 !py-2 !rounded-md !shadow-lg !text-sm !font-medium !z-50'
+                    className='!bg-black/80 !text-white dark:!bg-white/80 backdrop-blur-sm  dark:!text-gray-800 !px-3 !py-2 !rounded-md !shadow-lg !text-sm !font-medium !z-50'
                     arrowClassName='!border-white dark:!border-gray-800'
                   />
                 )}
@@ -112,11 +110,23 @@ const Sidebar = ({ setData }) => {
           </ul>
           <div className='p-4 border-t border-gray-200 dark:border-gray-700'>
             <button
+              data-tooltip-id={`tooltip-${'sidebar'}`}
+              data-tooltip-content={'Expand'}
               onClick={toggleSidebarMode}
-              className='w-full py-2 px-4 rounded-lg bg-customP2BackgroundW_500 dark:bg-customP2ForegroundD_600 text-gray-800 dark:text-gray-200 hover:text-customP2BackgroundD_100 hover:bg-customP2BackgroundW_700 hover:dark:bg-customP2ForegroundD_200 hover:dark:text-customP2ForegroundD_100  focus:outline-none'
+              className='w-full py-2  rounded-lg px-4 bg-customP2BackgroundW_500 dark:bg-customP2ForegroundD_600 text-gray-800 dark:text-gray-200 hover:text-customP2BackgroundD_100 hover:bg-customP2BackgroundW_700 hover:dark:bg-customP2ForegroundD_200 hover:dark:text-customP2ForegroundD_100  focus:outline-none'
             >
               {isCompact ? <FiSidebar className='ml-3' size={20} /> : 'Shrink'}
             </button>
+            {isCompact ? (
+              <Tooltip
+                id={`tooltip-${'sidebar'}`}
+                place='right'
+                className='!bg-black/80 !text-white dark:!bg-white/80 backdrop-blur-sm  dark:!text-gray-800 !px-3 !py-2 !rounded-md !shadow-lg !text-sm !font-medium !z-50'
+                arrowClassName='!border-white dark:!border-gray-800'
+              />
+            ) : (
+              ''
+            )}
           </div>
         </nav>
       </aside>

@@ -492,11 +492,84 @@ const getOrderStatusData = asyncHandler(async (req, res) => {
   error.statusCode = 400
   return next(error)
 })
+//
+//
+const getOverview = asyncHandler(async (req, res) => {
+  try {
+    const currentDate = new Date()
+    const startOfCurrentMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    )
+    const startOfPreviousMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1
+    )
+
+    const result = await Order.aggregate([
+      { $match: { createdAt: { $gte: startOfPreviousMonth } } },
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          totalRevenue: { $sum: '$totalAmount' },
+          totalOrders: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          month: '$_id',
+          totalRevenue: 1,
+          totalOrders: 1,
+          avgOrderValue: {
+            $cond: {
+              if: { $eq: ['$totalOrders', 0] },
+              then: 0,
+              else: { $divide: ['$totalRevenue', '$totalOrders'] }
+            }
+          }
+        }
+      },
+      { $sort: { month: -1 } }
+    ])
+
+    const [currentMonthData, previousMonthData] = result
+
+    const metrics = {
+      totalRevenue: currentMonthData?.totalRevenue || 0,
+      totalOrders: currentMonthData?.totalOrders || 0,
+      avgOrderValue: currentMonthData?.avgOrderValue || 0,
+      totalRevenueGrowth: previousMonthData
+        ? ((currentMonthData.totalRevenue - previousMonthData.totalRevenue) /
+            previousMonthData.totalRevenue) *
+          100
+        : 100,
+      totalOrdersGrowth: previousMonthData
+        ? ((currentMonthData.totalOrders - previousMonthData.totalOrders) /
+            previousMonthData.totalOrders) *
+          100
+        : 100,
+      avgOrderValueGrowth: previousMonthData
+        ? ((currentMonthData.avgOrderValue - previousMonthData.avgOrderValue) /
+            previousMonthData.avgOrderValue) *
+          100
+        : 100
+    }
+
+    res.json({ data: metrics, success: true })
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error)
+    res.status(500).json({ message: 'Server Error' })
+  }
+})
+
 export {
   getSalesReport,
   getDownloadURL,
   getSalesTrendsData,
   getTopProductsData,
   getSalesDistributionData,
-  getOrderStatusData
+  getOrderStatusData,
+  getOverview
 }

@@ -16,10 +16,12 @@ const DashboardLayout = () => {
       <div className='flex-1 flex flex-col overflow-hidden'>
         <main className='flex-1 overflow-x-hidden overflow-y-auto'>
           <div
-            className={`p-6 ${isCompact ? 'md:ml-20' : 'md:ml-72'} transition-all duration-300 ease-in-out`}
+            className={`p-6 ${isCompact ? 'md:ml-28' : 'md:ml-72'} transition-all duration-300 ease-in-out`}
           >
-            <Breadcrumb showHome={false} type='admin' />
-            <Outlet />
+            <div className='mt-14'>
+              <Breadcrumb showHome={false} type='admin' />
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>

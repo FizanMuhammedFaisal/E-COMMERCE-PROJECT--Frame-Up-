@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Table,
   TableBody,
@@ -21,7 +20,7 @@ const ReusableTable = ({ columns, data }) => {
             {columns.map((column, index) => (
               <TableCell
                 key={index}
-                className='dark:text-slate-50 dark:bg-customP2BackgroundD_100 '
+                className='dark:text-slate-50 bg-customP2BackgroundW_600 dark:bg-customP2BackgroundD '
               >
                 {column.label}
               </TableCell>

@@ -257,7 +257,11 @@ const AdminAddProducts = () => {
   return (
     <div className='max-w-5xl mx-auto p-1 font-primary  dark:text-slate-50'>
       {/* Heading */}
-      <h1 className='text-4xl font-bold mb-8 text-center '>Add New Product</h1>
+      <div className='flex flex-col sm:flex-row justify-center items-center my-5 mb-6'>
+        <h1 className='text-4xl font-bold mb-8 text-center '>
+          Add New Product
+        </h1>
+      </div>
       <Form
         handleSubmit={handleSubmit}
         formData={formData}

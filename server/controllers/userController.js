@@ -633,8 +633,6 @@ const uploadProfile = asyncHandler(async (req, res, next) => {
     return next(error)
   }
   const image = url[0]
-  console.log(image)
-  console.log(userId)
   const user = await User.findOneAndUpdate({ _id: userId }, { profile: image })
   if (user) {
     res.status(200).json({ message: 'user image uploaded' })

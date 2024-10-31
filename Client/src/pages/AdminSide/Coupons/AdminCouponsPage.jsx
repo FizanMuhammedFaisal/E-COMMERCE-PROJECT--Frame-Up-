@@ -172,9 +172,9 @@ const AdminCouponsPage = () => {
   }
 
   return (
-    <div className='p-6 bg-gray-50 dark:bg-customP2BackgroundD_darkest mt-10 min-h-screen'>
-      <div className='mb-6 flex justify-between items-center'>
-        <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+    <div className='p-6 bg-gray-50 dark:bg-customP2BackgroundD_darkest  min-h-screen'>
+      <div className='flex flex-col sm:flex-row justify-between items-center my-5 mb-6'>
+        <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
           Coupons Management
         </h1>
         <motion.button

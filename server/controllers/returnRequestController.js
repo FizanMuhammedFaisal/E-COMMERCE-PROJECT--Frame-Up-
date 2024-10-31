@@ -2,6 +2,8 @@ import asyncHandler from 'express-async-handler'
 import Return from '../models/returnModel.js'
 import Order from '../models/orderModel.js'
 import Wallet from '../models/walletModel.js'
+import Product from '../models/productModel.js'
+
 const createReturnRequest = asyncHandler(async (req, res, next) => {
   const { orderId, reason } = req.body
   if (!orderId || !reason) {
@@ -87,21 +89,63 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
         description: `Refund for order ${order._id}`
       })
       order.orderStatus = 'Return Accepted'
-
+      //updating stock
+      const productIds = order.items.map(item => {
+        return item.productId
+      })
+      const product = await Product.updateMany(
+        { _id: { $in: productIds } },
+        { $inc: { productStock: +1 } }
+      )
       await wallet.save()
     } else if (newStatus === 'Reject') {
       order.orderStatus = 'Return Rejected'
     }
 
-    await returnRequest.save()
+    const newReturnRequest = await returnRequest.save()
+    console.log(newReturnRequest)
     await order.save()
 
-    res.status(200).json({ message: `Return request ${newStatus}` })
+    res.status(200).json({
+      message: `Return request ${newStatus}`,
+      newStatus: newReturnRequest.status
+    })
   } catch (error) {
     res
       .status(500)
       .json({ message: 'Error processing the request', error: error.message })
   }
 })
+//
+const getReturnRequests = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1
+  const limit = parseInt(req.query.limit) || 10
 
-export { createReturnRequest, updateReturnRequest }
+  const skip = (page - 1) * limit
+
+  try {
+    const requests = await Return.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ requestedAt: -1 })
+
+    const totalOrders = await Return.countDocuments()
+    const totalPages = Math.ceil(totalOrders / limit)
+    let hasMore = true
+    if (page > totalPages) {
+      hasMore = false
+    }
+    res.status(200).json({
+      requests,
+      currentPage: page,
+      totalPages,
+      totalOrders,
+      hasMore
+    })
+  } catch {
+    const error = new Error('Cannot get Data.')
+    error.statusCode = 400
+    return next(error)
+  }
+})
+export { createReturnRequest, updateReturnRequest, getReturnRequests }

@@ -80,7 +80,7 @@ function OrderStatus({ COLORS }) {
                       color
                     }}
                   >
-                    {`Sales: $${payload[0].value.toFixed(2)}`}
+                    {`Value: ${payload[0].value}`}
                   </p>
                 </div>
               )

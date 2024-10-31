@@ -74,9 +74,11 @@ export default function SalesFilter({
   return (
     <div className='space-y-6'>
       <div className='flex flex-wrap items-center justify-between gap-4'>
-        <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
-          Sales Report
-        </h2>
+        <div className='flex flex-col sm:flex-row justify-between items-center my-5 mb-6'>
+          <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
+            Sales Report
+          </h1>
+        </div>
         <div className='flex items-center space-x-2'>
           <button
             onClick={handleRefresh}

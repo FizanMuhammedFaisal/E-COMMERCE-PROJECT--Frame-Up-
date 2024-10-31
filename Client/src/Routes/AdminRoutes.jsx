@@ -4,7 +4,6 @@ import AuthenticationRouter from '../utils/AuthenticationRouter'
 import ProtectedRoute from '../utils/ProtectedRoute'
 import { ThemeProvider } from '../context/ThemeContext'
 import AdminDashboard from '../pages/AdminSide/Dashboard/AdminDashboard'
-import BestSellers from '../pages/AdminSide/Dashboard/BestSellers'
 import AdminProducts from '../pages/AdminSide/Products/AdminProducts'
 import AdminUsers from '../pages/AdminSide/Users/AdminUsers'
 import DashboardLayout from '../components/layout/AdminSide/DashBoardLayout'
@@ -21,6 +20,7 @@ import AdminDiscountPage from '../pages/AdminSide/Discounts/AdminDiscountPage'
 import AddDiscountPage from '../pages/AdminSide/Discounts/AddDiscountPage'
 import AdminCouponsPage from '../pages/AdminSide/Coupons/AdminCouponsPage'
 import AddCouponsPage from '../pages/AdminSide/Coupons/AddCouponsPage'
+import ReturnRequestPage from '../pages/AdminSide/Orders/ReturnRequestPage'
 
 const AdminRoutes = [
   {
@@ -47,10 +47,7 @@ const AdminRoutes = [
             path: '',
             element: <AdminDashboard />
           },
-          {
-            path: 'best-sellers',
-            element: <BestSellers />
-          },
+
           {
             path: 'products',
             element: <AdminProducts />
@@ -76,6 +73,10 @@ const AdminRoutes = [
             element: <AdminOrders />
           },
 
+          {
+            path: 'orders/return-requests',
+            element: <ReturnRequestPage />
+          },
           {
             path: 'orders/:orderId',
             element: <OrdersEditPage />

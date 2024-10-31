@@ -1,47 +1,49 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Package,
   Calendar,
   CreditCard,
   Truck,
   AlertCircle,
-  ChevronLeft,
   ArrowLeft
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { validateCoupon } from '../../../../utils/validation/FormValidation'
 import {
   validateChekout,
   validatePayment
 } from '../../../../redux/slices/Users/Checkout/checkoutSlice'
 import apiClient from '../../../../services/api/apiClient'
 import OrderModal from '../../../modals/OrderModal'
-import AlertDialog from '../../../common/AlertDialog'
-import { Transition } from '@headlessui/react'
-import { Dialog } from '@mui/material'
+import Pagination from '../../../common/Pagination'
 
 export default function OrderHistory() {
   const [orderPage, setOrderPage] = useState(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(null)
   const navigate = useNavigate()
   const dispatch = useDispatch()
-
+  const fetchData = async () => {
+    const res = await apiClient.get(`/api/order/?page=${page}`)
+    setTotalPages(res.data.totalPages)
+    return res.data.orders
+  }
   const {
     data: orders,
     isLoading,
     isError,
     refetch
   } = useQuery({
-    queryKey: ['orders'],
-    queryFn: async () => {
-      const response = await apiClient.get('/api/order/')
-      console.log(response)
-      return response.data.orders
-    }
+    queryKey: ['orders', { page }],
+    queryFn: fetchData
   })
-
+  const handlePageChange = newPage => {
+    if (newPage > 0) {
+      setPage(newPage)
+    }
+  }
   const onRetryPayment = orderId => {
     dispatch(validateChekout())
     dispatch(validatePayment())
@@ -98,6 +100,11 @@ export default function OrderHistory() {
           )}
         </>
       )}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 }
@@ -228,16 +235,6 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
     'Return Accepted',
     'Return Rejected'
   ]
-
-  const formatDate = dateString => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
 
   const getStatusColor = status => {
     switch (status.toLowerCase()) {

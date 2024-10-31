@@ -14,9 +14,7 @@ const ProductBrowsePage = () => {
   const [page, setPage] = useState(1)
   const [totalpages, setTotalpages] = useState('')
   const [availableCategories, setAvailableCategories] = useState([])
-  // State to control when to include categories
   const [includeCategories, setIncludeCategories] = useState(true)
-  // Store the filters in state
   const [searchData, setSearchData] = useState(null)
   const [filters, setFilters] = useState({
     searchQuery: '',
@@ -27,7 +25,6 @@ const ProductBrowsePage = () => {
   })
   const limit = 6
 
-  // Function to fetch products with the provided filters, page, and sort order
   const fetchProducts = async ({
     page,
     sortBy,
@@ -66,7 +63,6 @@ const ProductBrowsePage = () => {
     keepPreviousData: true
   })
 
-  // Update the products when new data arrives
   useEffect(() => {
     if (data && data.products) {
       setProducts(data.products)
@@ -76,16 +72,13 @@ const ProductBrowsePage = () => {
     }
   }, [data])
 
-  // Handle filter change and update the filters state
   const handleFiltersChange = newFilters => {
-    // Update the URL with filters
-
     setFilters(newFilters)
   }
   const onSearch = searchData => {
     setSearchData(searchData)
   }
-  // Pagination handler
+
   const handlePageChange = newPage => {
     if (newPage > 0) {
       setPage(newPage)

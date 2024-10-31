@@ -137,22 +137,22 @@ const AdminArtists = () => {
 
   return (
     <div className='p-4 dark:bg-customP2BackgroundD_darkest  dark:text-slate-50'>
-      <div className='flex flex-col sm:flex-row justify-between items-center mb-4'>
-        <h1 className='text-4xl font-bold mb-2 sm:mb-0 '>Artist Management</h1>
-      </div>
-      <div className='flex justify-end'>
-        <motion.button
-          onClick={() => {
-            navigate('/dashboard/artists/add-artists')
-          }}
-          whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.1 }}
-          className='flex items-center px-4 py-2  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
-        >
-          Add New Artist
-        </motion.button>
-      </div>
+      <div className='flex flex-col sm:flex-row justify-between items-center my-5 mb-6'>
+        <h1 className='text-4xl font-bold mb-4 sm:mb-0 '>Artist Management</h1>
 
+        <div className='flex justify-end'>
+          <motion.button
+            onClick={() => {
+              navigate('/dashboard/artists/add-artists')
+            }}
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.1 }}
+            className='flex items-center px-4 py-2  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
+          >
+            Add New Artist
+          </motion.button>
+        </div>
+      </div>
       <div className='mt-4'>
         <ArtistsTable columns={columns} data={data} />
       </div>

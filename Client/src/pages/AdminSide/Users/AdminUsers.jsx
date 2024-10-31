@@ -125,7 +125,9 @@ const AdminUsers = () => {
 
   return (
     <div className='p-4 dark:bg-customP2BackgroundD_darkest  dark:text-slate-50'>
-      <h1 className='text-2xl font-semibold mb-4'>User Management</h1>
+      <div className='flex justify-start my-5'>
+        <h1 className='text-4xl font-bold mb-2 sm:mb-0'>User Management</h1>
+      </div>
       <UsersTable columns={columns} data={data} />
       <div className='flex justify-center mt-8'>
         {loading && <Spinner size={1} />}

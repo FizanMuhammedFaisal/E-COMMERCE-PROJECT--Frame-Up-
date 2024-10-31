@@ -11,6 +11,7 @@ import UsersTable from '../../../components/common/ReusableTable'
 import { FaEdit } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../../../components/common/Animations/Spinner'
+import { ListCheck } from 'lucide-react'
 const OrderStatusBadge = ({ status }) => {
   const statusColors = {
     pending:
@@ -49,7 +50,7 @@ const AdminOrders = () => {
 
   const fetchOrders = async ({ pageParam = page }) => {
     const response = await apiClient.get(
-      `/api/order?page=${pageParam}&limit=20`
+      `/api/order/all/orders/admin?page=${pageParam}&limit=20`
     )
     console.log(response)
     return response.data
@@ -146,54 +147,75 @@ const AdminOrders = () => {
     ],
     []
   )
-
+  const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered']
   const ordersData = useMemo(() => {
     if (!orders) return []
-    return orders.map((order, index) => ({
-      number: <p className='ms-5'>{index + 1}</p>,
-      orderNo: order._id.slice(-6).toUpperCase(),
-      customerName: order.shippingAddress.name || 'No name available',
-      totalPrice: `$${order.totalAmount.toFixed(2)}`,
-      orderDate: new Date(order.createdAt).toLocaleDateString(),
-      status: <OrderStatusBadge status={order.orderStatus} />,
-      action: (
-        <select
-          value={order.orderStatus}
-          onChange={e => handleStatusChange(order._id, e.target.value, index)}
-          className='w-full sm:w-auto px-2 py-1 text-sm border rounded-md bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400'
-        >
-          <option value='Pending'>Pending</option>
-          <option value='Processing'>Processing</option>
-          <option value='Shipped'>Shipped</option>
-          <option value='Delivered'>Delivered</option>
-        </select>
-      ),
-      details: (
-        <button
-          onClick={() => handleOrderEdit(order._id)}
-          className=' text-white p-4 duration-300 hover:duration-300 rounded-full hover:bg-gray-200 hover:dark:bg-customP2BackgroundD_300'
-        >
-          <FaEdit className='sm:text-xl md:text-2xl dark:text-white text-black' />
-        </button>
-      )
-    }))
+
+    return orders.map((order, index) => {
+      const currentStatusIndex = statusOptions.indexOf(order.orderStatus)
+
+      return {
+        number: <p className='ms-5'>{index + 1}</p>,
+        orderNo: order._id.slice(-6).toUpperCase(),
+        customerName: order.shippingAddress.name || 'No name available',
+        totalPrice: `$${order.totalAmount.toFixed(2)}`,
+        orderDate: new Date(order.createdAt).toLocaleDateString(),
+        status: <OrderStatusBadge status={order.orderStatus} />,
+        action: (
+          <select
+            value={order.orderStatus}
+            onChange={e => handleStatusChange(order._id, e.target.value, index)}
+            className='w-full sm:w-auto px-2 py-1 text-sm border rounded-md bg-white dark:bg-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400'
+          >
+            <option value={order.orderStatus} disabled>
+              {order.orderStatus}
+            </option>
+
+            {statusOptions.slice(currentStatusIndex + 1).map(status => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        ),
+        details: (
+          <button
+            onClick={() => handleOrderEdit(order._id)}
+            className='text-white p-4 duration-300 hover:duration-300 rounded-full hover:bg-gray-200 hover:dark:bg-customP2BackgroundD_300'
+          >
+            <FaEdit className='sm:text-xl md:text-2xl dark:text-white text-black' />
+          </button>
+        )
+      }
+    })
   }, [orders, handleStatusChange])
 
   return (
-    <div className='p-6  dark:bg-customP2BackgroundD_darkest mt-10 min-h-screen'>
-      <div className='mb-6 flex justify-between items-center'>
-        <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+    <div className='p-6  dark:bg-customP2BackgroundD_darkest min-h-screen'>
+      <div className='flex flex-col sm:flex-row justify-between items-center my-5 mb-6'>
+        <h1 className='text-4xl font-bold text-gray-900 dark:text-white'>
           Order Management
         </h1>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={refetch}
-          className='flex items-center px-4 py-2 bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white rounded-md shadow '
-        >
-          <ArrowPathIcon className='h-5 w-5 mr-2' />
-          Refresh
-        </motion.button>
+        <div className='flex gap-6 flex-nowrap'>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/dashboard/orders/return-requests')}
+            className='flex items-center flex-nowrap px-3 py-2 bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white rounded-md shadow min-w-[120px]'
+          >
+            <ListCheck className='h-5 w-5 mr-2' />
+            View return Requests
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={refetch}
+            className='flex items-center px-3 py-2 bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500 text-white rounded-md shadow min-w-[120px]'
+          >
+            <ArrowPathIcon className='h-5 w-5 mr-2' />
+            Refresh
+          </motion.button>
+        </div>
       </div>
       <UsersTable columns={columns} data={ordersData} />
       <div className='mt-4 flex justify-center items-center'>

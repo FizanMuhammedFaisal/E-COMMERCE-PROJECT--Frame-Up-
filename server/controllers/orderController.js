@@ -142,6 +142,43 @@ const getOrders = asyncHandler(async (req, res) => {
     return next(error)
   }
 })
+const getUserOrders = asyncHandler(async (req, res) => {
+  const userId = req.user._id
+  if (!userId) {
+    const error = new Error('No User')
+    error.statusCode = 400
+    return next(error)
+  }
+  const page = parseInt(req.query.page) || 1
+  const limit = parseInt(req.query.limit) || 10
+
+  const skip = (page - 1) * limit
+
+  try {
+    const orders = await Order.find({ userId: userId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+
+    const totalOrders = await Order.countDocuments()
+    const totalPages = Math.ceil(totalOrders / limit)
+    let hasMore = true
+    if (page > totalPages) {
+      hasMore = false
+    }
+    res.status(200).json({
+      orders,
+      currentPage: page,
+      totalPages,
+      totalOrders,
+      hasMore
+    })
+  } catch (err) {
+    const error = new Error('error fetching orders')
+    error.statusCode = 400
+    return next(error)
+  }
+})
 //
 //
 const updateOrderStatus = asyncHandler(async (req, res, next) => {
@@ -151,14 +188,17 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
   }
   try {
     const order = await Order.findById(orderId)
+    console.log(order)
     if (
       order.paymentMethod === 'Cash on Delivery' &&
       newStatus === 'Delivered'
     ) {
+      console.log('makinf payment')
       order.paymentStatus = 'Paid'
       order.orderStatus = newStatus
     } else {
       order.orderStatus = newStatus
+      console.log('upating it')
     }
     const updatedOrder = await order.save()
     if (!updatedOrder) {
@@ -166,12 +206,13 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
       error.statusCode = 404
       return next(error)
     }
-
+    console.log(updatedOrder)
     res.status(200).json({
       message: 'Order status updated successfully',
       order: updatedOrder
     })
   } catch (er) {
+    console.log(er)
     const error = new Error('failed to update user status')
     error.statusCode = 500
     return next(error)
@@ -582,5 +623,6 @@ export {
   createRazorpayOrder,
   verifyPayment,
   retryPayment,
-  cancelOrderAdmin
+  cancelOrderAdmin,
+  getUserOrders
 }
