@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
   const renderPaginationButtons = () => {
     const buttons = []
-    const maxButtons = 3
+    const maxButtons = 4
     const halfMaxButtons = Math.floor(maxButtons / 2)
 
     let startPage = Math.max(1, currentPage - halfMaxButtons)

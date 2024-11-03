@@ -39,7 +39,6 @@ function ProductListFilter({
       zZ_aA: searchParams.get('zZ_aA') === 'true'
     }
     const search = searchParams.get('searchQuery') || ''
-    console.log(search)
     setFilters(initialFilters)
     setSearchData(search)
     setUrlLoaded(true)
@@ -56,7 +55,7 @@ function ProductListFilter({
       return setUrlLoaded(true)
     }
     const newParams = new URLSearchParams(searchParams)
-    console.log(searchData)
+
     onFiltersChange(debouncedFilter)
     onSearch(debouncedSearchData)
 

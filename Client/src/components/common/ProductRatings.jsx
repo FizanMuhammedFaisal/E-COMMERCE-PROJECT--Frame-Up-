@@ -68,7 +68,7 @@ const ReviewCard = ({ review = {} }) => {
 
 const ProductRatings = () => {
   return (
-    <div className='max-w-full mx-20 p-8 bg-white shadow-md rounded-lg'>
+    <div className='max-w-full  p-8 bg-white shadow-md rounded-lg'>
       <h2 className='text-2xl font-semibold mb-6'>Recent Reviews</h2>
       {reviews.map((review, index) => (
         <ReviewCard key={index} review={review} />

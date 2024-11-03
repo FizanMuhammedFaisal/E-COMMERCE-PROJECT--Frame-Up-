@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import MovingBanner from '../../components/common/Animations/MovingBanner'
 import {
   MovingProductsSection,
@@ -10,8 +10,13 @@ import {
 import Sample from '../../components/common/Animations/Sample'
 import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
-
+import ChatButton from '../../components/common/Animations/ChatButton'
+import ChatComponent from '../../components/layout/UserSide/Products/ChatComponent'
 function HomePage() {
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen)
+  }
   const navigate = useNavigate()
 
   // const handleLogout = () => {
@@ -135,6 +140,24 @@ function HomePage() {
         </section>
         <section>
           <AnimatedCarousalSection />
+        </section>
+        <section>
+          <ChatButton toggleChat={toggleChat} />
+          <AnimatePresence>
+            {isChatOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                transition={{ duration: 0.5 }}
+                className='fixed bottom-4 right-4 z-50'
+              >
+                <div className='relative'>
+                  <ChatComponent toggleChat={toggleChat} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
         {/* Call to Action */}
         <section className='py-16 bg-primary text-primary-foreground'>

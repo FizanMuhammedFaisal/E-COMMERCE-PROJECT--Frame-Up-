@@ -64,7 +64,7 @@ const UserRoutes = [
         element: <ProductBrowsePage />
       },
       {
-        path: 'products/:productId',
+        path: 'all/:productId',
         element: <ProductDetailPage />
       },
       {

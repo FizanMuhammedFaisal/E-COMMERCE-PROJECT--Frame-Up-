@@ -22,7 +22,8 @@ import {
   updatePassword,
   deleteAddress,
   updateAddress,
-  uploadProfile
+  uploadProfile,
+  logoutUser
 } from '../controllers/userController.js'
 import verifyResetToken from '../middlewares/authResetTokenMiddleware.js'
 router.post('/checkUser', checkUser)
@@ -36,6 +37,7 @@ router.post('/reset-password', resetPassword)
 router.post('/send-otp', verifySignUpToken, sendOTP)
 router.post('/verify-otp', verifySignUpToken, verifyOTP)
 router.get('/access', refreshTokenMiddleware, makeAccess)
+router.get('/logout', protect, logoutUser)
 //
 router.post('/add-address', protect, addAddress)
 router.get('/get-address', protect, getAddress)

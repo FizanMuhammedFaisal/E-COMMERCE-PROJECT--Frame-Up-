@@ -11,13 +11,11 @@ const ResultCategory = React.memo(({ category }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const handleCategorySelect = (event, category) => {
     event.preventDefault()
-    console.log('asf')
     console.log(category)
     const newSearchParams = new URLSearchParams(searchParams)
-    const qname = category.type
+    const qname = category.type + 's'
     const q = category.name
     if (q) {
-      console.log('asdf')
       newSearchParams.set(qname, q)
       setSearchParams(newSearchParams)
     }
@@ -25,7 +23,7 @@ const ResultCategory = React.memo(({ category }) => {
   return (
     <li>
       <div
-        onClick={() => handleCategorySelect(category)}
+        onClick={e => handleCategorySelect(e, category)}
         className='flex items-center text-sm text-gray-600 hover:text-customColorTertiarypop transition duration-150 ease-in-out'
       >
         <span>{category.name}</span>
@@ -117,8 +115,11 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
     const newSearchParams = new URLSearchParams(searchParams)
     const q = query.trim()
     if (q) {
-      console.log('asdf')
       newSearchParams.set('searchQuery', q)
+      navigate({
+        pathname: '/all',
+        search: `?${newSearchParams.toString()}`
+      })
       setSearchParams(newSearchParams)
     }
   }
@@ -238,10 +239,17 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
               </div>
               {query && !loading && (
                 <div className='p-4 border-t border-gray-200 bg-gray-50'>
-                  {/* newSearchParams.set('searchQuery', q)
-                   setSearchParams(newSearchParams) */}
                   <p
-                    onClick={handleSearchSubmit}
+                    onClick={() => {
+                      const newSearchParams = new URLSearchParams(searchParams)
+                      newSearchParams.set('searchQuery', query)
+                      newSearchParams.set('searchQuery', query)
+                      navigate({
+                        pathname: '/all',
+                        search: `?${newSearchParams.toString()}`
+                      })
+                      setIsSearchFocused(false)
+                    }}
                     className='text-sm text-customColorTertiarypop hover:underline block text-center'
                   >
                     View all results for "{query}"

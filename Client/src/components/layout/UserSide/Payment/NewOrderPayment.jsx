@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { CreditCard, Truck, DollarSign } from 'lucide-react'
+import { CreditCard, Truck, DollarSign, Wallet } from 'lucide-react'
 import { motion } from 'framer-motion'
-
 import apiClient from '../../../../services/api/apiClient'
 import Spinner from '../../../common/Animations/Spinner'
 import { handleRazorPaySuccess } from '../../../../services/RazorPay/razorPay'
@@ -14,7 +13,8 @@ import { clearValidations } from '../../../../redux/slices/Users/Checkout/checko
 
 const paymentMethods = [
   { id: 'Razor Pay', name: 'Razor Pay', icon: CreditCard },
-  { id: 'Cash on Delivery', name: 'Cash on Delivery', icon: DollarSign }
+  { id: 'Cash on Delivery', name: 'Cash on Delivery', icon: DollarSign },
+  { id: 'Wallet', name: 'Wallet', icon: Wallet }
 ]
 
 export default function NewOrderPayment({
@@ -27,15 +27,16 @@ export default function NewOrderPayment({
 }) {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const [appliedCouponCode, setAppliedCouponCode] = useState(null)
+  const address = useSelector(state => state.address.selectedAddressId)
+  const [walletError, setWalletError] = useState(null)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     paymentMethods[0].id
   )
-  const [appliedCouponCode, setAppliedCouponCode] = useState(null)
-  const address = useSelector(state => state.address.selectedAddressId)
   const { items, subtotal, totalPrice, discount, appliedCoupon } = useSelector(
     state => state.cart
   )
-  console.log(appliedCoupon)
+
   const totalDiscount = Math.floor(discount + appliedCoupon)
   const shipping = 50
   const tax = Math.floor(subtotal * 0.02)
@@ -49,7 +50,10 @@ export default function NewOrderPayment({
     taxAmount: tax,
     appliedCouponCode
   }
-
+  ////////
+  ////////
+  ////////
+  ///mutation
   const { mutate: placeOrder } = useMutation({
     mutationFn: async () => {
       const endpoint =
@@ -78,13 +82,17 @@ export default function NewOrderPayment({
           handleSuccess()
         }
       } catch (error) {
-        console.error('Error during payment:', error.message)
-        setPaymentError(true)
-        setErrorMessage(
-          error.message.includes('interrupted')
-            ? 'Payment was interrupted. Please try again.'
-            : 'Payment failed. Please retry or check your orders.'
-        )
+        if (selectedPaymentMethod === 'Razor Pay') {
+          console.error('Error during payment:', error.message)
+          setPaymentError(true)
+          setErrorMessage(
+            error.message.includes('interrupted')
+              ? 'Payment was interrupted. Please try again.'
+              : 'Payment failed. Please retry or check your orders.'
+          )
+        } else if (selectedPaymentMethod === 'Wallet') {
+          setWalletError('Payment failed. Please retry or check your orders.')
+        }
       }
     },
     onError: error => {
@@ -103,6 +111,22 @@ export default function NewOrderPayment({
         }, 3000)
         dispatch(setCart(error?.response?.data.cart))
       } else {
+        if (selectedPaymentMethod === 'Wallet') {
+          console.log(error)
+          if (
+            error?.response?.data?.message.includes(
+              'Not enough Balance in Wallet.'
+            )
+          ) {
+            return setWalletError('Not enough Balance in Wallet.')
+          } else {
+            console.error('Error placing order:', error)
+            setPaymentError(true)
+            setErrorMessage(
+              'Payment failed. Please try again or check your orders.'
+            )
+          }
+        }
         console.error('Error placing order:', error)
         setPaymentError(true)
         setErrorMessage(
@@ -111,13 +135,34 @@ export default function NewOrderPayment({
       }
     }
   })
-
   const handleSubmit = e => {
     e.preventDefault()
+
     setPaymentError(false)
     setErrorMessage('')
-    placeOrder()
+
+    if (selectedPaymentMethod === 'Wallet') {
+      if (data >= TotalAfterTax) {
+        placeOrder()
+      } else {
+        return setWalletError('Not enough balance to make order')
+      }
+    } else {
+      placeOrder()
+    }
   }
+
+  //for fetching wallet balance
+  const { data, isLoading, isError } = useQuery({
+    queryFn: async () => {
+      const res = await apiClient.get('api/wallet/')
+      console.log(res.data.wallet.balance)
+      console.log(res.data.wallet.balance)
+      console.log(res.data.wallet.balance)
+      return res.data.wallet.balance
+    },
+    queryKey: ['walletBalance']
+  })
 
   return (
     <motion.div
@@ -142,31 +187,72 @@ export default function NewOrderPayment({
           </div>
         </div>
         <div>
+          {/* ///hasdnflit here */}
           <h2 className='text-xl font-semibold mb-4'>Payment Method</h2>
           <div className='space-y-4'>
-            {paymentMethods.map(method => (
-              <label
-                key={method.id}
-                className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-colors cursor-pointer ${
-                  selectedPaymentMethod === method.id
-                    ? 'border-customColorTertiarypop bg-blue-50'
-                    : 'border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                <input
-                  type='radio'
-                  name='paymentMethod'
-                  value={method.id}
-                  checked={selectedPaymentMethod === method.id}
-                  onChange={() => setSelectedPaymentMethod(method.id)}
-                  className='form-radio h-5 w-5 text-custombg-customColorTertiary'
-                />
-                <span className='flex items-center text-gray-700 flex-grow'>
-                  <method.icon className='h-6 w-6 mr-2 text-gray-500' />
-                  {method.name}
-                </span>
-              </label>
-            ))}
+            {paymentMethods
+              .slice(0, 2)
+              .filter(
+                method =>
+                  !(method.id === 'Cash on Delivery' && TotalAfterTax > 1000)
+              )
+              .map(method => (
+                <div key={method.id}>
+                  <label
+                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-colors cursor-pointer ${
+                      selectedPaymentMethod === method.id
+                        ? 'border-customColorTertiarypop bg-blue-50'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type='radio'
+                      name='paymentMethod'
+                      value={method.id}
+                      checked={selectedPaymentMethod === method.id}
+                      onChange={() => setSelectedPaymentMethod(method.id)}
+                      className='form-radio h-5 w-5 text-custombg-customColorTertiary'
+                    />
+                    <span className='flex items-center text-gray-700 flex-grow'>
+                      <method.icon className='h-6 w-6 mr-2 text-gray-500' />
+                      {method.name}
+                    </span>
+                  </label>
+                </div>
+              ))}
+
+            <label
+              key={paymentMethods[2].id}
+              className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-colors cursor-pointer ${
+                selectedPaymentMethod === paymentMethods[2].id
+                  ? 'border-customColorTertiarypop bg-blue-50'
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <input
+                type='radio'
+                name='paymentMethod'
+                value={paymentMethods[2].id}
+                checked={selectedPaymentMethod === paymentMethods[2].id}
+                onChange={() => setSelectedPaymentMethod(paymentMethods[2].id)}
+                className='form-radio h-5 w-5 text-custombg-customColorTertiary'
+              />
+              <span className=' text-gray-700 flex-grow'>
+                <div className='flex justify-between'>
+                  <div className='flex'>
+                    <Wallet className='h-6 w-6 mr-2 text-gray-500' />
+                    {paymentMethods[2].name}
+                  </div>
+                  <div>
+                    {isLoading ? (
+                      <Spinner size={-1} speed={2} />
+                    ) : (
+                      <p className='text-blue-900'> Balance Amount : ₹{data}</p>
+                    )}
+                  </div>
+                </div>
+              </span>
+            </label>
           </div>
         </div>
         <div className='w-full'>
@@ -219,6 +305,13 @@ export default function NewOrderPayment({
         </div>
       </div>
       <div className='px-6 py-4 bg-gray-50  border-t border-gray-200'>
+        {walletError ? (
+          <div className='px-4 py-3 rounded-md text-white  bg-red-500'>
+            {walletError}
+          </div>
+        ) : (
+          ''
+        )}
         <form onSubmit={handleSubmit}>
           <button
             type='submit'

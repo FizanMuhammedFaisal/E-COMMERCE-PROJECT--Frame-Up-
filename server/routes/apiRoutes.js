@@ -10,6 +10,7 @@ import wishlistRoutes from './wishlistRoutes.js'
 import salesReportRoutes from './salesReportRoutes.js'
 import walletRoutes from './walletRoutes.js'
 import returnRequestRoutes from './returnRequestRoutes.js'
+import chatRoutes from './chatRoutes.js'
 const app = express.Router()
 
 app.use('/admin', adminRoutes)
@@ -23,4 +24,5 @@ app.use('/coupons', couponRoutes)
 app.use('/wishlist', wishlistRoutes)
 app.use('/sales-report', salesReportRoutes)
 app.use('/return-request', returnRequestRoutes)
+app.use('/chat', chatRoutes)
 export default app

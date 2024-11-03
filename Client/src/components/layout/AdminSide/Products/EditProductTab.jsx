@@ -9,6 +9,7 @@ import {
 import apiClient from '../../../../services/api/apiClient'
 import validataImages from '../../../../utils/validation/ImageValidation'
 import Spinner from '../../../common/Animations/Spinner'
+import ArtistSelect from '../../../common/ArtistSelect'
 
 function EditProductTab({
   handleSubmit,
@@ -231,6 +232,26 @@ function EditProductTab({
               className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
+          <div className='flex flex-col'>
+            <label
+              htmlFor='productCategory'
+              className='dark:text-slate-100 text-slate-900 mb-2 font-medium text-xl my-2'
+            >
+              Product Artist
+            </label>
+            <div className='flex flex-col  gap-3 lg:flex-row sm:gap-4 w-full border p-4 py-4 rounded-xl border-gray-200 dark:border-customP2ForegroundD_400'>
+              <div className='flex-1 dark:text-slate-200 text-slate-900 '>
+                <p className='mb-2'>Select Artist</p>
+                <ArtistSelect
+                  handleInputChange={handleInputChange}
+                  value={{
+                    label: product?.artist?.name,
+                    value: product?.artist?._id
+                  }}
+                />
+              </div>
+            </div>
+          </div>
           <div>
             <label
               htmlFor='categories'
@@ -434,7 +455,7 @@ function EditProductTab({
             {isLoading ? (
               <div className=' flex justify-center'>
                 <div className='flex justify-center mr-2'>
-                  <Spinner size={-1} />
+                  <Spinner size={-1} speed={2} />
                 </div>
                 Updating...
               </div>

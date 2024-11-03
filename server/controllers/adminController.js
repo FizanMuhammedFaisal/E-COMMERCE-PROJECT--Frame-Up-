@@ -263,6 +263,11 @@ const updateCategories = asyncHandler(async (req, res, next) => {
     { _id: id },
     { status: newStatus }
   )
+  const pr = await Product.updateMany(
+    { productCategories: { $in: [id] } },
+    { status: newStatus }
+  )
+  console.log(pr)
   if (category) {
     return res.status(200).json({ message: 'status updated successfully' })
   }

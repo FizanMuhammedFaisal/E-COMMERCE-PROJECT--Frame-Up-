@@ -7,6 +7,9 @@ import crypto from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
 import { getCartDetails, applyCoupon } from '../utils/cartUtils.js'
 import Wallet from '../models/walletModel.js'
+import PDFDocument from 'pdfkit'
+import fs from 'fs'
+import mongoose from 'mongoose'
 
 ///
 //
@@ -60,33 +63,31 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
     return next(error)
   }
 
-  if (order.paymentStatus !== 'Paid') {
-    const error = new Error(
-      'Cancellation not possible. Payment has not been made.'
-    )
-    error.statusCode = 400
-    return next(error)
-  }
-
   let wallet = await Wallet.findOne({ userId: order.userId })
+  if (order.paymentStatus === 'Paid') {
+    if (!wallet) {
+      wallet = new Wallet({
+        userId: order.userId,
+        balance: 0,
+        transactions: []
+      })
+    }
 
-  if (!wallet) {
-    wallet = new Wallet({
-      userId: order.userId,
-      balance: 0,
-      transactions: []
+    wallet.balance +=
+      order.subtotal +
+      order.taxAmount +
+      order.shippingCost -
+      order.couponAmount -
+      order.discount
+
+    wallet.transactions.push({
+      type: 'refund',
+      amount: order.totalAmount,
+      description: `Refund for order ${order._id}`
     })
+
+    await wallet.save()
   }
-
-  wallet.balance += order.totalAmount
-
-  wallet.transactions.push({
-    type: 'refund',
-    amount: order.totalAmount,
-    description: `Refund for order ${order._id}`
-  })
-
-  await wallet.save()
 
   order.orderStatus = 'Cancelled'
   await order.save()
@@ -252,25 +253,19 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
   try {
     let outOfStock = false
     const productIds = items.map(item => item.productId)
-
     const products = await Product.find({ _id: { $in: productIds } }).lean()
 
     const updatedCart = items.map(item => {
       const product = products.find(p => p._id.equals(item.productId))
-
       if (!product || product.productStock === 0) {
         outOfStock = true
         return {
           ...item,
           quantity: 0,
           price: product ? product.productPrice : 0
-        } // Out of stock
+        }
       }
-
-      const updatedQuantity =
-        product.productStock < item.quantity
-          ? product.productStock
-          : item.quantity
+      const updatedQuantity = Math.min(product.productStock, item.quantity)
       return { ...item, quantity: updatedQuantity, price: product.productPrice }
     })
 
@@ -283,24 +278,24 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     }
 
     const cartDetails = await getCartDetails(user._id)
-
     if (!cartDetails) {
-      const error = new Error('order creation Failed')
+      const error = new Error('Order creation failed')
       error.statusCode = 400
       return next(error)
     }
 
-    const subtotal = cartDetails[0].subtotal
-    const totalDiscount = cartDetails[0].totalDiscount
-    const totalPrice = cartDetails[0].totalPrice
-    let totalAmount = Math.floor(totalPrice + taxAmount + shippingCost)
+    const subtotal = Math.ceil(cartDetails[0].subtotal)
+    const discount = Math.ceil(cartDetails[0].discount)
+    console.log(discount)
+    const totalPrice = Math.ceil(cartDetails[0].totalPrice)
+    let totalAmount = Math.ceil(totalPrice + taxAmount + shippingCost)
+
+    //apply coupons if provided
     let couponDiscount = 0
-    console.log(appliedCouponCode)
     if (appliedCouponCode) {
       try {
         couponDiscount = await applyCoupon(appliedCouponCode, totalPrice)
-        console.log(couponDiscount)
-        totalAmount -= couponDiscount
+        totalAmount -= Math.ceil(couponDiscount)
       } catch (err) {
         const error = new Error(err)
         error.statusCode = 400
@@ -308,27 +303,48 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       }
     }
 
-    // Create a new Order
+    // Cheking wallet balnce and if not balance then rejecting
+    let paymentStatus = 'Pending'
+    const wallet = await Wallet.findOne({ userId: user._id })
+    if (paymentMethod === 'Wallet') {
+      if (wallet.balance < totalAmount) {
+        const error = new Error('Not enough Balance in Wallet.')
+        error.statusCode = 400
+        return next(error)
+      }
+      paymentStatus = 'Paid'
+    }
+
+    // Create the new order
     const newOrder = await Order.create({
       userId: user._id,
       items: updatedCart,
       shippingAddress,
       paymentMethod,
       shippingCost,
-      discount: totalDiscount,
+      discount,
       taxAmount,
       totalAmount,
       orderStatus: 'Pending',
-      paymentStatus: 'Pending',
+      paymentStatus,
       subtotal,
       couponCode: appliedCouponCode,
       couponAmount: couponDiscount
     })
 
-    // Deduct stock
-    // Clear the user's cart
-    await clearCart(user._id)
+    //Deduct amount
+    if (paymentMethod === 'Wallet') {
+      wallet.balance -= totalAmount
+      wallet.transactions.push({
+        type: 'order',
+        amount: totalAmount,
+        description: `Made Order ${newOrder._id}`
+      })
+      await wallet.save()
+    }
+
     await updateProductStock(updatedCart)
+    await clearCart(user._id)
 
     res.status(200).json({
       order: newOrder,
@@ -341,6 +357,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       .json({ message: 'An error occurred while placing the order', error })
   }
 })
+
 //
 //for razor pay order intiating
 const razorpay = new Razorpay({
@@ -405,25 +422,25 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       error.statusCode = 400
       return next(error)
     }
+    const subtotal = Math.ceil(cartDetails[0].subtotal)
+    const discount = Math.ceil(cartDetails[0].discount)
+    console.log(discount)
+    const totalPrice = Math.ceil(cartDetails[0].totalPrice)
+    let totalAmount = Math.ceil(totalPrice + taxAmount + shippingCost)
 
-    const subtotal = cartDetails[0].subtotal
-    const totalDiscount = cartDetails[0].totalDiscount
-    const totalPrice = cartDetails[0].totalPrice
-    let totalAmount = Math.floor(totalPrice + taxAmount + shippingCost)
-    console.log(totalAmount)
+    //apply coupons if provided
     let couponDiscount = 0
-    console.log(appliedCouponCode)
     if (appliedCouponCode) {
       try {
         couponDiscount = await applyCoupon(appliedCouponCode, totalPrice)
-        console.log(couponDiscount)
-        totalAmount -= couponDiscount
+        totalAmount -= Math.ceil(couponDiscount)
       } catch (err) {
         const error = new Error(err)
         error.statusCode = 400
         return next(error)
       }
     }
+
     console.log(totalAmount)
     const newOrder = await Order.create({
       userId: user._id,
@@ -431,7 +448,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       shippingAddress,
       paymentMethod,
       shippingCost,
-      discount: totalDiscount,
+      discount,
       taxAmount,
       totalAmount,
       orderStatus: 'Pending',
@@ -453,7 +470,6 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
           payment_capture: 1
         }
         const razorpayOrder = await razorpay.orders.create(options)
-        console.log(newOrder)
         const orderData = {
           razorpayOrderId: razorpayOrder.id,
           amount: razorpayOrder.amount,
@@ -505,14 +521,6 @@ const verifyPayment = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
     req.body.paymentResponse
   const { orderId } = req.body
-  console.log(orderId)
-  console.log(orderId)
-  console.log(orderId)
-  console.log(orderId)
-  console.log(orderId)
-  console.log(orderId)
-  console.log('Payment Response:', req.body)
-  console.log('Secret Key:', process.env.RAZOR_PAY_KEY_SECRET)
 
   const expectedSignature = crypto
     .createHmac('sha256', process.env.RAZOR_PAY_KEY_SECRET)
@@ -598,7 +606,7 @@ const retryPayment = asyncHandler(async (req, res, next) => {
 //
 const cancelOrderAdmin = asyncHandler(async (req, res, next) => {
   const { orderId } = req.params
-  console.log(orderId)
+
   if (!orderId) {
     const error = new Error('id Required for cancelling')
     error.statusCode = 400
@@ -609,10 +617,131 @@ const cancelOrderAdmin = asyncHandler(async (req, res, next) => {
     { orderStatus: 'Cancelled' },
     { new: true }
   )
+  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+    const error = new Error(
+      'Order cannot be cancelled. It has already been shipped or delivered.'
+    )
+    error.statusCode = 400
+    return next(error)
+  }
+
+  if (order.paymentStatus === 'Paid') {
+    let wallet = await Wallet.findOne({ userId: order.userId })
+
+    if (!wallet) {
+      wallet = new Wallet({
+        userId: order.userId,
+        balance: 0,
+        transactions: []
+      })
+    }
+    const amount =
+      order.subtotal +
+      order.taxAmount +
+      order.shippingCost -
+      order.couponAmount -
+      order.discount
+    console.log(amount)
+    wallet.balance += amount
+    wallet.transactions.push({
+      type: 'refund',
+      amount: order.totalAmount,
+      description: `Refund for order ${order._id}`
+    })
+
+    await wallet.save()
+  }
   if (order) {
     res.status(200).json({ message: 'cancellation successfull', order })
   }
 })
+//
+//
+const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
+  const { id: orderId } = req.params
+  console.log('asdfasdf')
+  console.log(req.params)
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return res.status(400).json({ message: 'Invalid order ID' })
+  }
+
+  const order = await Order.findById(orderId)
+    .populate('items.productId')
+    .populate('userId')
+  if (!order) {
+    return res.status(404).json({ message: 'Order not found' })
+  }
+
+  const pdfDoc = new PDFDocument({ margin: 50 })
+
+  res.setHeader('Content-Type', 'application/pdf')
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename=invoice_${orderId}.pdf`
+  )
+
+  pdfDoc.pipe(res)
+
+  pdfDoc.fontSize(20).text('Order Invoice', { align: 'center' }).moveDown(0.5)
+
+  pdfDoc
+    .fontSize(12)
+    .text(`Order ID: ${orderId}`, { align: 'right' })
+    .text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`, {
+      align: 'right'
+    })
+    .moveDown(1.5)
+
+  pdfDoc
+    .fontSize(14)
+    .text('Billing Information:', { underline: true })
+    .moveDown(0.5)
+    .fontSize(12)
+    .text(`Name: ${order.shippingAddress.name}`)
+    .text(`Address: ${order.shippingAddress.address}`)
+    .text(
+      `City: ${order.shippingAddress.city}, State: ${order.shippingAddress.state}`
+    )
+    .text(`Postal Code: ${order.shippingAddress.postalCode}`)
+    .text(`Phone: ${order.shippingAddress.phoneNumber}`)
+    .moveDown(1.5)
+
+  pdfDoc.fontSize(14).text('Order Summary:', { underline: true }).moveDown(0.5)
+
+  order.items.forEach((item, index) => {
+    pdfDoc
+      .fontSize(12)
+      .text(`${index + 1}. ${item.productName}`)
+      .text(`   Quantity: ${item.quantity} x $${item.price.toFixed(2)}`)
+      .text(`   Total: $${(item.quantity * item.price).toFixed(2)}`)
+      .moveDown(0.5)
+  })
+
+  pdfDoc
+    .moveDown(1)
+    .fontSize(14)
+    .text('Order Details:', { underline: true })
+    .fontSize(12)
+    .text(`Subtotal: $${order.subtotal.toFixed(2)}`)
+    .text(`Shipping Cost: $${order.shippingCost.toFixed(2)}`)
+    .text(`Discount: -$${order.discount.toFixed(2)}`)
+    .text(`Coupon Discount: -$${order.couponAmount.toFixed(2)}`)
+    .text(`Tax: $${order.taxAmount.toFixed(2)}`)
+    .moveDown(0.5)
+    .fontSize(14)
+    .text(`Total Amount: $${order.totalAmount.toFixed(2)}`, { align: 'right' })
+
+  pdfDoc
+    .moveDown(2)
+    .fontSize(10)
+    .text(
+      'Thank you for your order! For any questions, please contact our support team.',
+      { align: 'center', lineGap: 6 }
+    )
+
+  pdfDoc.end()
+})
+
 export {
   initiateOrder,
   getOrdersAdmin,
@@ -624,5 +753,6 @@ export {
   verifyPayment,
   retryPayment,
   cancelOrderAdmin,
-  getUserOrders
+  getUserOrders,
+  getInvoiceDownloadURL
 }

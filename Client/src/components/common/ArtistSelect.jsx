@@ -5,11 +5,15 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import apiClient from '../../services/api/apiClient'
 import { useEffect, useState } from 'react'
 
-function ArtistSelect() {
+function ArtistSelect({ handleInputChange, value }) {
   const dispatch = useDispatch()
   const [searchTerm, setSearchTerm] = useState('')
   const [options, setOptions] = useState([])
-
+  useEffect(() => {
+    if (value) {
+      dispatch(setFormData({ id: 'artistName', value }))
+    }
+  }, [value, dispatch])
   const fetchArtists = async ({ page = 1, search = '' }) => {
     const res = await apiClient.get('/api/artists/get-artists', {
       params: { page, search }
@@ -47,7 +51,7 @@ function ArtistSelect() {
   const { artistName } = useSelector(state => state.product)
 
   console.log(artistName)
-  // Function to load options dynamically  when user typess
+
   const loadOptions = async (inputValue, callback) => {
     setSearchTerm(inputValue)
     const res = await fetchArtists({ search: inputValue, page: 1 })
@@ -60,13 +64,19 @@ function ArtistSelect() {
 
   const onChange = selectedOptions => {
     console.log(selectedOptions)
-
+    if (handleInputChange) {
+      handleInputChange({
+        target: {
+          name: 'artist',
+          value: { name: selectedOptions.label, _id: selectedOptions.value }
+        }
+      })
+    }
     dispatch(setFormData({ id: 'artistName', value: selectedOptions }))
   }
 
   return (
     <AsyncSelect
-      isMulti
       defaultOptions={options}
       loadOptions={loadOptions}
       value={artistName}

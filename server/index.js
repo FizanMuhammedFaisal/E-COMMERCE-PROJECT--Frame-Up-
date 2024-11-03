@@ -1,4 +1,4 @@
-import express, { json } from 'express'
+import express, { json, query } from 'express'
 import dotenv from 'dotenv/config'
 import cookieParser from 'cookie-parser'
 const app = express()
@@ -7,7 +7,7 @@ import { throwError } from './middlewares/errorMiddleware.js'
 import connectDB from './config/db.js'
 import morgan from 'morgan'
 import cors from 'cors'
-import { check } from './services/cloudinaryServices.js'
+
 const corsOptions = {
   origin: 'http://localhost:5173',
   credentials: true // Allow credentials to be sent

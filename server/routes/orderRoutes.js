@@ -12,16 +12,19 @@ import {
   verifyPayment,
   retryPayment,
   cancelOrderAdmin,
-  getUserOrders
+  getUserOrders,
+  getInvoiceDownloadURL
 } from '../controllers/orderController.js'
 
 //users
 router.post('/initiate-order', protect, initiateOrder)
 router.post('/initiate-order/razor-pay', protect, createRazorpayOrder)
+
 router.post('/verify-payment', protect, verifyPayment)
 router.post('/retry-payment', protect, retryPayment)
 router.get('/', protect, getUserOrders)
 router.post('/cancel', protect, cancelOrder)
+router.get('/download-invoice/:id', getInvoiceDownloadURL)
 router.get('/:orderId', getOrderDetails)
 // admins
 router.get('/admin', getOrdersAdmin)

@@ -24,14 +24,14 @@ const QuickStat = ({ title, value, icon, trend, trendValue }) => (
       </div>
     </div>
     <h3 className='text-2xl font-bold text-gray-900 dark:text-white mb-1'>
-      {value.toFixed(2)}
+      {value.toFixed(0)}
     </h3>
     <p className='text-sm text-gray-500 dark:text-gray-400'>{title}</p>
     <div
       className={`text-sm font-medium ${trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
     >
       {trend >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-      <span className='ml-1'>{trendValue}% vs last month</span>
+      <span className='ml-1'>{trendValue.toFixed(2)}% vs last month</span>
     </div>
   </motion.div>
 )

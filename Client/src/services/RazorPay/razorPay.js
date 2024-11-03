@@ -1,21 +1,22 @@
 import apiClient from '../api/apiClient'
 
-export const handleRazorPaySuccess = async orderData => {
+export const handleRazorPaySuccess = async (orderData, transactionType) => {
   console.log(orderData)
   return new Promise((resolve, reject) => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: orderData.amount, // In paise
+      amount: orderData.amount,
       currency: 'INR',
       order_id: orderData.razorpayOrderId,
       handler: async response => {
         try {
           const verificationResult = await verifyPayment(
             response,
-            orderData.orderId
+            orderData.orderId,
+            transactionType
           )
           if (verificationResult.success) {
-            resolve({ success: true })
+            resolve(verificationResult)
           } else {
             reject(new Error('Payment verification failed.'))
           }
@@ -35,9 +36,13 @@ export const handleRazorPaySuccess = async orderData => {
   })
 }
 
-const verifyPayment = async (paymentResponse, orderId) => {
-  console.log(orderId)
-  const res = await apiClient.post('/api/order/verify-payment', {
+const verifyPayment = async (paymentResponse, orderId, transactionType) => {
+  const endpoint =
+    transactionType === 'addMoney'
+      ? '/api/wallet/verify-add-money'
+      : '/api/order/verify-payment'
+
+  const res = await apiClient.post(endpoint, {
     paymentResponse,
     orderId
   })

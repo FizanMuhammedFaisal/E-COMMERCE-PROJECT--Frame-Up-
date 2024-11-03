@@ -292,6 +292,12 @@ export default function OrderEditPage() {
                   </td>
                   <td className='p-2'>-${order.discount?.toFixed(2)}</td>
                 </tr>
+                <tr>
+                  <td colSpan='3' className='p-2 text-right'>
+                    CouponDiscount:
+                  </td>
+                  <td className='p-2'>-${order.couponAmount?.toFixed(2)}</td>
+                </tr>
                 <tr className='font-bold'>
                   <td colSpan='3' className='p-2 text-right'>
                     Total:

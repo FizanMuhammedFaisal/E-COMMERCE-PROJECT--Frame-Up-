@@ -12,7 +12,7 @@ function ProductCard({ product, viewMode, addToWishlist }) {
 
   return (
     <Link
-      to={`/products/${product._id}`}
+      to={`/all/${product._id}`}
       className={`block ${viewMode === 'list' ? 'w-full' : 'flex-grow'}`}
     >
       <motion.div
@@ -25,7 +25,7 @@ function ProductCard({ product, viewMode, addToWishlist }) {
         <div
           className={`relative h-64 bg-gray-200 ${
             viewMode === 'list' ? 'w-1/3' : 'w-full'
-          } flex items-center justify-center`}
+          } flex items-center justify-center overflow-hidden`}
         >
           <img
             src={product.thumbnailImage}
@@ -47,16 +47,15 @@ function ProductCard({ product, viewMode, addToWishlist }) {
             </span>
           )}
         </div>
-
         <div
-          className={`p-4 ${viewMode === 'list' ? 'w-2/3' : 'w-full'} flex flex-col justify-between`}
+          className={`p-4 ${viewMode === 'list' ? 'w-2/3' : 'w-full'} flex flex-col  justify-between`}
         >
           <div>
             <h3 className='font-semibold text-lg text-gray-800 mb-1 truncate'>
               {product.productName}
             </h3>
             <p className='text-gray-600 mb-2 text-sm truncate'>
-              {product.artist}
+              By <span className='font-semibold'> {product?.artist?.name}</span>
             </p>
           </div>
 

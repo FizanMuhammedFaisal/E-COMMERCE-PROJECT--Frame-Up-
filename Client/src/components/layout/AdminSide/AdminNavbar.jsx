@@ -1,4 +1,3 @@
-import React from 'react'
 import { IoMenu } from 'react-icons/io5'
 import ThemeToggler from '../../common/ThemeToggler'
 import { motion } from 'framer-motion'
@@ -6,7 +5,7 @@ function AdminNavbar({ isCompact, isOpen, toggleSidebar }) {
   return (
     <div
       className={`fixed top-0 right-0 left-0 z-50 h-16 p-4 bg-customP2BackgroundW_500 dark:bg-customP2BackgroundD dark:text-slate-50 text-slate-900 justify-between items-center transition-all duration-500 ease-in-out ${
-        isCompact ? (isOpen ? 'md:ml-24' : 'ml-0') : 'md:ml-72'
+        isCompact ? (isOpen ? 'md:ml-28' : 'ml-0') : 'md:ml-72'
       } flex`}
     >
       {/* Navbar content */}
@@ -14,14 +13,14 @@ function AdminNavbar({ isCompact, isOpen, toggleSidebar }) {
         <div className='flex items-center'>
           <motion.div
             className='flex-1'
-            initial={{ x: '0%' }} // Starting position
-            animate={{ x: isCompact ? '0%' : '-100%' }} // Animate position based on isCompact
+            initial={{ x: '0%' }}
+            animate={{ x: isCompact ? '0%' : '-100%' }}
             transition={{ type: 'spring', stiffness: 600, damping: 60 }}
           >
             <motion.span
               className='font-bold justify-center font-secondary whitespace-nowrap dark:text-slate-50 text-3xl'
-              initial={{ opacity: 0 }} // Starting opacity
-              animate={{ opacity: isCompact ? 1 : 0 }} // Animate opacity based on isCompact
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isCompact ? 1 : 0 }}
               transition={{ type: 'spring', stiffness: 1000, damping: 60 }}
             >
               {isCompact ? 'Frame Up' : ''}

@@ -1,14 +1,16 @@
-import React from 'react'
+import { useEffect } from 'react'
 import Navbar from '../../common/Navbar'
-import { Outlet } from 'react-router-dom'
-import Breadcrumb from '../../common/Breadcrumb'
+import { Outlet, useLocation } from 'react-router-dom'
+
 import { useSelector } from 'react-redux'
 
 import { useFetchCart } from '../../../hooks/useFetchCart'
+import { useScrollToTop } from '../../../hooks/useScrollToTop'
 
 const UserLayout = () => {
   const { isAuthenticated, role } = useSelector(state => state.auth)
 
+  useScrollToTop()
   useFetchCart()
   return (
     <>

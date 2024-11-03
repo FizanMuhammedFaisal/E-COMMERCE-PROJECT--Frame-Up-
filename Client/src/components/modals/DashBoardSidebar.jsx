@@ -61,7 +61,7 @@ const Sidebar = ({ setData }) => {
           </motion.div>
         </div>
 
-        <nav className='overflow-y-auto h-[calc(100vh-80px)]'>
+        <nav className='overflow-y-auto scrollbar-hidden h-[calc(100vh-80px)]'>
           <ul className='pt-4 px-2'>
             {sideBarData.map((item, index) => (
               <li

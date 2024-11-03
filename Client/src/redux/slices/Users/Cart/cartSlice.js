@@ -48,12 +48,10 @@ const cartSlice = createSlice({
         discount,
         totalPrice
       } = action.payload
-      console.log(productId, quantity)
-      console.log(action.payload)
+
       const existingProduct = state.items.find(
         item => item.productId === productId
       )
-      console.log(existingProduct)
 
       if (existingProduct) {
         existingProduct.quantity = quantity

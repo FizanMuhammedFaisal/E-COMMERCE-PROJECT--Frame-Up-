@@ -29,6 +29,7 @@ export default function ProductEditPage() {
       setError(null)
       try {
         const res = await apiClient.get(`/api/products/${productId}`)
+        console.log(res.data)
         setProduct(res.data.product[0])
       } catch (error) {
         setError('Failed to load product details.')
@@ -41,7 +42,6 @@ export default function ProductEditPage() {
   }, [productId])
 
   const handleCategoryChange = (selectedOption, type) => {
-    // Convert selectedOption to an array if it's not already
     const selectedOptionsArray = Array.isArray(selectedOption)
       ? selectedOption
       : [selectedOption]
@@ -71,7 +71,7 @@ export default function ProductEditPage() {
 
   const handleInputChange = e => {
     const { name, value } = e.target
-    console.log(product)
+    console.log(name, value)
     setProduct(prev => ({ ...prev, [name]: value }))
   }
 

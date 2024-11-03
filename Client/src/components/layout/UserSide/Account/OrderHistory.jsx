@@ -7,7 +7,8 @@ import {
   CreditCard,
   Truck,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  Wallet
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
@@ -54,7 +55,21 @@ export default function OrderHistory() {
   const handleCancelOrder = id => {
     // Implement cancel order logic here
   }
-
+  const handleDownloadInvoice = async id => {
+    try {
+      const res = await apiClient.get(`/api/order/download-invoice/${id}`, {
+        responseType: 'blob'
+      })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `Invoice of order${id}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+    } catch (error) {
+      console.error(error, 'report download Failed')
+    }
+  }
   if (isLoading) {
     return <div className='text-center py-8'>Loading your order history...</div>
   }
@@ -74,6 +89,7 @@ export default function OrderHistory() {
           order={orders[orderPage]}
           setOrderPage={setOrderPage}
           refetch={refetch}
+          handleDownloadInvoice={handleDownloadInvoice}
         />
       ) : (
         <>
@@ -92,6 +108,11 @@ export default function OrderHistory() {
                   index={index}
                 />
               ))}
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </div>
           ) : (
             <div className='text-center py-8 text-gray-500'>
@@ -100,11 +121,6 @@ export default function OrderHistory() {
           )}
         </>
       )}
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
     </div>
   )
 }
@@ -187,6 +203,8 @@ function OrderCard({
           <div className='flex items-center space-x-2 text-sm text-gray-600'>
             {order.paymentMethod === 'Cash on Delivery' ? (
               <Truck className='h-5 w-5 text-gray-500' />
+            ) : order.paymentMethod === 'Wallet' ? (
+              <Wallet className='h-5 w-5 text-gray-500' />
             ) : (
               <CreditCard className='h-5 w-5 text-gray-500' />
             )}
@@ -218,7 +236,12 @@ function OrderCard({
   )
 }
 
-function OrderDetailsPage({ order, setOrderPage, refetch }) {
+function OrderDetailsPage({
+  order,
+  setOrderPage,
+  refetch,
+  handleDownloadInvoice
+}) {
   const [orderId, setOrderId] = useState(null)
   const [cancelIsOpen, setCancelIsOpen] = useState(false)
   const [returnIsOpen, setReturnIsOpen] = useState(false)
@@ -312,7 +335,6 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
           </button>
           <h2 className='text-3xl font-bold text-gray-900'>Order Details</h2>
         </div>
-
         {successMessage && (
           <div
             className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative'
@@ -321,7 +343,6 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
             <span className='block sm:inline'>{successMessage}</span>
           </div>
         )}
-
         {errorMessage && (
           <div
             className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative'
@@ -330,13 +351,11 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
             <span className='block sm:inline'>{errorMessage}</span>
           </div>
         )}
-
         <div className={`p-4 rounded-lg ${getStatusColor(order.orderStatus)}`}>
           <h3 className='text-lg font-semibold mb-2'>
             Order Status: {order.orderStatus}
           </h3>
         </div>
-
         <div className='bg-white shadow rounded-lg p-6 mb-6'>
           <h4 className='font-semibold text-gray-800 mb-4 text-lg'>Items</h4>
           <ul className='space-y-4'>
@@ -367,7 +386,6 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
             ))}
           </ul>
         </div>
-
         <div className='bg-white shadow rounded-lg p-6 mb-6'>
           <h4 className='font-semibold text-gray-800 mb-4 text-lg'>
             Order Summary
@@ -397,7 +415,6 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
             </div>
           </div>
         </div>
-
         <div className='bg-white shadow rounded-lg p-6 mb-6'>
           <h4 className='font-semibold text-gray-800 mb-4 text-lg'>
             Shipping Address
@@ -415,7 +432,16 @@ function OrderDetailsPage({ order, setOrderPage, refetch }) {
             {order.shippingAddress.phoneNumber}
           </address>
         </div>
-
+        <div className='flex justify-end'>
+          <button
+            onClick={() => {
+              handleDownloadInvoice(order._id)
+            }}
+            className='px-3 py-2 bg-customColorTertiary rounded-lg text-white duration-200 hover:bg-customColorTertiaryLight'
+          >
+            Download Invoice
+          </button>
+        </div>
         {getStatusIndex(order.orderStatus) <= 1 && (
           <div className='mt-6'>
             <button

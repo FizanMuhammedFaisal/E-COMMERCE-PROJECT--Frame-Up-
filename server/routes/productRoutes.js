@@ -10,10 +10,12 @@ import {
   updateProductStatus,
   getProductsAdmin,
   getSearched,
-  getProductCards
+  getProductCards,
+  getRelatedProducts
 } from '../controllers/productController.js'
 router.post('/add', addProducts)
 router.get('/get-products', validateGetProducts, getProducts)
+router.get('/get-related-products/:id', getRelatedProducts)
 router.get('/get-cards', getProductCards)
 router.get('/get-products-admin', getProductsAdmin)
 router.get('/:id', getProductById)

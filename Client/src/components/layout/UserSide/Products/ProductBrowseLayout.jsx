@@ -108,11 +108,15 @@ function ProductBrowseLayout({
             )}
           </div>
           <div className='flex justify-center mt-8'>
-            <Pagination
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              totalPages={totalPages}
-            />
+            {sortedProducts ? (
+              <Pagination
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalPages={totalPages}
+              />
+            ) : (
+              ''
+            )}
           </div>
         </div>
       )}

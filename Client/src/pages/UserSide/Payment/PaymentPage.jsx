@@ -20,7 +20,6 @@ export default function PaymentPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const { state } = useLocation()
   const OrderIdFromState = state?.orderId || null
-  console.log(OrderIdFromState)
   const [orderId, setOrderId] = useState(OrderIdFromState)
   const [orderDetails, setOrderDetails] = useState(null)
   const [snackbarData, setSnackbarData] = useState({

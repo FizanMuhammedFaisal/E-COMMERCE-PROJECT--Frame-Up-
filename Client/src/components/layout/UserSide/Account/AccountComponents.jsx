@@ -184,6 +184,26 @@ const EditProfile = () => {
                 </p>
               )}
             </div>
+          </div>{' '}
+          <div className='m-4'>
+            <button
+              type='button'
+              onClick={e => document.getElementById('profile').click()}
+              className='p-3 bg-customColorTertiary rounded-md flex-nowrap  w-32 hover:bg-customColorTertiaryLight text-white'
+            >
+              {loading ? (
+                <Spinner size={-1} speed={2} />
+              ) : (
+                <p className='whitespace-nowrap'> Update Profile</p>
+              )}
+            </button>
+            <input
+              type='file'
+              accept='image/jpeg, image/png,image/webp'
+              id='profile'
+              className='hidden'
+              onChange={handleImageUpload}
+            />
           </div>
           <div className='mt-6 flex justify-end space-x-3'>
             <button
@@ -196,9 +216,10 @@ const EditProfile = () => {
             >
               Cancel
             </button>
+
             <button
               type='submit'
-              className='bg-customtext-customColorTertiary border min-w-20 border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop'
+              className='bg-customColorTertiary border min-w-20 border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop'
             >
               {loading ? (
                 <CircularProgress color='inherit' size={20} />

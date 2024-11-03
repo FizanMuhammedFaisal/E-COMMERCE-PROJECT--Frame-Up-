@@ -641,6 +641,20 @@ const uploadProfile = asyncHandler(async (req, res, next) => {
   error.statusCode = 400
   return next(error)
 })
+//
+//
+const logoutUser = asyncHandler(async (req, res) => {
+  const user = req.user
+  if (!user) {
+    return res.status(400).json({ message: 'No user to log out.' })
+  }
+  res.cookie('jwtrefresh', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== 'development',
+    expires: new Date(0)
+  })
+  res.status(200).json({ message: ' user logged out' })
+})
 export {
   checkUser,
   userlogin,
@@ -661,5 +675,6 @@ export {
   updatePassword,
   deleteAddress,
   updateAddress,
-  uploadProfile
+  uploadProfile,
+  logoutUser
 }

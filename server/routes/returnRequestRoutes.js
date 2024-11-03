@@ -8,6 +8,8 @@ import {
 import { protect } from '../middlewares/authMiddleware.js'
 import admin from '../middlewares/authAdminMiddleware.js'
 router.post('/', protect, createReturnRequest)
+//for admin
 router.post('/update', protect, updateReturnRequest)
 router.get('/', protect, getReturnRequests)
+
 export default router

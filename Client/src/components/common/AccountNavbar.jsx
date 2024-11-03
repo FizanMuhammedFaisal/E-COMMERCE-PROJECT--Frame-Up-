@@ -4,13 +4,26 @@ import { Link } from 'react-router-dom'
 import { FaRegUser, FaUserCircle } from 'react-icons/fa'
 
 import { RiLogoutBoxRLine } from 'react-icons/ri'
+import { useDispatch } from 'react-redux'
+import apiClient from '../../services/api/apiClient'
+import { logoutUser } from '../../redux/slices/authSlice'
 
 export default function AccountNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef()
-
+  const dispatch = useDispatch()
   const toggleMenu = () => setIsOpen(!isOpen)
-
+  //
+  const handleLogout = async () => {
+    const res = await apiClient.get('api/users/logout', {
+      withCredentials: true
+    })
+    console.log(res.data)
+    if (res.status === 200) {
+      dispatch(logoutUser())
+    }
+  }
+  //
   useEffect(() => {
     const handleClickOutside = event => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -88,14 +101,13 @@ export default function AccountNavbar() {
               className='py-1 border-t border-gray-200'
               variants={itemVariants}
             >
-              <Link
-                to='/logout'
-                className='flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200'
-                onClick={() => setIsOpen(false)}
+              <button
+                onClick={handleLogout}
+                className='flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200'
               >
                 <RiLogoutBoxRLine className='mr-3 text-red-500' />
                 <span className='font-medium'>Sign out</span>
-              </Link>
+              </button>
             </motion.div>
           </motion.div>
         )}

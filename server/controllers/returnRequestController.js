@@ -50,10 +50,11 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
     }
 
     const order = await Order.findById(orderId)
-
+    let wallet = await Wallet.findOne({ userId: order.userId })
     if (!order) {
       return res.status(404).json({ message: 'Order not found' })
     }
+    //
     if (
       order.orderStatus === 'Return Accepted' ||
       order.orderStatus === 'Return Rejected'
@@ -62,6 +63,8 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
       error.statusCode = 400
       return next(error)
     }
+    //
+
     if (newStatus === 'Accept') {
       returnRequest.status = 'Approved'
     } else if (newStatus === 'Reject') {
@@ -73,8 +76,6 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
     }
 
     if (newStatus === 'Accept') {
-      let wallet = await Wallet.findOne({ userId: order.userId })
-
       if (!wallet) {
         wallet = new Wallet({
           userId: order.userId,
@@ -82,7 +83,9 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
           transactions: []
         })
       }
-      wallet.balance += order.subtotal
+      const amount =
+        order.subtotal + order.taxAmount - order.couponAmount - order.discount
+      wallet.balance += amount
       wallet.transactions.push({
         type: 'refund',
         amount: order.subtotal,

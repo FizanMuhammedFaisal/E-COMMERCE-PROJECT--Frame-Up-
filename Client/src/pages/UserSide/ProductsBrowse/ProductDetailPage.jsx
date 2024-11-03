@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import apiClient from '../../../services/api/apiClient'
 import ProductDetails from '../../../components/layout/UserSide/Products/ProductDetails'
 import api from '../../../services/api/api'
 import Spinner from '../../../components/common/Animations/Spinner'
