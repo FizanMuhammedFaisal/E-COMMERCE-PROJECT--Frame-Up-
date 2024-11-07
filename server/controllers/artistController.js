@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import Artist from '../models/artistModel.js'
-import User from '../models/userModel.js'
+import Product from '../models/productModel.js'
+import mongoose from 'mongoose'
 
 const addArtist = asyncHandler(async (req, res, next) => {
   const { name, description, image } = req.body.data
@@ -38,7 +39,6 @@ const checkArtist = asyncHandler(async (req, res, next) => {
   const artistExist = await Artist.findOne({
     name: { $regex: new RegExp(`^${name}$`, 'i') }
   })
-  console.log(artistExist)
   if (artistExist) {
     const error = new Error('This Name Already Exist')
     error.statusCode = 400
@@ -50,7 +50,7 @@ const checkArtist = asyncHandler(async (req, res, next) => {
 //@ discp   to fetch artists
 //route      api/admin/getArtists
 //@access    private
-const getArtists = asyncHandler(async (req, res, next) => {
+const getArtistsAdmin = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1
   const limit = 10
   const search = req.query.search
@@ -92,4 +92,62 @@ const getArtists = asyncHandler(async (req, res, next) => {
     return next(error)
   }
 })
-export { addArtist, checkArtist, getArtists }
+//
+//@ discp   to fetch artists
+//route      api/artists/getArtists
+//@access    private
+const getArtist = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1
+  const limit = 10
+  const search = req.query.search
+  const skip = (page - 1) * limit
+  let artists
+
+  artists = await Artist.find({}).skip(skip).limit(limit)
+  const totalCount = await Artist.countDocuments({})
+  const totalPages = Math.ceil(totalCount / limit)
+  if (artists) {
+    setTimeout(() => {
+      return res.status(200).json({
+        artists,
+        hasNextPage: page < totalPages,
+        currentPage: Number(page),
+        totalPages
+      })
+    }, 4000)
+  }
+})
+//@ discp   to fetch artist detials
+//route      api/admin/getArtists
+//@access    private
+const getArtistDetails = asyncHandler(async (req, res) => {
+  const { id } = req.params
+  if (!id || !mongoose.isValidObjectId(id)) {
+    const error = new Error('Error finding artist.')
+    error.statusCode = 400
+    return next(error)
+  }
+  const artist = await Artist.findById(id)
+  if (artist) {
+    res.status(200).json({ artist })
+  }
+})
+//@ discp   to fetch artist art
+//route      api/admin/getArtistArt
+//@access    public
+const getArtistArt = asyncHandler(async (req, res) => {
+  const { artistId } = req.body
+  console.log(artistId)
+  const products = await Product.find({ artist: artistId })
+  if (products) {
+    res.status(200).json({ products })
+  }
+})
+export {
+  addArtist,
+  checkArtist,
+  getArtistsAdmin,
+  getArtist,
+  getArtistDetails,
+  getArtistArt
+}

@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -14,9 +12,6 @@ const orderStatuses = [
   'Shipped',
   'Delivered',
   'Cancelled'
-  // 'Return Initialized',
-  // 'Return Accepted',
-  // 'Return Rejected'
 ]
 
 export default function OrderEditPage() {
@@ -27,7 +22,9 @@ export default function OrderEditPage() {
   const [statusLoading, setStatusLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isStatusChangeOpen, setIsStatusChangeOpen] = useState(false)
+  const [isSingleCancelOpen, setIsSingleCancelOpen] = useState(false)
   const [newStatus, setNewStatus] = useState('')
+  const [cancelItemId, setCancelItemId] = useState('')
   const [error, setError] = useState(null)
 
   const fetchOrder = async orderId => {
@@ -78,7 +75,6 @@ export default function OrderEditPage() {
       setCurrentStatus(newStatus)
       await refetch()
       setIsStatusChangeOpen(false)
-      console.log(`Order status updated to: ${newStatus}`)
     } catch (error) {
       console.error('Failed to update order status:', error)
       setError('Failed to update order status. Please try again.')
@@ -103,6 +99,32 @@ export default function OrderEditPage() {
       setError('Failed to cancel order. Please try again.')
     } finally {
       setStatusLoading(false)
+    }
+  }
+
+  const handleSingleCancel = async itemId => {
+    console.log(itemId)
+    setCancelItemId(itemId)
+    setIsSingleCancelOpen(true)
+  }
+
+  const confirmSingleCancel = async () => {
+    setStatusLoading(true)
+    try {
+      console.log(cancelItemId)
+      await apiClient.post(`/api/order/cancel-item/admin`, {
+        orderId,
+        itemId: cancelItemId
+      })
+      await refetch()
+      setError(null)
+      setIsSingleCancelOpen(false)
+    } catch (error) {
+      console.error('Failed to cancel item:', error)
+      setError('Failed to cancel item. Please try again.')
+    } finally {
+      setStatusLoading(false)
+      setCancelItemId('')
     }
   }
 
@@ -241,9 +263,11 @@ export default function OrderEditPage() {
               <thead>
                 <tr className='text-left bg-gray-100 dark:bg-customP2BackgroundD/35'>
                   <th className='p-2'>Product</th>
+                  <th className='p-2'>Status</th>
                   <th className='p-2'>Quantity</th>
                   <th className='p-2'>Unit Price</th>
                   <th className='p-2'>Total</th>
+                  <th className='p-2'>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,47 +283,58 @@ export default function OrderEditPage() {
                         <span>{item.productName}</span>
                       </div>
                     </td>
+                    <td className='p-2'>{item.status}</td>
                     <td className='p-2'>{item.quantity}</td>
                     <td className='p-2'>${item.price.toFixed(2)}</td>
                     <td className='p-2'>
                       ${(item.price * item.quantity).toFixed(2)}
+                    </td>
+                    <td className='p-2'>
+                      {getStatusIndex(item.status) <= 1 && (
+                        <button
+                          onClick={() => handleSingleCancel(item._id)}
+                          className='bg-red-600 rounded-md px-3 py-2 hover:bg-red-500 text-white'
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className='border-t border-gray-700'>
-                  <td colSpan='3' className='p-2 text-right'>
+                  <td colSpan='5' className='p-2 text-right'>
                     Subtotal:
                   </td>
                   <td className='p-2'>${order.subtotal?.toFixed(2)}</td>
                 </tr>
                 <tr>
-                  <td colSpan='3' className='p-2 text-right'>
+                  <td colSpan='5' className='p-2 text-right'>
                     Shipping:
                   </td>
                   <td className='p-2'>${order.shippingCost?.toFixed(2)}</td>
                 </tr>
                 <tr>
-                  <td colSpan='3' className='p-2 text-right'>
+                  <td colSpan='5' className='p-2 text-right'>
                     Tax:
                   </td>
                   <td className='p-2'>${order.taxAmount?.toFixed(2)}</td>
                 </tr>
                 <tr>
-                  <td colSpan='3' className='p-2 text-right'>
+                  <td colSpan='5' className='p-2 text-right'>
                     Discount:
                   </td>
                   <td className='p-2'>-${order.discount?.toFixed(2)}</td>
                 </tr>
                 <tr>
-                  <td colSpan='3' className='p-2 text-right'>
-                    CouponDiscount:
+                  <td colSpan='5' className='p-2 text-right'>
+                    Coupon Discount:
                   </td>
                   <td className='p-2'>-${order.couponAmount?.toFixed(2)}</td>
                 </tr>
                 <tr className='font-bold'>
-                  <td colSpan='3' className='p-2 text-right'>
+                  <td colSpan='5' className='p-2 text-right'>
                     Total:
                   </td>
                   <td className='p-2'>${order.totalAmount?.toFixed(2)}</td>
@@ -392,7 +427,9 @@ export default function OrderEditPage() {
         >
           {isExpanded ? 'Hide Additional Details' : 'Show Additional Details'}
           <ChevronDown
-            className={`ml-2 transform ${isExpanded ? 'rotate-180' : ''} transition-transform duration-200`}
+            className={`ml-2 transform ${
+              isExpanded ? 'rotate-180' : ''
+            } transition-transform duration-200`}
           />
         </motion.button>
 
@@ -433,19 +470,29 @@ export default function OrderEditPage() {
       <AlertDialog
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
-        button2={'Cancel Order'}
+        button2='Cancel Order'
         onConfirm={onConfirm}
         loading={statusLoading}
+        description='Are you sure you want to cancel this order?'
       />
 
       <AlertDialog
         isOpen={isStatusChangeOpen}
         onCancel={() => setIsStatusChangeOpen(false)}
-        button2={'Confirm Status Change'}
+        button2='Confirm Status Change'
         onConfirm={confirmStatusUpdate}
         loading={statusLoading}
         description={`Are you sure you want to change the order status to ${newStatus}?`}
-      ></AlertDialog>
+      />
+
+      <AlertDialog
+        isOpen={isSingleCancelOpen}
+        onCancel={() => setIsSingleCancelOpen(false)}
+        button2='Cancel Item'
+        onConfirm={confirmSingleCancel}
+        loading={statusLoading}
+        description='Are you sure you want to cancel this item?'
+      />
     </motion.div>
   )
 }

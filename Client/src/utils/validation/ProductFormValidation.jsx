@@ -50,18 +50,12 @@ const validateProductForm = (
     errors.productDescription =
       'Description should be at least 10 characters long'
   }
-  const artistName = formData.artistName || []
+  const artist = formData.artist || []
+  console.log(artist)
+  // Check if at least one element in the artist array is an object
 
-  // Check if at least one element in the artistName array is an object
-  const hasOneOption = artistName.some(
-    option =>
-      typeof option === 'object' &&
-      !Array.isArray(option) &&
-      Object.keys(option).length > 0
-  )
-
-  if (!hasOneOption) {
-    errors.artistName = 'At least one artist Name is required'
+  if (!artist) {
+    errors.artist = 'At least one artist Name is required'
   }
 
   // Validate product information (optional but can have min length)

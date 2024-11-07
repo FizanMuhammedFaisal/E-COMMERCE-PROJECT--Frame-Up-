@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Alert, Button, Snackbar } from '@mui/material'
 import ImageZoomModal from '../../../modals/ImageZoomModal'
-import ProductRatings from '../../../common/ProductRatings'
 import ProductFeatures from './ProductFeatures'
 import RelatedProducts from './RelatedProducts'
 import { useCart } from '../../../../hooks/useCart'
@@ -11,7 +10,6 @@ import apiClient from '../../../../services/api/apiClient'
 import Breadcrumb from '../../../common/Breadcrumb'
 import ProductDetailsSection from './ProductDetailsSection'
 import ArtDetailsSection from './ArtDetailsSection'
-import { motion } from 'framer-motion'
 
 function ProductDetails({ product, discount }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -114,9 +112,6 @@ function ProductDetails({ product, discount }) {
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <section>
           <RelatedProducts productId={product._id} />
-        </section>
-        <section className='mt-16'>
-          <ProductRatings />
         </section>
 
         <section className='mt-16'>

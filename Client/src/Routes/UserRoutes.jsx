@@ -21,7 +21,9 @@ import OrderConfirmationWrapper from '../utils/OrderConfirmationWrapper.jsx'
 import PaymentPage from '../pages/UserSide/Payment/PaymentPage.jsx'
 import OrderConfirmedPage from '../pages/UserSide/Payment/OrderConfirmedPage.jsx'
 import WishlistPage from '../pages/UserSide/Wishlist/WishlistPage.jsx'
-
+import ArtistsBrowsePage from '../pages/UserSide/Artists/ArtistsBrowsePage.jsx'
+import ArtistDetailsPage from '../pages/UserSide/Artists/ArtistDetailsPage.jsx'
+import OrderDetails from '../pages/UserSide/Account/OrderDetails.jsx'
 const UserRoutes = [
   {
     path: '/login',
@@ -75,6 +77,14 @@ const UserRoutes = [
         path: 'wishlist',
         element: <WishlistPage />
       },
+      {
+        path: 'artists',
+        element: <ArtistsBrowsePage />
+      },
+      {
+        path: 'artists/:id',
+        element: <ArtistDetailsPage />
+      },
 
       {
         path: 'account',
@@ -83,6 +93,10 @@ const UserRoutes = [
       {
         path: 'account/:routes',
         element: <ProtectedRoute element={<AccountPage />} />
+      },
+      {
+        path: 'account/order-history/:id',
+        element: <ProtectedRoute element={<OrderDetails />} />
       },
       {
         path: 'order-confirmed',

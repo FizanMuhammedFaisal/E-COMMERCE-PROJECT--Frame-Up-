@@ -6,7 +6,7 @@ let initialState = {
   productYear: '',
   productStock: '',
   productCategory: { themes: [], styles: [], techniques: [] },
-  artistName: '',
+  artist: '',
   productDescription: '',
   productInformation: '',
   productImages: [],

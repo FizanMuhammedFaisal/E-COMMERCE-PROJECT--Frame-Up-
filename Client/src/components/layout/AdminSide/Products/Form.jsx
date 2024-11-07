@@ -218,7 +218,7 @@ function Form({
             <div className='pt-2 font-tertiary'>
               {errorMessages && (
                 <p className='text-red-500 hover:text-red-300'>
-                  {errorMessages.artistName}
+                  {errorMessages.artist}
                 </p>
               )}
             </div>
@@ -447,7 +447,7 @@ function Form({
             disabled={loadingImages || loadingThumbnail || loading}
           >
             <div className='flex gap-2'>
-              {loading ? <Spinner size={1} /> : ''}
+              {loading ? <Spinner size={-1} speed={2} /> : ''}
               Add Product
             </div>
           </button>

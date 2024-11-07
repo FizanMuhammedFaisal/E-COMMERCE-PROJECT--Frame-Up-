@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react'
-
+import { useState } from 'react'
 import api from '../../../../services/api/api'
 import { validateLoginForm } from '../../../../utils/validation/FormValidation'
-
 import { setUser } from '../../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
+import { toast } from 'sonner'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -28,7 +27,7 @@ function LoginForm() {
       localStorage.setItem('accessToken', accessToken)
       const data = { user: res.data._id, role: res.data.role }
       dispatch(setUser(data))
-      console.log(res)
+      toast.success('Login Successfull')
     } catch (error) {
       const responseError = error?.response?.data?.message || error
       setErrors({ ...errors, responseError })

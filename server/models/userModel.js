@@ -19,8 +19,7 @@ const userSchema = mongoose.Schema({
     default: null
   },
   profile: {
-    type: String,
-    required: true
+    type: String
   },
   status: {
     type: String,

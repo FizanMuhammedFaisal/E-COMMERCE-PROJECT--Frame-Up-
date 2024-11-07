@@ -34,7 +34,6 @@ const addProducts = asyncHandler(async (req, res) => {
       ...processedProductCategory.styles,
       ...processedProductCategory.techniques
     ]
-    console.log(artistName)
 
     // Create the product using the extracted IDs
     const newProduct = await Product.create({
@@ -44,7 +43,7 @@ const addProducts = asyncHandler(async (req, res) => {
       productDescription,
       productImages,
       thumbnailImage,
-      artist: artistName.id,
+      artist: artistName.value,
       weight,
       dimensions,
       productCategories,
@@ -108,7 +107,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // Search functionality
   if (searchData) {
-    const searchRegex = new RegExp(searchData, 'i') // 'i' for case-insensitive search
+    const searchRegex = new RegExp(searchData, 'i')
     filter.$or = [
       { productName: { $regex: searchRegex } },
       { productDescription: { $regex: searchRegex } }
@@ -759,14 +758,19 @@ const getSearched = asyncHandler(async (req, res) => {
 })
 //
 const getProductCards = asyncHandler(async (req, res, next) => {
-  const products = await Product.find({}).sort({ productStock: 1 }).limit(9)
+  const products = await Product.find({})
+    .populate('artist')
+    .sort({ productStock: 1 })
+    .limit(9)
 
   const Products = products.map((product, i) => {
     return {
       image: product.thumbnailImage,
       title: product.productName,
       price: product.productPrice,
-      id: product._id
+      id: product._id,
+      artist: product.artist,
+      description: product.productDescription
     }
   })
   res.status(200).json({ message: 'fetched Products', Products })
@@ -957,6 +961,24 @@ const getRelatedProducts = asyncHandler(async (req, res, next) => {
     res.status(200).json({ success: true, products })
   }
 })
+const getNewArt = asyncHandler(async (req, res, next) => {
+  const products = await Product.find({})
+    .populate('artist')
+    .sort({ createdAt: -1 })
+    .limit(6)
+
+  const Products = products.map((product, i) => {
+    return {
+      image: product.thumbnailImage,
+      title: product.productName,
+      price: product.productPrice,
+      id: product._id,
+      artist: product.artist,
+      description: product.productDescription
+    }
+  })
+  res.status(200).json({ message: 'fetched Products', Products })
+})
 export {
   addProducts,
   getProducts,
@@ -966,5 +988,6 @@ export {
   getProductsAdmin,
   getSearched,
   getProductCards,
-  getRelatedProducts
+  getRelatedProducts,
+  getNewArt
 }

@@ -9,7 +9,7 @@ import { getCartDetails, applyCoupon } from '../utils/cartUtils.js'
 import Wallet from '../models/walletModel.js'
 import PDFDocument from 'pdfkit'
 import fs from 'fs'
-import mongoose from 'mongoose'
+import mongoose, { isValidObjectId } from 'mongoose'
 
 ///
 //
@@ -90,6 +90,13 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   }
 
   order.orderStatus = 'Cancelled'
+  for (const item of order.items) {
+    const product = await Product.findById(item.productId)
+    if (product) {
+      product.stock += item.quantity
+      await product.save()
+    }
+  }
   await order.save()
 
   return res.status(200).json({
@@ -184,30 +191,42 @@ const getUserOrders = asyncHandler(async (req, res) => {
 //
 const updateOrderStatus = asyncHandler(async (req, res, next) => {
   const { orderId, newStatus } = req.body
-  console.log(orderId, newStatus)
-  if (newStatus === 'Delivered') {
-  }
+
   try {
     const order = await Order.findById(orderId)
-    console.log(order)
+
+    if (!order) {
+      const error = new Error('Order not found')
+      error.statusCode = 404
+      return next(error)
+    }
+
+    if (order.orderStatus === 'Cancelled') {
+      return res.status(400).json({
+        message: 'Cannot update a canceled order'
+      })
+    }
+
     if (
       order.paymentMethod === 'Cash on Delivery' &&
       newStatus === 'Delivered'
     ) {
-      console.log('makinf payment')
       order.paymentStatus = 'Paid'
-      order.orderStatus = newStatus
-    } else {
-      order.orderStatus = newStatus
-      console.log('upating it')
     }
+    order.orderStatus = newStatus
+
+    // Update the status of each item in the order
+    order.items.forEach(item => {
+      item.status = newStatus
+    })
+
     const updatedOrder = await order.save()
     if (!updatedOrder) {
       const error = new Error('order not found')
       error.statusCode = 404
       return next(error)
     }
-    console.log(updatedOrder)
+
     res.status(200).json({
       message: 'Order status updated successfully',
       order: updatedOrder
@@ -424,7 +443,6 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     }
     const subtotal = Math.ceil(cartDetails[0].subtotal)
     const discount = Math.ceil(cartDetails[0].discount)
-    console.log(discount)
     const totalPrice = Math.ceil(cartDetails[0].totalPrice)
     let totalAmount = Math.ceil(totalPrice + taxAmount + shippingCost)
 
@@ -457,10 +475,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       couponCode: appliedCouponCode,
       couponAmount: couponDiscount
     })
-
-    await updateProductStock(updatedCart)
     await clearCart(user._id)
-
     if (paymentMethod === 'Razor Pay') {
       try {
         const options = {
@@ -538,14 +553,13 @@ const verifyPayment = async (req, res) => {
 
   // Update order status in your database
   try {
-    console.log(orderId)
     try {
       const order = await Order.findByIdAndUpdate(
         orderId,
         { paymentStatus: 'Paid' },
         { new: true }
       )
-      console.log(order)
+      await updateProductStock(order.items)
     } catch (error) {
       console.log(error)
     }
@@ -562,14 +576,19 @@ const verifyPayment = async (req, res) => {
 //
 const retryPayment = asyncHandler(async (req, res, next) => {
   const { orderId } = req.body
-  console.log(orderId)
   try {
     const order = await Order.findById(orderId)
 
     if (!order || order.paymentStatus === 'Paid') {
-      return res.status(400).json({ message: 'Invalid or already paid order' })
+      const error = new Error('Invalid or Already Paid.')
+      error.statusCode = 400
+      return next(error)
     }
-
+    if (order.orderStatus === 'Cancelled') {
+      const error = new Error('Order Already Cancelled')
+      error.statusCode = 400
+      return next(error)
+    }
     let razorpayOrderId = order.razorpayOrderId
 
     if (!razorpayOrderId) {
@@ -742,6 +761,174 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   pdfDoc.end()
 })
 
+//
+const cancelOrderItem = asyncHandler(async (req, res, next) => {
+  const { orderId, itemId } = req.body
+  const userId = req.user._id
+  let Message = ''
+  if (
+    !orderId ||
+    !itemId ||
+    !mongoose.isValidObjectId(orderId) ||
+    !mongoose.isValidObjectId(itemId)
+  ) {
+    const error = new Error('No required data to cancel order.')
+    error.statusCode = 400
+    return next(error)
+  }
+  const order = await Order.findById(orderId)
+
+  if (!order) {
+    const error = new Error('Order Not Found.')
+    error.statusCode = 400
+    return next(error)
+  }
+  if (order.userId.toString() !== userId.toString()) {
+    const error = new Error('You are not authorized to cancel this order.')
+    error.statusCode = 403
+    return next(error)
+  }
+
+  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+    const error = new Error(
+      'Order cannot be cancelled. It has already been shipped or delivered.'
+    )
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const itemIndex = order.items.findIndex(
+    item => item._id.toString() === itemId
+  )
+
+  if (itemIndex === -1) {
+    const error = new Error('item Not Found.')
+    error.statusCode = 404
+    return next(error)
+  }
+
+  order.items[itemIndex].status = 'Cancelled'
+  const allItemsCanceled = order.items.every(
+    item => item.status === 'Cancelled'
+  )
+
+  if (allItemsCanceled) {
+    order.orderStatus = 'Cancelled'
+  }
+  // need to do calcuationhere
+
+  // const canceledItem = order.items[itemIndex]
+  // order.totalAmount -= canceledItem.price // Adjust this based on your schema
+  // if (order.totalAmount < 0) order.totalAmount = 0 // To avoid negative totals
+  Message = 'Cancellation successfull'
+  let wallet = await Wallet.findOne({ userId: order.userId })
+  if (order.paymentStatus === 'Paid') {
+    if (!wallet) {
+      wallet = new Wallet({
+        userId: order.userId,
+        balance: 0,
+        transactions: []
+      })
+    }
+
+    wallet.balance +=
+      order.subtotal +
+      order.taxAmount +
+      order.shippingCost -
+      order.couponAmount -
+      order.discount
+
+    wallet.transactions.push({
+      type: 'refund',
+      amount: order.totalAmount,
+      description: `Refund for order item ${order._id}`
+    })
+
+    await wallet.save()
+    Message = 'Cancellation successful and amount refunded to  wallet.'
+  }
+
+  const product = await Product.findById(itemId)
+  if (product) {
+    product.stock += item.quantity
+    await product.save()
+  }
+
+  await order.save()
+
+  return res.status(200).json({
+    message: Message,
+    order,
+    walletBalance: wallet.balance
+  })
+})
+//
+//
+const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
+  const { orderId, itemId } = req.body
+
+  if (!orderId || !itemId) {
+    const error = new Error('id Required for cancelling')
+    error.statusCode = 400
+    return next(error)
+  }
+  const order = await Order.findById(orderId)
+  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+    const error = new Error(
+      'Order cannot be cancelled. It has already been shipped or delivered.'
+    )
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const itemIndex = order.items.findIndex(
+    item => item._id.toString() === itemId
+  )
+
+  if (itemIndex === -1) {
+    const error = new Error('item Not Found.')
+    error.statusCode = 404
+    return next(error)
+  }
+
+  order.items[itemIndex].status = 'Cancelled'
+  const allItemsCanceled = order.items.every(
+    item => item.status === 'Cancelled'
+  )
+  console.log(allItemsCanceled)
+  if (allItemsCanceled) {
+    order.orderStatus = 'Cancelled'
+  }
+  await order.save()
+  if (order.paymentStatus === 'Paid') {
+    let wallet = await Wallet.findOne({ userId: order.userId })
+
+    if (!wallet) {
+      wallet = new Wallet({
+        userId: order.userId,
+        balance: 0,
+        transactions: []
+      })
+    }
+    const amount =
+      order.subtotal +
+      order.taxAmount +
+      order.shippingCost -
+      order.couponAmount -
+      order.discount
+    wallet.balance += amount
+    wallet.transactions.push({
+      type: 'refund',
+      amount: order.totalAmount,
+      description: `Refund for order ${order._id}`
+    })
+
+    await wallet.save()
+  }
+  if (order) {
+    res.status(200).json({ message: 'cancellation successfull', order })
+  }
+})
 export {
   initiateOrder,
   getOrdersAdmin,
@@ -754,5 +941,7 @@ export {
   retryPayment,
   cancelOrderAdmin,
   getUserOrders,
-  getInvoiceDownloadURL
+  getInvoiceDownloadURL,
+  cancelOrderItem,
+  cancelOrderItemAdmin
 }

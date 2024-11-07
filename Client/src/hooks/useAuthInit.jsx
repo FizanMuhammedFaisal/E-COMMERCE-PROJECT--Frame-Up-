@@ -12,7 +12,6 @@ const useAuthInit = () => {
         const response = await api.get('/users/access', {
           withCredentials: true
         })
-        console.log('called')
         const data = {
           user: response.data.user,
           role: response.data.role,

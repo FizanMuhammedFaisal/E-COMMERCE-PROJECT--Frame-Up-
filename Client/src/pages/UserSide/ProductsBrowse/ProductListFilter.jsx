@@ -21,7 +21,7 @@ function ProductListFilter({
     Themes: [],
     Styles: [],
     Techniques: [],
-    priceRange: [0, 10000],
+    priceRange: [0, 100000],
     aA_zZ: false,
     zZ_aA: false
   })
@@ -34,7 +34,7 @@ function ProductListFilter({
       Themes: searchParams.get('Themes')?.split(',') || [],
       Styles: searchParams.get('Styles')?.split(',') || [],
       Techniques: searchParams.get('Techniques')?.split(',') || [],
-      priceRange: [0, Number(searchParams.get('priceRange')) || 10000],
+      priceRange: [0, Number(searchParams.get('priceRange')) || 100000],
       aA_zZ: searchParams.get('aA_zZ') === 'true',
       zZ_aA: searchParams.get('zZ_aA') === 'true'
     }
@@ -133,7 +133,7 @@ function ProductListFilter({
       Themes: [],
       Styles: [],
       Techniques: [],
-      priceRange: [0, 10000],
+      priceRange: [0, 100000],
       aA_zZ: false,
       zZ_aA: false
     })
@@ -253,10 +253,10 @@ function ProductListFilter({
           />
           <div className='flex justify-between mt-2'>
             <span className='inline-block px-2 py-1 text-sm bg-customColorPrimary text-customP2BackgroundD_600 rounded-full '>
-              $0
+              ₹0
             </span>
             <span className='inline-block px-2 py-1 text-sm bg-customColorPrimary text-customP2BackgroundD_600 rounded-full'>
-              ${filters.priceRange[1]}
+              ₹{filters.priceRange[1]}
             </span>
           </div>
         </div>

@@ -61,7 +61,7 @@ const ReturnRequestPage = () => {
   })
 
   const handleAction = useCallback((request, action, index) => {
-    setSelectedRequest(request.orderId)
+    setSelectedRequest(request._id)
     setActionType(action)
     setSelectedIndex(index)
     setIsModalOpen(true)
@@ -71,9 +71,8 @@ const ReturnRequestPage = () => {
     try {
       const res = await apiClient.post('/api/return-request/update', {
         newStatus: actionType,
-        orderId: selectedRequest
+        requestId: selectedRequest
       })
-      console.log(res.data)
       if (res.status === 200) {
         setReturnRequests(prev => {
           const newRequest = [...prev]
@@ -110,6 +109,7 @@ const ReturnRequestPage = () => {
     () => [
       { label: 'Request No.', field: 'requestNo' },
       { label: 'Order Id', field: 'orderId' },
+      { label: 'ProductId', field: 'productId' },
       { label: 'Customer Name', field: 'customerName' },
       { label: 'Return Reason', field: 'reason' },
       { label: 'Request Date', field: 'requestDate' },
@@ -124,6 +124,13 @@ const ReturnRequestPage = () => {
     return returnRequests.map((request, index) => ({
       requestNo: <p className='p-l-2'>{index + 1}</p>,
       orderId: <p>#{request.orderId.slice(-6).toUpperCase()}</p>,
+      productId: (
+        <p>
+          {request.productId
+            ? `# ${request?.productId?.slice(-6).toUpperCase()}`
+            : 'Whole Order'}
+        </p>
+      ),
       customerName: request.customerName || 'No name available',
       reason: request.reason,
       requestDate: new Date(request.requestedAt).toLocaleDateString(),

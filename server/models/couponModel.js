@@ -37,13 +37,7 @@ const couponSchema = new mongoose.Schema(
       type: String,
       enum: ['Active', 'Blocked'],
       default: 'Active'
-    },
-    usedBy: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
-    ]
+    }
   },
   { timestamps: true }
 )

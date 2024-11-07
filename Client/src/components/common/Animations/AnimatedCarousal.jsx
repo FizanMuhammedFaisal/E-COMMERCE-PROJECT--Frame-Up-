@@ -3,11 +3,13 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Draggable } from 'gsap/Draggable'
 import { CircularProgress } from '@mui/material'
+import { Link } from 'react-router-dom'
 
 gsap.registerPlugin(ScrollTrigger, Draggable)
 
 const ArtworkCard = ({ product, isActive }) => (
-  <div
+  <Link
+    to={`/all/${product.id}`}
     className={`flex-shrink-0 mt-9 w-[90vw] sm:w-[80vw] md:w-[60vw] lg:w-[35vw] mx-10 flex flex-col items-center transition-all duration-300 ${isActive ? 'scale-105 z-10' : 'scale-95 text-opacity-90'}`}
   >
     <div className='relative overflow-hidden rounded-sm w-full h-[50vh] sm:h-[60vh] md:h-[60vh] lg:h-[50vh]'>
@@ -21,7 +23,7 @@ const ArtworkCard = ({ product, isActive }) => (
       <div className='flex justify-between items-start mb-4'>
         <div>
           <h2 className='text-2xl font-bold'>{product.title}</h2>
-          <p className='text-lg text-gray-300'>by {product.artist}</p>
+          <p className='text-lg text-gray-300'>by {product.artist.name}</p>
         </div>
         <p className='text-xl font-bold'>${product.price}</p>
       </div>
@@ -30,7 +32,7 @@ const ArtworkCard = ({ product, isActive }) => (
         View Artwork
       </button>
     </div>
-  </div>
+  </Link>
 )
 
 const ExploreGalleryCard = ({ isActive }) => (

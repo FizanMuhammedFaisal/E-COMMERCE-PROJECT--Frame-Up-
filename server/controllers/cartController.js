@@ -5,7 +5,6 @@ import { getCartDetails } from '../utils/cartUtils.js'
 const addToCart = asyncHandler(async (req, res, next) => {
   const user = req.user
   const { productId, quantity } = req.body
-
   if (!productId || !quantity || quantity < 1) {
     const error = new Error('Invalid product data')
     error.statusCode = 400
@@ -29,7 +28,6 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
   //fetching all products needed
   const products = await Product.find({ _id: { $in: productIds } })
-
   const requestedProduct = products.find(
     product => product._id.toString() === productId
   )
@@ -74,11 +72,13 @@ const addToCart = asyncHandler(async (req, res, next) => {
 
   // Save the cart
   await cart.save()
-
   await cart.populate(
     'items.productId',
     'productName productPrice thumbnailImage'
   )
+
+  console.log('Populated Cart Items:', cart.items)
+
   const data = cart.items.map((item, i) => ({
     productPrice: item.productId.productPrice,
     productName: item.productId.productName,

@@ -35,7 +35,7 @@ const ResultCategory = React.memo(({ category }) => {
 const ResultProduct = React.memo(({ product }) => (
   <li>
     <Link
-      to={`/products/${product._id}`}
+      to={`/all/${product._id}`}
       className='flex items-start space-x-3 hover:bg-gray-50 p-2 rounded-md transition duration-150 ease-in-out'
     >
       <img

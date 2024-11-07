@@ -22,6 +22,19 @@ const itemsSchema = {
   thumbnailImage: {
     type: [String],
     required: false
+  },
+  status: {
+    type: String,
+    enum: [
+      'Pending',
+      'Shipped',
+      'Delivered',
+      'Cancelled',
+      'Return Initialized',
+      'Return Accepted',
+      'Return Rejected'
+    ],
+    default: 'Pending'
   }
 }
 
@@ -108,11 +121,6 @@ const orderSchema = new mongoose.Schema(
     },
     transactionId: {
       type: String
-    },
-
-    createdAt: {
-      type: Date,
-      default: Date.now
     }
   },
   {

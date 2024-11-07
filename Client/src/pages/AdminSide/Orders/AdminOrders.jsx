@@ -52,7 +52,6 @@ const AdminOrders = () => {
     const response = await apiClient.get(
       `/api/order/all/orders/admin?page=${pageParam}&limit=20`
     )
-    console.log(response)
     return response.data
   }
 

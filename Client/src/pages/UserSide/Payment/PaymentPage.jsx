@@ -75,10 +75,14 @@ export default function PaymentPage() {
         )
       }
     },
-    onError: () => {
+    onError: data => {
       setLoading(false)
       setPaymentError(true)
-      setErrorMessage('Payment failed. Please try again or check your orders.')
+      console.log()
+      setErrorMessage(
+        data?.response?.data?.message ||
+          'Payment failed. Please try again or check your orders.'
+      )
     }
   })
 

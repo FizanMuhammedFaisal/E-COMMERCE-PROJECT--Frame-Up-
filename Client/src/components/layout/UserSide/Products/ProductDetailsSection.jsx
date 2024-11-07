@@ -1,13 +1,14 @@
+'use client'
+
 import { useState } from 'react'
-import { Alert, LinearProgress } from '@mui/material'
+import { Alert } from '@mui/material'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   CheckIcon,
-  CrossIcon,
+  XIcon,
   HeartIcon,
   ShoppingCartIcon,
-  StarIcon,
-  XIcon
+  StarIcon
 } from 'lucide-react'
 import ChatComponent from './ChatComponent'
 import ChatButton from '../../../common/Animations/ChatButton'
@@ -30,10 +31,11 @@ function ProductDetailsSection({
   return (
     <section className='py-8 md:py-16 font-primary'>
       <div className='container mx-auto px-4'>
-        <div className='flex flex-col lg:flex-row items-start'>
-          <div className='w-full lg:w-1/2 mb-8 lg:mb-0'>
+        <div className='flex flex-col lg:flex-row items-start gap-8'>
+          {/* Image Gallery */}
+          <div className='w-full lg:w-1/2'>
             <div
-              className='w-full h-64 sm:h-96 relative overflow-hidden cursor-pointer mb-4'
+              className='w-full h-64 sm:h-96 relative overflow-hidden cursor-pointer mb-4 rounded-lg '
               onClick={openModal}
             >
               <motion.div
@@ -44,12 +46,12 @@ function ProductDetailsSection({
                 {allImages.map((image, index) => (
                   <div
                     key={index}
-                    className='w-full h-full flex-shrink-0 flex items-center justify-center'
+                    className='w-full h-full flex-shrink-0 flex items-center justify-center bg-gray-100'
                   >
                     <img
-                      src={image || '/placeholder.svg'}
+                      src={image}
                       alt={`Product ${index + 1}`}
-                      className='max-w-full max-h-full hover:scale-105 duration-500 object-contain'
+                      className='max-w-full max-h-full object-contain'
                     />
                   </div>
                 ))}
@@ -58,46 +60,48 @@ function ProductDetailsSection({
 
             <div className='mt-4'>
               <h2 className='text-xl font-semibold mb-4'>Product Images</h2>
-              <div className='flex space-x-4 overflow-x-auto pb-2'>
+              <div className='flex space-x-4 overflow-x-auto pb-2 scrollbar-hidden'>
                 {allImages.map((image, index) => (
-                  <div key={index} className='relative flex-shrink-0'>
-                    <motion.div
+                  <motion.div
+                    key={index}
+                    className='relative flex-shrink-0'
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div
                       className='cursor-pointer mb-2'
                       onClick={() => handleThumbnailClick(index)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 200,
-                        damping: 10
-                      }}
                     >
-                      <div className='h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center'>
+                      <div className='h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center bg-gray-100 rounded-md overflow-hidden'>
                         <img
-                          src={image || '/placeholder.svg'}
+                          src={image}
                           alt={`Thumbnail ${index + 1}`}
                           className='w-full h-full object-cover'
                           loading='lazy'
                         />
                       </div>
-                    </motion.div>
+                    </div>
                     {selectedImageIndex === index && (
                       <div className='absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-1 bg-customColorTertiary'></div>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className='w-full lg:w-3/4 lg:pl-12'>
-            <h1 className='text-3xl md:text-4xl mb-3 font-primary tracking-tighter leading-tight font-semibold text-customColorTertiaryDark'>
+          {/* Product Details */}
+          <div className='w-full lg:w-1/2 space-y-6'>
+            <h1 className='text-3xl md:text-4xl font-semibold text-customColorTertiaryDark'>
               {product.productName}
             </h1>
-            <p className='text-lg md:text-xl mb-6 text-gray-600'>
-              {product.productDescription}
+            <p className='text-lg sm:text-center text-gray-600'>
+              {product.productDescription.split(',').map((description, i) => {
+                return <p key={i}>{description}</p>
+              })}
             </p>
-            <div className='mb-6'>
+
+            <div>
               <h2 className='text-xl font-semibold mb-2'>Categories:</h2>
               <div className='flex flex-wrap gap-2'>
                 {product.productCategories.map(category => (
@@ -111,7 +115,7 @@ function ProductDetailsSection({
               </div>
             </div>
 
-            <div className='mb-6'>
+            <div>
               {product.discountPrice ? (
                 <>
                   <p className='text-2xl md:text-3xl font-bold text-red-600'>
@@ -143,92 +147,70 @@ function ProductDetailsSection({
               )}
             </div>
 
-            <div className='mb-6'>
-              <div className='flex items-center'>
-                {[0, 1, 2, 3, 4].map(rating => (
-                  <StarIcon
-                    key={rating}
-                    className={`h-5 w-5 flex-shrink-0 ${
-                      rating < Math.floor(4.5)
-                        ? 'text-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                    aria-hidden='true'
-                  />
-                ))}
-                <p className='ml-2 text-sm text-gray-600'>4.5 out of 5 stars</p>
+            <div className='grid grid-cols-2 gap-4 text-sm text-gray-700'>
+              <div>
+                <strong>Year:</strong> {product.productYear}
+              </div>
+              <div>
+                <strong>Dimensions:</strong> {product.dimensions}
+              </div>
+              <div>
+                <strong>Weight:</strong> {product.weight} kg
+              </div>
+              <div>
+                {product.productStock > 0 ? (
+                  <div className='flex items-center text-green-500'>
+                    <CheckIcon className='w-5 h-5 mr-2' />
+                    <span>In stock</span>
+                  </div>
+                ) : (
+                  <div className='flex items-center text-red-500'>
+                    <XIcon className='w-5 h-5 mr-2' />
+                    <span>Out of stock</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className='text-md text-gray-700 mb-4'>
-              <strong>Dimensions:</strong> {product.dimensions}
-            </div>
-            <div className='text-md text-gray-700 mb-6'>
-              <strong>Weight:</strong> {product.weight} kg
-            </div>
-
-            {product.productStock > 0 ? (
-              <div className='flex items-center mb-6'>
-                <CheckIcon
-                  className='flex-shrink-0 w-5 h-5 text-green-500 mr-2'
-                  aria-hidden='true'
-                />
-                <p className='text-sm text-gray-600'>
-                  In stock and ready to ship
-                </p>
-              </div>
-            ) : (
-              <div className='flex items-center mb-6'>
-                <CrossIcon
-                  className='flex-shrink-0 w-5 h-5 text-red-500 mr-2'
-                  aria-hidden='true'
-                />
-                <p className='text-sm text-gray-600'>Out of stock</p>
-              </div>
+            {product.productStock <= 5 && product.productStock > 0 && (
+              <Alert severity='warning' className='mb-6'>
+                Only {product.productStock} left in stock - order soon!
+              </Alert>
             )}
 
-            <div className='mt-8'>
-              {product.productStock <= 5 && (
-                <Alert severity='warning' className='mb-6'>
-                  Only {product.productStock} left in stock - order soon!
-                </Alert>
-              )}
+            <div className='flex flex-col sm:flex-row gap-4'>
+              <motion.button
+                disabled={loading || added || product.productStock === 0}
+                onClick={handleAddToCart}
+                className={`sm:flex-1 bg-customColorTertiary text-white h-12 px-8  rounded-md font-medium ${
+                  loading || added || product.productStock === 0
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:bg-customColorTertiaryLight'
+                } transition duration-300`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ShoppingCartIcon className='w-5 h-5 mr-2 inline' />
 
-              <div className='flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8'>
-                <button
-                  disabled={loading}
-                  onClick={handleAddToCart}
-                  className={`sm:flex-1 bg-customColorTertiary duration-300 hover:bg-customColorTertiaryLight whitespace-nowrap text-white h-12 px-8 rounded-md font-medium ${
-                    loading || added ? '' : 'hover:bg-customColorTertiaryLight'
-                  }`}
-                >
-                  {loading ? (
-                    <LinearProgress color='inherit' />
-                  ) : (
-                    <>
-                      <ShoppingCartIcon className='w-5 h-5 mr-2 inline' />
-                      Add to Cart
-                    </>
-                  )}
-                </button>
-                <motion.button
-                  onClick={() => {
-                    handleAddToWishlist(product._id)
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className='sm:flex-1 bg-gray-200 duration-300 text-gray-700 h-12 px-8 rounded-md font-medium hover:bg-gray-300'
-                >
-                  <>
-                    {' '}
-                    <HeartIcon className='w-5 h-5 mr-2 inline' />
-                    Wishlist
-                  </>
-                </motion.button>
-                <div className='sm:flex-1'>
-                  <ChatButton toggleChat={toggleChat} />
-                </div>
-              </div>
+                {loading
+                  ? 'Adding...'
+                  : added
+                    ? 'Added to Cart'
+                    : 'Add to Cart'}
+              </motion.button>
+              <motion.button
+                onClick={() => handleAddToWishlist(product._id)}
+                className='sm:flex-1 bg-gray-200 text-gray-700 h-12 px-8 rounded-md font-medium hover:bg-gray-300 transition duration-300'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <HeartIcon className='w-5 h-5 mr-2 inline' />
+                Wishlist
+              </motion.button>
+            </div>
+
+            <div className='mt-4'>
+              <ChatButton toggleChat={toggleChat} />
             </div>
           </div>
         </div>
@@ -243,9 +225,7 @@ function ProductDetailsSection({
             transition={{ duration: 0.5 }}
             className='fixed bottom-4 right-4 z-50'
           >
-            <div className='relative'>
-              <ChatComponent toggleChat={toggleChat} />
-            </div>
+            <ChatComponent toggleChat={toggleChat} id={product._id} />
           </motion.div>
         )}
       </AnimatePresence>

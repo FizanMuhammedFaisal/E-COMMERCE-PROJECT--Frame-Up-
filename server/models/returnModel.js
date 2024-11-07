@@ -11,6 +11,10 @@ const returnSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product'
+  },
   reason: {
     type: String,
     required: true

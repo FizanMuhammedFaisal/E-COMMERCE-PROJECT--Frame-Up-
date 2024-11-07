@@ -23,6 +23,7 @@ export default function InfiniteScrollText({
     const copiesNeeded =
       Math.ceil(container.offsetWidth / textElement.offsetWidth) + 1
     for (let i = 0; i < copiesNeeded; i++) {
+      console.log('times')
       container.appendChild(textElement.cloneNode(true))
     }
 
@@ -62,7 +63,7 @@ export default function InfiniteScrollText({
     >
       <div
         ref={containerRef}
-        className='inline-block whitespace-nowrap bg-textPrimary font-tertiary font-extrabold text-3xl width: max-content text-white'
+        className='inline-block whitespace-nowrap bg-customColorTertiary font-tertiary font-extrabold text-3xl width: max-content text-white'
       >
         <div ref={textRef} className='inline-block px-4  '>
           {text}

@@ -26,9 +26,9 @@ const AdminDiscountPage = () => {
   ]
 
   return (
-    <div className='p-6 font-primary bg-gray-100 dark:bg-customP2BackgroundD_darkest text-black dark:text-slate-50 min-h-screen  mt-3 rounded-sm'>
+    <div className='py-6 font-primary bg-gray-100 dark:bg-customP2BackgroundD_darkest text-black dark:text-slate-50 min-h-screen  mt-3 rounded-sm'>
       <div className='flex flex-col sm:flex-row justify-between items-center mb-4'>
-        <h1 className='text-4xl font-bold mb-2 sm:mb-0 '>
+        <h1 className=' text-3xl sm:text-4xl font-bold mb-2 sm:mb-0 '>
           Discounts Management
         </h1>
       </div>
@@ -40,7 +40,7 @@ const AdminDiscountPage = () => {
               <li key={tab.value} className='flex-1 relative'>
                 <a
                   onClick={() => setSelectedTab(tab.value)}
-                  className={`relative flex items-center justify-center w-full px-4 py-2 text-sm transition-colors duration-500 ease-in-out cursor-pointer rounded-md z-10 ${
+                  className={`relative flex whitespace-nowrap items-center justify-center w-full px-4 py-2 text-sm transition-colors duration-500 ease-in-out cursor-pointer rounded-md z-10 ${
                     selectedTab === tab.value
                       ? 'text-black font-semibold  dark:text-black shadow-sm'
                       : 'text-slate-600 hover:text-slate-900 font-medium dark:text-customP2BackgroundW'
@@ -68,7 +68,7 @@ const AdminDiscountPage = () => {
           </ul>
         </div>
         {/* Tab Content */}
-        <div className='p-5 '>
+        <div className='py-7 '>
           {selectedTab === 'productDiscount' && <ProductDiscount />}
           {selectedTab === 'categoryDiscount' && <CategoryDiscount />}
         </div>

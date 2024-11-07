@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import UsersTable from '../../../components/common/ReusableTable'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'sonner'
 import { Select } from '@headlessui/react'
 import AlertDialog from '../../../components/common/AlertDialog'
 import { useDispatch, useSelector } from 'react-redux'
@@ -39,9 +38,9 @@ const AdminUsers = () => {
         updateUserStatus({ id: currentUserId, status: newStatus })
       ).unwrap()
       toast.success('User status updated successfully!', {
-        className:
-          'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white '
+        position: 'top-right'
       })
+
       setIsOpen(false)
     } catch (error) {
       toast.error('Failed to update user status')

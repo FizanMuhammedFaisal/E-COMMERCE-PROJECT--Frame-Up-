@@ -21,7 +21,7 @@ const ProductBrowsePage = () => {
     Themes: [],
     Styles: [],
     Techniques: [],
-    priceRange: [0, 10000]
+    priceRange: [0, 100000]
   })
   const limit = 6
 
@@ -95,7 +95,7 @@ const ProductBrowsePage = () => {
       </div>
       <div>
         <div className=' py-6 mb-7  flex justify-center'>
-          <h1 className=' md:text-4.5xl  text-4xl font-primary tracking-tight leading-5 font-semibold text-center text-customColorTertiaryDark'>
+          <h1 className=' md:text-4.5xl  text-4xl font-primary tracking-tight leading-8 font-semibold text-center text-customColorTertiaryDark'>
             {searchData
               ? `Search Result for '${searchData}'`
               : '  Discover Unique Artworks'}

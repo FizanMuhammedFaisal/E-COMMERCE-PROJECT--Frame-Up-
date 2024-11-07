@@ -21,14 +21,16 @@ function ProductDiscount() {
   return (
     <div className=''>
       <div className='flex justify-between'>
-        <h2 className='text-2xl text-center font-bold'>Product Discount</h2>
+        <h2 className='text-lg sm:text-2xl whitespace-nowrap  text-center font-bold'>
+          Product Discount
+        </h2>
         <motion.button
           onClick={() => {
             navigate('/dashboard/discounts/add', { state: { type: 'product' } })
           }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
-          className='flex items-center px-4 py-2  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
+          className='flex items-center text-sm sm:text-base px-2 sm:px-3 py-2 whitespace-nowrap  text-white rounded-md shadow  bg-customP2BackgroundD_800 hover:bg-customP2BackgroundD_500'
         >
           Add Product Discount
         </motion.button>

@@ -7,6 +7,7 @@ import { setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 import { provider, auth } from '../../../services/firebase/firebase'
 import { signInWithPopup } from 'firebase/auth'
+import { toast, Toaster } from 'sonner'
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,7 +28,7 @@ function LoginForm() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
       const idToken = await user.getIdToken()
-      console.log(idToken)
+
       const res = await api.post('/users/google/auth', { idToken })
       const data = {
         user: res.data._id,
@@ -36,6 +37,7 @@ function LoginForm() {
         accessToken: res.data.accessToken
       }
       dispatch(setUser(data))
+      toast.success('Login Successfull')
     } catch (error) {
       // Handle Errors here.
       console.error('Error code:', error.code)
@@ -63,7 +65,7 @@ function LoginForm() {
       }
       console.log(data)
       dispatch(setUser(data))
-      console.log(res)
+      toast.success('Login Successfull')
     } catch (error) {
       const responseError = error?.response?.data?.message || error
       setErrors({ ...errors, responseError })
@@ -212,6 +214,7 @@ function LoginForm() {
               <button onClick={testAdmin}>admin</button>
             </div>
           </form>
+          <Toaster position='bottom-right' richColors />
         </div>
       </div>
     </>
