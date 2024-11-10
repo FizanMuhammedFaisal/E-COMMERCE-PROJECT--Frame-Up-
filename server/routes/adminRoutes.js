@@ -15,14 +15,21 @@ import {
   fetchStyles,
   fetchTechniques,
   updateArtistStatus,
-  updateCategories,
+  updateCategoryStatus,
+  updateCategory,
   getCategoryDiscounds,
   getProductDiscounds,
   addDiscount,
   updateDiscountStatus,
-  deleteCloudinaryImages
+  deleteCloudinaryImages,
+  getCategory
 } from '../controllers/adminController.js'
-
+import {
+  validateUpdateCategory,
+  validateAddCategory,
+  validateAddDiscount
+} from '../middlewares/validation/reqValidator.js'
+import Validate from '../middlewares/validation/validateRequest.js'
 router.post('/login', login)
 router.get('/getusers', protect, admin, getUsers)
 router.post('/adduser', protect, admin, addUser)
@@ -32,15 +39,22 @@ router.put('/updateuser', protect, admin, updateUser)
 router.post('/deleteuser', protect, admin, deleteUser)
 router.put('/users/:id/status', updateStatus)
 //categories
-router.post('/add-category', addCategory)
+router.post('/add-category', validateAddCategory, Validate, addCategory)
 router.get('/get-category-themes', fetchThemes)
 router.get('/get-category-styles', fetchStyles)
 router.get('/get-category-techniques', fetchTechniques)
-router.post('/categories/update-status', updateCategories)
+router.get('/category/:id', getCategory)
+router.post('/categories/update-status', updateCategoryStatus)
+router.put(
+  '/category/update/:id',
+  validateUpdateCategory,
+  Validate,
+  updateCategory
+)
 //dicounts
 router.get('/get-category-discounts', getCategoryDiscounds)
 router.get('/get-product-discounts', getProductDiscounds)
-router.post('/add-discount', addDiscount)
+router.post('/add-discount', validateAddDiscount, Validate, addDiscount)
 router.put('/discounts/update-status', updateDiscountStatus)
 //artist
 router.put('/artists/:id/status', updateArtistStatus)

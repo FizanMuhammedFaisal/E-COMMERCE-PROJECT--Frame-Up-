@@ -1,188 +1,164 @@
 import React from 'react'
-import { FaFacebookF } from 'react-icons/fa'
-import { FaInstagram } from 'react-icons/fa'
-import { FaGithub } from 'react-icons/fa'
-import { FaXTwitter } from 'react-icons/fa6'
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTwitter,
+  FaPinterest
+} from 'react-icons/fa'
+
 function Footer() {
+  const currentYear = new Date().getFullYear()
+
   return (
-    <div>
-      <footer className='bg-customColorTertiaryDark text-slate-50'>
-        <div className='mx-auto w-full max-w-screen-xl p-4 py-8 lg:py-8'>
-          <div className='md:flex md:justify-between'>
-            {/* logo of the brand */}
-            <div className='mb-6 md:mb-0'>
-              <a href='https://flowbite.com/' className='flex items-center'>
-                {/* <img
-                  src='https://flowbite.com/docs/images/logo.svg'
-                  className='h-8 me-3'
-                  alt='FrameUp Logo'
-                /> */}
-                <span className='self-center text-2xl font-semibold whitespace-nowrap dark:text-white'>
-                  FrameUP
-                </span>
-              </a>
-              <p></p>
-            </div>
-            <div className='grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3'>
-              <div>
-                <ul className='text-slate-50 font-primary font-medium'>
-                  <li className='mb-4'>
-                    <a className='hover:underline hover:text-slate-300'>FAQ</a>
-                  </li>
-                  <li className='mb-4'>
-                    <a className='hover:underline hover:text-slate-300'>
-                      Contact Us
-                    </a>
-                  </li>
-                  <li className='mb-4'>
-                    <a className='hover:underline hover:text-slate-300'>
-                      Returns
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <ul className='text-slate-50 font-primary font-medium'>
-                  <li className='mb-4'>
-                    <a className='hover:underline hover:text-slate-300'>FAQ</a>
-                  </li>
-                  <li className='mb-4'>
-                    <a className='hover:underline hover:text-slate-300'>
-                      Contact Us
-                    </a>
-                  </li>
-                  <li className='mb-4'>
-                    <a className='hover:underline hover:text-slate-300'>
-                      Returns
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+    <footer className='bg-customColorTertiaryDark text-slate-50'>
+      <div className='mx-auto w-full max-w-screen-xl p-4 py-8 lg:py-12'>
+        <div className='md:flex md:justify-between'>
+          <div className='mb-6 md:mb-0'>
+            <a href='/' className='flex items-center'>
+              <span className='self-center text-2xl font-semibold whitespace-nowrap'>
+                FrameUP
+              </span>
+            </a>
+            <p className='mt-2 max-w-xs text-sm text-slate-300'>
+              Discover and collect unique artworks from talented artists
+              worldwide.
+            </p>
           </div>
-          <hr className='my-6 border-gray-200 sm:mx-auto lg:my-8' />
           <div className='grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-4'>
             <div>
-              <h2 className='mb-6 text-sm font-semibold font-primary text-gray-900 uppercase dark:text-white'>
-                style
-              </h2>
-              <ul className='text-gray-500 dark:text-gray-400 font-primary font-medium'>
+              <h2 className='mb-6 text-sm font-semibold uppercase'>Shop Art</h2>
+              <ul className='text-slate-300 font-medium'>
                 <li className='mb-4'>
-                  <a href='https://flowbite.com/' className='hover:underline'>
-                    Flowbite
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Paintings
                   </a>
                 </li>
-                <li>
-                  <a
-                    href='https://tailwindcss.com/'
-                    className='hover:underline'
-                  >
-                    Tailwind CSS
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Sculptures
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Photography
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Digital Art
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h2 className='mb-6 text-sm font-semibold font-primary text-gray-900 uppercase dark:text-white'>
-                Subject
+              <h2 className='mb-6 text-sm font-semibold uppercase'>
+                For Artists
               </h2>
-              <ul className='text-gray-500 dark:text-gray-400 font-primary font-medium'>
+              <ul className='text-slate-300 font-medium'>
                 <li className='mb-4'>
-                  <a
-                    href='https://github.com/themesberg/flowbite'
-                    className='hover:underline '
-                  >
-                    Github
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Sell Your Art
                   </a>
                 </li>
-                <li>
-                  <a
-                    href='https://discord.gg/4eeurUVvTy'
-                    className='hover:underline'
-                  >
-                    Discord
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Artist Resources
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Artist Spotlight
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Become a Partner
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h2 className='mb-6 text-sm font-semibold text-gray-900 uppercase font-primary dark:text-white'>
-                For Artist
-              </h2>
-              <ul className='text-gray-500 dark:text-gray-400 font-primary font-medium'>
+              <h2 className='mb-6 text-sm font-semibold uppercase'>About Us</h2>
+              <ul className='text-slate-300 font-medium'>
                 <li className='mb-4'>
-                  <a href='#' className='hover:underline'>
-                    Privacy Policy
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Our Story
                   </a>
                 </li>
-                <li>
-                  <a href='#' className='hover:underline'>
-                    Terms &amp; Conditions
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Blog
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Press
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Careers
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h2 className='mb-6 text-sm font-semibold text-gray-900 uppercase font-primary dark:text-white'>
-                For Artist
-              </h2>
-              <ul className='text-gray-500 dark:text-gray-400 font-primary font-medium'>
+              <h2 className='mb-6 text-sm font-semibold uppercase'>Support</h2>
+              <ul className='text-slate-300 font-medium'>
                 <li className='mb-4'>
-                  <a href='#' className='hover:underline'>
-                    Privacy Policy
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    FAQ
                   </a>
                 </li>
-                <li>
-                  <a href='#' className='hover:underline'>
-                    Terms &amp; Conditions
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Contact Us
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Shipping
+                  </a>
+                </li>
+                <li className='mb-4'>
+                  <a href='#' className='hover:underline hover:text-slate-100'>
+                    Returns
                   </a>
                 </li>
               </ul>
-            </div>
-          </div>
-          <hr className='my-6 border-gray-200 sm:mx-auto lg:my-8' />
-          <div className='sm:flex sm:items-center sm:justify-between'>
-            <span className='text-sm font-primary text-gray-500 sm:text-center dark:text-gray-400'>
-              © 2023{' '}
-              <a href='https://flowbite.com/' className='hover:underline'>
-                Flowbite™
-              </a>
-              . All Rights Reserved.
-            </span>
-            <div className='flex mt-4 sm:justify-center sm:mt-0'>
-              <a
-                href='#'
-                className='text-gray-500 hover:text-gray-900 dark:hover:text-white'
-              >
-                <FaFacebookF />
-                <span className='sr-only'>Facebook page</span>
-              </a>
-              <a
-                href='#'
-                className='text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5'
-              >
-                <FaInstagram />
-                <span className='sr-only'>Instagram Page</span>
-              </a>
-              <a
-                href='#'
-                className='text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5'
-              >
-                <FaXTwitter />
-                <span className='sr-only'>Twitter page</span>
-              </a>
-              <a
-                href='#'
-                className='text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5'
-              >
-                <FaGithub />
-                <span className='sr-only'>GitHub account</span>
-              </a>
             </div>
           </div>
         </div>
-      </footer>
-    </div>
+        <hr className='my-6 border-slate-700 sm:mx-auto lg:my-8' />
+        <div className='sm:flex sm:items-center sm:justify-between'>
+          <span className='text-sm text-slate-300 sm:text-center'>
+            © {currentYear}{' '}
+            <a href='https://frameup.com' className='hover:underline'>
+              FrameUP™
+            </a>
+            . All Rights Reserved.
+          </span>
+          <div className='flex mt-4 space-x-5 sm:justify-center sm:mt-0'>
+            <a href='#' className='text-slate-400 hover:text-slate-100'>
+              <FaFacebookF className='w-5 h-5' />
+              <span className='sr-only'>Facebook page</span>
+            </a>
+            <a href='#' className='text-slate-400 hover:text-slate-100'>
+              <FaInstagram className='w-5 h-5' />
+              <span className='sr-only'>Instagram page</span>
+            </a>
+            <a href='#' className='text-slate-400 hover:text-slate-100'>
+              <FaTwitter className='w-5 h-5' />
+              <span className='sr-only'>Twitter page</span>
+            </a>
+            <a href='#' className='text-slate-400 hover:text-slate-100'>
+              <FaPinterest className='w-5 h-5' />
+              <span className='sr-only'>Pinterest page</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   )
 }
 

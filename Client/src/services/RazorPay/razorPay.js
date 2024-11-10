@@ -28,6 +28,11 @@ export const handleRazorPaySuccess = async (orderData, transactionType) => {
         ondismiss: () => {
           reject(new Error('Payment process interrupted.'))
         }
+      },
+      name: 'Frame Up',
+      description: 'Payment for your order',
+      theme: {
+        color: '#2B5D6E'
       }
     }
 

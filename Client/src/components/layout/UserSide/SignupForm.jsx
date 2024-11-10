@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import { validateRegisterForm } from '../../../utils/validation/FormValidation'
 import api from '../../../services/api/api'
@@ -28,15 +28,15 @@ function SignupForm() {
       const user = result.user
       const idToken = await user.getIdToken()
 
-      console.log(idToken, user) // You can log idToken here for debugging
       const res = await api.post('/users/google/auth', { idToken })
       const accessToken = res.data.accessToken
-      localStorage.setItem('accessToken', accessToken)
       const data = {
         user: res.data._id,
         role: res.data.role,
-        status: res.data.status
+        status: res.data.status,
+        accessToken
       }
+      navigate('/set-up')
 
       dispatch(setUser(data))
     } catch (error) {
@@ -57,12 +57,9 @@ function SignupForm() {
       return setError(errors)
     }
     try {
-      console.log(form)
       const res = await api.post('/users/checkuser', form)
       console.log(res)
-
-      const item = sessionStorage.setItem('x-timer', res.data.token)
-      console.log(item)
+      sessionStorage.setItem('x-timer', res.data.token)
 
       navigate('/send-otp', { replace: true })
     } catch (error) {

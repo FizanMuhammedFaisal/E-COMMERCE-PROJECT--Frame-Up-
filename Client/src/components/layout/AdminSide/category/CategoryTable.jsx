@@ -6,17 +6,20 @@ import AlertDialog from '../../../common/AlertDialog'
 import { toast } from 'react-toastify'
 import { useDispatch } from 'react-redux'
 import { updateStatus } from '../../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
+import { FaEdit } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 
 function CategoryTable({ data, type }) {
   const [modal, setModal] = useState({ isOpen: false, newStatus: '', id: '' })
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const columns = [
     { label: 'Serial No.', field: 'serialNo' },
     { label: 'Name', field: 'name' },
     { label: 'Description', field: 'description' },
-
-    { label: 'Action', field: 'action' }
+    { label: 'Action', field: 'action' },
+    { label: 'Edit', field: 'edit' }
   ]
 
   const handleStatusChange = (id, newStatus) => {
@@ -45,6 +48,9 @@ function CategoryTable({ data, type }) {
   }
   const onCancel = () => {
     setModal({ isOpen: false, newStatus: '', id: '' })
+  }
+  const handleEditCategory = id => {
+    navigate(`/dashboard/category/${id}`)
   }
   const store = useMemo(
     () =>
@@ -79,6 +85,15 @@ function CategoryTable({ data, type }) {
             <option value='Active'>Active</option>
             <option value='Blocked'>Blocked</option>
           </Select>
+        ),
+        edit: (
+          <div>
+            <FaEdit
+              onClick={() => {
+                handleEditCategory(curr._id)
+              }}
+            />
+          </div>
         )
       })),
     [data]

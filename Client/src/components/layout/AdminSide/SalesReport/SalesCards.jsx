@@ -51,7 +51,7 @@ export default function SalesCards({ salesData = {} }) {
       trend: -2
     },
     {
-      title: 'Total Order Amount',
+      title: 'Total Sales Amount',
       value: salesData.summary?.totalOrderAmount,
       icon: DollarSign,
       iconColor: 'bg-green-500',

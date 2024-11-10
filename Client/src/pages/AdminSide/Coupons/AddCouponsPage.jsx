@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { toast } from 'react-toastify'
+import { toast } from 'sonner'
 import apiClient from '../../../services/api/apiClient'
-
-import { CalendarIcon } from 'lucide-react'
 import { validateCoupon } from '../../../utils/validation/FormValidation'
 import { useNavigate } from 'react-router-dom'
 
@@ -29,7 +27,6 @@ export default function AddCouponForm() {
 
   const handleSubmit = async e => {
     e.preventDefault()
-    // Validate form data
     const validationErrors = validateCoupon(formData)
 
     if (Object.keys(validationErrors).length > 0) {
@@ -51,7 +48,7 @@ export default function AddCouponForm() {
     }
 
     try {
-      const res = await apiClient.post('/api/coupons/add-coupon', { newCoupon })
+      await apiClient.post('/api/coupons/add-coupon', { newCoupon })
       navigate('/dashboard/coupons')
       toast.success('Coupon Created', {
         className:
@@ -72,7 +69,22 @@ export default function AddCouponForm() {
       setErrors({})
     } catch (err) {
       console.error('Failed to add coupon:', err)
-      setErrors({ general: 'Failed to add coupon. Please try again.' })
+      if (err && err?.response?.data.errors) {
+        const errorMessages = err?.response?.data.errors
+          .map(error => error.msg)
+          .join(', ')
+        setErrors({ general: errorMessages })
+      } else if (err && err?.response?.data.message) {
+        setErrors({
+          general:
+            err?.response?.data.message ||
+            'Failed to add coupon. Please try again.'
+        })
+      } else {
+        setErrors({
+          general: 'Failed to add coupon. Please try again.'
+        })
+      }
     }
   }
 
@@ -83,7 +95,7 @@ export default function AddCouponForm() {
       </h1>
 
       {errors.general && (
-        <div className='dark:bg-customP2ForegroundD_400 border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
+        <div className='dark:bg-customP2BackgroundD border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
           <p className='text-red-900 dark:text-red-500 ms-4 text-start'>
             {errors.general}
           </p>

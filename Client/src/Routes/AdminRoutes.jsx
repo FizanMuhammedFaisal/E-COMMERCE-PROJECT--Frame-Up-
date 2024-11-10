@@ -21,6 +21,7 @@ import AddDiscountPage from '../pages/AdminSide/Discounts/AddDiscountPage'
 import AdminCouponsPage from '../pages/AdminSide/Coupons/AdminCouponsPage'
 import AddCouponsPage from '../pages/AdminSide/Coupons/AddCouponsPage'
 import ReturnRequestPage from '../pages/AdminSide/Orders/ReturnRequestPage'
+import CategoryEdit from '../pages/AdminSide/Categories/CategoryEdit'
 
 const AdminRoutes = [
   {
@@ -88,6 +89,10 @@ const AdminRoutes = [
           {
             path: 'category/add-categories',
             element: <AddCategoriesPage />
+          },
+          {
+            path: 'category/:categoryId',
+            element: <CategoryEdit />
           },
           {
             path: 'products/:productId',

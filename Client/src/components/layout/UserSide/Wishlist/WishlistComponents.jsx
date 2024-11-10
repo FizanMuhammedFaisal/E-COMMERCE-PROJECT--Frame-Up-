@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import apiClient from '../../../../services/api/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -45,9 +45,11 @@ const EmptyWishlist = () => {
 }
 
 const WishlistCard = ({ item, removeItem, handleAddToCard }) => {
-  console.log(item)
   return (
-    <div className='relative flex flex-col justify-between w-full h-96 bg-white rounded-lg overflow-hidden'>
+    <Link
+      to={`/all/${item._id}`}
+      className='relative flex flex-col justify-between w-full h-96 bg-white rounded-lg overflow-hidden'
+    >
       <div className='relative h-48 w-full overflow-hidden'>
         <img
           src={item.thumbnailImage[0]}
@@ -60,22 +62,14 @@ const WishlistCard = ({ item, removeItem, handleAddToCard }) => {
           </div>
         )}
       </div>
-      <div className='p-4 flex-grow'>
+      <div className='p-4 '>
         <h2 className='text-lg font-semibold text-gray-900 mb-1 truncate'>
           {item.productName}
         </h2>
         <p className='text-sm text-gray-500 mb-2'>Year: {item.productYear}</p>
-        <p className='text-lg font-medium text-gray-900'>
-          $
-          {item.discountPrice
-            ? item.discountPrice.toFixed(2)
-            : item.productPrice.toFixed(2)}
+        <p className='text-sm text-gray-500 font-semibold mb-2'>
+          Artist: {item.artist.name}
         </p>
-        {item.discountPrice && (
-          <p className='text-sm text-gray-500 line-through'>
-            ${item.productPrice.toFixed(2)}
-          </p>
-        )}
       </div>
       <button
         onClick={() => removeItem(item._id)}
@@ -88,17 +82,16 @@ const WishlistCard = ({ item, removeItem, handleAddToCard }) => {
         onClick={() => {
           handleAddToCard(item._id, item.productPrice)
         }}
-        className='w-full py-3 bg-white text-customColorTertiary hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center'
+        className='w-full py-3 bg-white text-customColorTertiary hover:bg-gray-100 hover:text-customColorTertiarypop transition-colors duration-300 flex items-center justify-center'
         disabled={item.productStock === 0}
       >
         <ShoppingCart size={18} className='mr-2' />
         {item.productStock === 0 ? 'Out of Stock' : 'Add to Cart'}
       </button>
-    </div>
+    </Link>
   )
 }
 const WishlistGrid = ({ wishlistItems, setSnackbarData, setWishlistItems }) => {
-  console.log(wishlistItems)
   const { addToCart } = useCart()
   const { isAuthenticated } = useSelector(state => state.auth)
 
@@ -106,7 +99,6 @@ const WishlistGrid = ({ wishlistItems, setSnackbarData, setWishlistItems }) => {
   const removeItem = async productId => {
     try {
       const res = await apiClient.post('/api/wishlist/remove', { productId })
-      console.log(res?.data?.wishlist)
       setWishlistItems(res?.data?.wishlist?.items)
       setSnackbarData({
         open: true,
@@ -131,7 +123,7 @@ const WishlistGrid = ({ wishlistItems, setSnackbarData, setWishlistItems }) => {
         severity: 'error'
       })
     }
-    const result = await addToCart(id, price, 1)
+    const result = await addToCart(id, 1)
     if (result.success) {
       // setAdded(true)
       setSnackbarData({
@@ -151,7 +143,7 @@ const WishlistGrid = ({ wishlistItems, setSnackbarData, setWishlistItems }) => {
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
       {wishlistItems.map(item => (
         <WishlistCard
-          key={item.id}
+          key={item._id}
           item={item}
           removeItem={removeItem}
           handleAddToCard={handleAddToCard}

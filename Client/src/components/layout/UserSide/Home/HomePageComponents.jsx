@@ -243,12 +243,12 @@ const FeaturedArtSection = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16'>
           {artworks?.length > 0
-            ? artworks.map(artwork => (
+            ? artworks.map((artwork, i) => (
                 <motion.div
                   onClick={() => {
                     handleClick(artwork._id)
                   }}
-                  key={artwork._id}
+                  key={i}
                   className='group hover:cursor-pointer p-4 sm:p-1'
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -395,7 +395,7 @@ function ArtistsComponent() {
           {[...Array(duplicateCount)].flatMap(() =>
             artists.map((artist, index) => (
               <motion.div
-                key={`${artist._id}-${Date.now()}`}
+                key={`${artist._id}-${index}-${duplicateCount}`}
                 whileHover={{ scale: 1.05, y: -10 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleArtistClick(artist._id)}

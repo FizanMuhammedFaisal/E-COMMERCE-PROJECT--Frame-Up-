@@ -1,16 +1,9 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
-import { AnimatePresence, easeInOut, motion } from 'framer-motion'
-import {
-  ArrowDownTrayIcon,
-  ArrowPathIcon,
-  CalendarIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline'
+import { useState, useMemo, useEffect } from 'react'
 import ReusableTable from '../../components/common/ReusableTable'
 import apiClient from '../../services/api/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import SalesCards from '../../components/layout/AdminSide/SalesReport/SalesCards'
-import { ArrowDown } from 'lucide-react'
+
 import SalesFilter from '../../components/layout/AdminSide/SalesReport/SalesFilter'
 
 export default function AdminSalesReport() {

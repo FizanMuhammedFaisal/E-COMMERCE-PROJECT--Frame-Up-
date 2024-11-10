@@ -156,15 +156,15 @@ export default function CartPage() {
               <div className='mt-8 bg-white p-6 rounded-lg shadow-sm'>
                 <div className='flex justify-between text-lg font-medium text-gray-900 mb-4'>
                   <p>Subtotal</p>
-                  <p>${subtotal.toFixed(2)}</p>
+                  <p>₹{subtotal.toFixed(2)}</p>
                 </div>
                 <div className='flex justify-between text-lg font-medium text-gray-900 mb-4'>
                   <p>Total Discount</p>
-                  <p>${discount.toFixed(2)}</p>
+                  <p>₹{discount.toFixed(2)}</p>
                 </div>
                 <div className='flex justify-between text-xl font-bold text-gray-900 mb-6'>
                   <p>Total</p>
-                  <p>${totalPrice.toFixed(2)}</p>
+                  <p>₹{totalPrice.toFixed(2)}</p>
                 </div>
                 <motion.button
                   className='w-full mb-4 py-3 px-4 border border-transparent rounded-md text-base font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none  transition-colors duration-200'

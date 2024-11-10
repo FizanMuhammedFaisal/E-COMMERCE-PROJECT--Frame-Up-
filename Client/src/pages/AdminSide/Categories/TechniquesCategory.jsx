@@ -18,7 +18,7 @@ function TechniquesCategory({ AddButton }) {
     <div>
       <div className='flex justify-between'>
         <h2 className='text-2xl ml-4 font-bold'>Techniques</h2>
-        <AddButton />
+        {AddButton}
       </div>
       <div className='mt-6'>
         <CategoriesTable type={'techniques'} data={techniques.data} />

@@ -273,32 +273,32 @@ export default function NewOrderPayment({
                   {item.productName} (x{item.quantity})
                 </span>
                 <span className='font-medium'>
-                  ${(item.productPrice * item.quantity).toFixed(2)}
+                  ₹{(item.productPrice * item.quantity).toFixed(2)}
                 </span>
               </div>
             ))}
             <div className='border-t border-gray-200 pt-4 space-y-2'>
               <div className='flex justify-between items-center'>
                 <span className='text-gray-600'>Subtotal</span>
-                <span className='font-medium'>${totalPrice.toFixed(2)}</span>
+                <span className='font-medium'>₹{totalPrice.toFixed(2)}</span>
               </div>
               <div className='flex justify-between items-center'>
                 <span className='text-gray-600'>Shipping</span>
-                <span className='font-medium'>${shipping.toFixed(2)}</span>
+                <span className='font-medium'>₹{shipping.toFixed(2)}</span>
               </div>
               <div className='flex justify-between items-center'>
                 <span className='text-gray-600'>Tax</span>
-                <span className='font-medium'>${tax.toFixed(2)}</span>
+                <span className='font-medium'>₹{tax.toFixed(2)}</span>
               </div>
               <div className='flex justify-between items-center text-green-600'>
                 <span>Total Discount</span>
-                <span>-${totalDiscount.toFixed(2)}</span>
+                <span>-₹{totalDiscount.toFixed(2)}</span>
               </div>
             </div>
             <div className='border-t border-gray-200 pt-4 flex justify-between items-center'>
               <span className='text-lg font-semibold'>Total</span>
               <span className='text-lg font-semibold'>
-                ${TotalAfterTax.toFixed(2)}
+                ₹{TotalAfterTax.toFixed(2)}
               </span>
             </div>
           </div>

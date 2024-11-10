@@ -1,9 +1,11 @@
 import asyncHandler from 'express-async-handler'
 import Cart from '../models/cartModel.js'
 import Product from '../models/productModel.js'
-import { getCartDetails } from '../utils/cartUtils.js'
+import { getCartDetails } from '../utils/helperUtils.js'
+import mongoose from 'mongoose'
 const addToCart = asyncHandler(async (req, res, next) => {
-  const user = req.user
+  console.log(req.body)
+  const userId = new mongoose.Types.ObjectId(req.user._id)
   const { productId, quantity } = req.body
   if (!productId || !quantity || quantity < 1) {
     const error = new Error('Invalid product data')
@@ -12,10 +14,12 @@ const addToCart = asyncHandler(async (req, res, next) => {
   }
 
   // cart fetch
-  let cart = await Cart.findOne({ userId: req.user.id })
+  console.log(userId)
+  let cart = await Cart.findOne({ userId: userId })
+  console.log(cart)
   if (!cart) {
     cart = new Cart({
-      userId: req.user.id,
+      userId: userId,
       items: [],
       subtotal: 0,
       discount: 0,
@@ -98,16 +102,17 @@ const addToCart = asyncHandler(async (req, res, next) => {
 // for fetching cart
 //
 const fetchCart = asyncHandler(async (req, res, next) => {
-  const user = req.user
-  if (!user) {
+  const userId = new mongoose.Types.ObjectId(req.user._id)
+  if (!userId) {
     const error = new Error('Invalid user')
     error.statusCode = 400
     return next(error)
   }
-  const cart = await getCartDetails(user._id)
-  console.log(cart)
-  if (!cart || cart.length === 0) {
-    return res.status(404).json({ message: 'Cart not found' })
+  const cart = await getCartDetails(userId)
+  if (!cart) {
+    const error = new Error('cart Not Fount')
+    error.statusCode = 400
+    return next(error)
   }
 
   res.status(200).json({
@@ -161,6 +166,7 @@ const updateQuantity = asyncHandler(async (req, res, next) => {
   }
 
   const user = req.user
+
   // if not cart
   const cart = await Cart.findOne({ userId: user._id })
   if (!cart) {
@@ -201,19 +207,25 @@ const updateQuantity = asyncHandler(async (req, res, next) => {
     error.statusCode = 400
     return next(error)
   }
-
+  const userId = new mongoose.Types.ObjectId(req.user._id)
   cart.items[productIndex].quantity = newQuantity
   await cart.save()
-  const cartDetails = await getCartDetails(user._id)
+  const cartDetails = await getCartDetails(userId)
   console.log(cartDetails)
   const quantity = cart.items[productIndex].quantity
+  console.log(
+    quantity,
+    cartDetails[0]?.subtotal,
+    cartDetails[0]?.discount,
+    cartDetails[0]?.totalPrice
+  )
   res.status(200).json({
     success: true,
     data: {
       quantity: quantity,
-      subtotal: cartDetails[0].subtotal,
-      discount: cartDetails[0].discount,
-      totalPrice: cartDetails[0].totalPrice
+      subtotal: cartDetails[0]?.subtotal,
+      discount: cartDetails[0]?.discount,
+      totalPrice: cartDetails[0]?.totalPrice
     }
   })
 })

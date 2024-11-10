@@ -7,6 +7,8 @@ import { RiLogoutBoxRLine } from 'react-icons/ri'
 import { useDispatch } from 'react-redux'
 import apiClient from '../../services/api/apiClient'
 import { logoutUser } from '../../redux/slices/authSlice'
+import { clearCart } from '../../redux/slices/Users/Cart/cartSlice'
+import { clearWishlist } from '../../redux/slices/Users/Wishlist/wishlistSlice'
 
 export default function AccountNavbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,8 +20,9 @@ export default function AccountNavbar() {
     const res = await apiClient.get('api/users/logout', {
       withCredentials: true
     })
-    console.log(res.data)
     if (res.status === 200) {
+      dispatch(clearCart())
+      dispatch(clearWishlist())
       dispatch(logoutUser())
     }
   }

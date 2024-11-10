@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useLocation } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { addDiscount } from '../../../../redux/slices/Admin/AdminDiscount/adminDiscountSlice'
 import {
   fetchStyles,
@@ -10,6 +9,7 @@ import {
   fetchThemes
 } from '../../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
 import ProductSelect from '../../../common/ProductSelect'
+import { validateDiscount } from '../../../../utils/validation/FormValidation'
 
 export default function AddDiscountForm() {
   const location = useLocation()
@@ -19,6 +19,7 @@ export default function AddDiscountForm() {
     discountTarget: type,
     discountType: '',
     discountValue: '',
+    minValue: '',
     startDate: '',
     endDate: '',
     description: '',
@@ -26,8 +27,9 @@ export default function AddDiscountForm() {
     status: 'Active'
   })
   const [error, setError] = useState('')
+  const [errors, setErrors] = useState('')
   const dispatch = useDispatch()
-
+  const navigate = useNavigate()
   const { themes, styles, techniques } = useSelector(
     state => state.categoryFetch
   )
@@ -49,39 +51,29 @@ export default function AddDiscountForm() {
 
   const handleSubmit = async e => {
     e.preventDefault()
+    const validationErrors = validateDiscount(discountData)
 
-    if (
-      !discountData.name ||
-      !discountData.discountTarget ||
-      !discountData.targetId ||
-      !discountData.discountType ||
-      !discountData.discountValue ||
-      !discountData.startDate ||
-      !discountData.endDate
-    ) {
-      setError('Please fill in all required fields')
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       return
     }
-
+    setErrors('')
     try {
-      const result = await dispatch(addDiscount(discountData)).unwrap()
-      toast.success('Discount Created', {
-        className:
-          'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white'
-      })
-      console.log('Discount added successfully:', result)
+      await dispatch(addDiscount(discountData)).unwrap()
+      toast.success('Discount Created')
       setDiscountData({
         name: '',
         discountTarget: '',
         discountType: '',
         discountValue: '',
+        minValue: '',
         startDate: '',
         endDate: '',
-
         targetId: '',
         status: 'active'
       })
       setError('')
+      navigate('/dashboard/discounts')
     } catch (err) {
       console.error('Failed to add discount:', err)
       setError(err.message || 'An error occurred while adding the discount')
@@ -99,7 +91,7 @@ export default function AddDiscountForm() {
       </h1>
 
       {error && (
-        <div className='dark:bg-customP2ForegroundD_400 border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
+        <div className='dark:bg-customP2BackgroundD border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
           <p className='text-red-900 dark:text-red-500 ms-4 text-start'>
             {error}
           </p>
@@ -108,6 +100,11 @@ export default function AddDiscountForm() {
 
       <form onSubmit={handleSubmit} className='space-y-6'>
         <div className='form-group'>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>{errors.name}</p>
+            )}
+          </div>
           <label
             htmlFor='name'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
@@ -126,11 +123,18 @@ export default function AddDiscountForm() {
         </div>
 
         <div className='form-group'>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.discountTarget}
+              </p>
+            )}
+          </div>
           <label
             htmlFor='discountTarget'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
           >
-            Offer Type
+            Discount Target
           </label>
           <select
             id='discountTarget'
@@ -139,9 +143,9 @@ export default function AddDiscountForm() {
             onChange={handleChange}
             className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
           >
-            <option value=''>Select offer type</option>
+            <option value=''>Select Discount target</option>
             <option value='Category'>Category</option>
-            <option value='Products'>Products</option>
+            <option value='Product'>Product</option>
           </select>
         </div>
 
@@ -151,12 +155,14 @@ export default function AddDiscountForm() {
               htmlFor='targetId'
               className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
             >
-              {discountData.discountTarget === 'Products'
+              {discountData.discountTarget === 'Product'
                 ? 'Product'
                 : 'Category'}
             </label>
-            {discountData.discountTarget === 'Products' ? (
-              <ProductSelect onSelect={handleSelectedOption} />
+            {discountData.discountTarget === 'Product' ? (
+              <div>
+                <ProductSelect onSelect={handleSelectedOption} />
+              </div>
             ) : (
               <select
                 id='targetId'
@@ -177,6 +183,13 @@ export default function AddDiscountForm() {
         )}
 
         <div className='form-group'>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.discountType}
+              </p>
+            )}
+          </div>
           <label
             htmlFor='discountType'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
@@ -195,8 +208,43 @@ export default function AddDiscountForm() {
             <option value='fixed'>Fixed Amount</option>
           </select>
         </div>
+        {discountData.discountType === 'fixed' ? (
+          <div className='form-group'>
+            <div className='pt-2 font-tertiary'>
+              {errors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {errors.minValue}
+                </p>
+              )}
+            </div>
+            <label
+              htmlFor='minValue'
+              className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
+            >
+              Min Amount To Apply Discout
+            </label>
+            <input
+              type='number'
+              id='minValue'
+              name='minValue'
+              value={discountData.minValue}
+              onChange={handleChange}
+              placeholder={'Min Purchase Amount'}
+              className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
+            />
+          </div>
+        ) : (
+          ''
+        )}
 
         <div className='form-group'>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.discountValue}
+              </p>
+            )}
+          </div>
           <label
             htmlFor='discountValue'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
@@ -209,7 +257,6 @@ export default function AddDiscountForm() {
             name='discountValue'
             value={discountData.discountValue}
             onChange={handleChange}
-            min='0'
             placeholder={
               discountData.discountType === 'percentage'
                 ? 'Enter percentage (0-100)'
@@ -220,6 +267,13 @@ export default function AddDiscountForm() {
         </div>
 
         <div className='form-group'>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.startDate}
+              </p>
+            )}
+          </div>
           <label
             htmlFor='startDate'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'
@@ -237,6 +291,13 @@ export default function AddDiscountForm() {
         </div>
 
         <div className='form-group'>
+          <div className='pt-2 font-tertiary'>
+            {errors && (
+              <p className='text-red-500 hover:text-red-300'>
+                {errors.endDate}
+              </p>
+            )}
+          </div>
           <label
             htmlFor='endDate'
             className='block text-sm font-semibold mb-2 text-gray-700 dark:text-slate-200'

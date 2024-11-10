@@ -9,6 +9,6 @@ import {
   removeFromWishlist
 } from '../controllers/wishlistController.js'
 router.post('/add', protect, addToWishlist)
-router.get('/get', protect, getWishlist)
+router.get('/', protect, getWishlist)
 router.post('/remove', protect, removeFromWishlist)
 export default router

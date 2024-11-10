@@ -62,7 +62,6 @@ const ProductBrowsePage = () => {
       fetchProducts({ page, sortBy, filters, includeCategories, searchData }),
     keepPreviousData: true
   })
-
   useEffect(() => {
     if (data && data.products) {
       setProducts(data.products)

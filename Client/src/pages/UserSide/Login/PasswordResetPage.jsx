@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../../services/api/api'
-import Navbar from '../../../components/common/Navbar'
 
 const PasswordResetPage = () => {
   const [isAuthorized, setIsAuthorized] = useState(false)
@@ -89,7 +88,6 @@ const PasswordResetPage = () => {
 
   return (
     <>
-      <Navbar />
       <div className='flex bg-slate-50 min-h-screen  flex-1 flex-col justify-center px-6 py-12 lg:px-8'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <h2 className='mt-10 text-3xl font-tertiary leading-7 font-semibold text-center text-textPrimary'>

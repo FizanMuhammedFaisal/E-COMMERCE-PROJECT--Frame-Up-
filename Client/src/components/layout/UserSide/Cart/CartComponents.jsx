@@ -131,11 +131,11 @@ const CartItems = ({ items, handleUpdateQuantity, handleRemoveItem }) => {
                   </h2>
                   {item.discountPrice ? (
                     <p className='text-xl text-customColorTertiaryDark font-bold'>
-                      ${item.discountPrice.toFixed(2)}
+                      ₹{item.discountPrice.toFixed(2)}
                     </p>
                   ) : (
                     <p className='text-xl text-customColorTertiaryDark  font-bold'>
-                      ${item.productPrice.toFixed(2)}
+                      ₹{item.productPrice.toFixed(2)}
                     </p>
                   )}
                 </div>

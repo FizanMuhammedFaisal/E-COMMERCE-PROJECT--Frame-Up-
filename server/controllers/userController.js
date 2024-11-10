@@ -12,6 +12,10 @@ import {
 import jwt from 'jsonwebtoken'
 import ResetToken from '../models/resetTokenModel.js'
 import Address from '../models/addressModel.js'
+import Referral from '../models/referralModel.js'
+import Wallet from '../models/walletModel.js'
+import crypto from 'crypto'
+import mongoose from 'mongoose'
 // -----
 
 // for sending otp
@@ -90,7 +94,6 @@ const checkUser = asyncHandler(async (req, res, next) => {
     error.statusCode = 400
     return next(error)
   }
-  console.log(req.body)
   const tempUser = await TempUser.create({
     username,
     email,
@@ -127,7 +130,7 @@ const userlogin = asyncHandler(async (req, res, next) => {
   if (user && (await user.matchPassword(password))) {
     //refresh cookie
     generateCookie(res, user._id)
-    const accessToken = generateToken(user._id)
+    const accessToken = generateToken(user)
     return res.status(200).json({
       message: 'user validated',
       _id: user._id,
@@ -137,7 +140,6 @@ const userlogin = asyncHandler(async (req, res, next) => {
       accessToken
     })
   }
-  console.log(user, req.body)
   const error = new Error('Invalid Email Or Password')
   error.statusCode = 400
   return next(error)
@@ -156,7 +158,6 @@ const googleAuth = asyncHandler(async (req, res, next) => {
   const displayName = decodedToken.name
   const uid = decodedToken.uid
   const email = decodedToken.email
-  console.log(uid, email, displayName)
   let user = await User.findOne({ email })
   let updatedUser = null
   let newUser = null
@@ -169,7 +170,8 @@ const googleAuth = asyncHandler(async (req, res, next) => {
     newUser = await User.create({
       username: displayName,
       email,
-      firebaseUid: uid
+      firebaseUid: uid,
+      status: 'Active'
     })
   }
 
@@ -183,8 +185,7 @@ const googleAuth = asyncHandler(async (req, res, next) => {
       return res.status(404).json({ message: 'User not found' })
     }
     generateCookie(res, id)
-
-    const accessToken = generateToken(id)
+    const accessToken = generateToken(user)
     return res.status(201).json({
       message: 'user create',
       _id: user._id,
@@ -230,16 +231,14 @@ const userCreate = asyncHandler(async (req, res, next) => {
 const makeAccess = (req, res) => {
   const user = req.user
   // Generate a new access token
-  const token = generateToken(user._id)
+  const token = generateToken(user)
 
-  setTimeout(() => {
-    res.json({
-      accessToken: token,
-      user: user._id,
-      role: user.role,
-      status: user.status
-    })
-  }, 1000)
+  res.json({
+    accessToken: token,
+    user: user._id,
+    role: user.role,
+    status: user.status
+  })
 }
 //
 const verifyResetOTP = asyncHandler(async (req, res, next) => {
@@ -430,7 +429,7 @@ const addAddress = asyncHandler(async (req, res, next) => {
     const id = user._id
     if (isDefault === true) {
       await Address.updateMany(
-        { userId: id, _id: { $ne: addressDoc._id } },
+        { userId: id, _id: { $ne: createdAddress._id } },
         { isDefault: false }
       )
     }
@@ -635,7 +634,7 @@ const uploadProfile = asyncHandler(async (req, res, next) => {
   const image = url[0]
   const user = await User.findOneAndUpdate({ _id: userId }, { profile: image })
   if (user) {
-    res.status(200).json({ message: 'user image uploaded' })
+    return res.status(200).json({ message: 'user image uploaded' })
   }
   const error = new Error('Cannot update profile')
   error.statusCode = 400
@@ -655,6 +654,132 @@ const logoutUser = asyncHandler(async (req, res) => {
   })
   res.status(200).json({ message: ' user logged out' })
 })
+
+///
+// referral
+//
+const generateReferralCode = () => {
+  return crypto.randomBytes(4).toString('hex')
+}
+const getUserReferral = asyncHandler(async (req, res) => {
+  const user = req.user
+  let referral = await Referral.findOne({ referrer: user._id }).select(
+    '-referrer -referredUser'
+  )
+  if (!referral) {
+    let code
+    let isUnique = false
+
+    while (!isUnique) {
+      code = generateReferralCode()
+      const existingReferral = await Referral.findOne({ code })
+
+      if (!existingReferral) {
+        isUnique = true
+      }
+    }
+
+    referral = await Referral.create({
+      referrer: user._id,
+      code: code
+    })
+    referral = await Referral.findById(referral._id).select(
+      '-referrer -referredUser'
+    )
+  }
+  res.status(200).json({
+    message: 'Referral code retrieved successfully!',
+    referral
+  })
+})
+//
+
+//
+const applyReferral = asyncHandler(async (req, res, next) => {
+  const { code } = req.body
+  console.log(req.body)
+  const user = req.user
+  const userId = new mongoose.Types.ObjectId(user._id)
+  if (!code) {
+    const error = new Error('No Code Provided')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const referral = await Referral.findOne({ code })
+
+  if (!referral) {
+    const error = new Error('Incorrect Referral Code')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  if (referral.usedCount >= 10) {
+    const error = new Error('Referral code has already been used 10 times')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  const referrer = await User.findById(referral.referrer)
+  console.log(user)
+  if (referrer) {
+    const referrerWallet = await Wallet.findOne({ userId: referrer._id })
+    if (referrerWallet) {
+      const amount = referral.rewardAmount
+      console.log(amount)
+      // console.log(referrerWallet)
+      referrerWallet.balance += amount
+      referrerWallet.transactions.push({
+        type: 'credit',
+        amount,
+        description: `Referral money added to wallet ${amount}`
+      })
+      await referrerWallet.save()
+    } else {
+      const error = new Error('Referrer wallet not found')
+      error.statusCode = 404
+      return next(error)
+    }
+  }
+
+  if (user) {
+    let referredUserWallet = await Wallet.findOne({
+      userId
+    })
+    if (!referredUserWallet) {
+      referredUserWallet = new Wallet({
+        userId: userId,
+        balance: 0,
+        transactions: []
+      })
+    }
+    console.log(referredUserWallet)
+    if (referredUserWallet) {
+      const amount = referral.referrerRewardAmount
+      console.log(amount)
+      referredUserWallet.balance += amount
+      referredUserWallet.transactions.push({
+        type: 'credit',
+        amount,
+        description: `Referral money added ${amount}`
+      })
+      await referredUserWallet.save()
+    } else {
+      const error = new Error('Referred user wallet not found')
+      error.statusCode = 404
+      return next(error)
+    }
+  }
+  referral.referredUsers.push(userId)
+  referral.usedCount += 1
+  await referral.save()
+
+  res.status(200).json({
+    message: 'Referral applied successfully',
+    referral
+  })
+})
+
 export {
   checkUser,
   userlogin,
@@ -676,5 +801,7 @@ export {
   deleteAddress,
   updateAddress,
   uploadProfile,
-  logoutUser
+  logoutUser,
+  getUserReferral,
+  applyReferral
 }

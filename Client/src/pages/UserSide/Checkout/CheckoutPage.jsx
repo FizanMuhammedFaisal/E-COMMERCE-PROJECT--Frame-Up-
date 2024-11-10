@@ -6,8 +6,7 @@ import {
   PlusIcon,
   CheckIcon,
   MapPinIcon,
-  PhoneIcon,
-  TagIcon
+  PhoneIcon
 } from '@heroicons/react/24/solid'
 import {
   ExclamationCircleIcon,
@@ -19,7 +18,7 @@ import AddressModal from '../../../components/modals/AddressModal'
 import apiClient from '../../../services/api/apiClient'
 import { useQuery } from '@tanstack/react-query'
 import { setCart } from '../../../redux/slices/Users/Cart/cartSlice'
-import { Alert, Badge, Button, Snackbar, TextField } from '@mui/material'
+import { Alert, Badge, Button, Snackbar } from '@mui/material'
 import { useCart } from '../../../hooks/useCart'
 import { setSelectedAddressRedux } from '../../../redux/slices/Users/Address/addressSlice'
 import { validatePayment } from '../../../redux/slices/Users/Checkout/checkoutSlice'
@@ -46,7 +45,7 @@ function CheckoutPage() {
     const { data } = await apiClient.get('/api/users/get-address')
     return data
   }
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['address'],
     queryFn: fetchData
   })
@@ -109,10 +108,15 @@ function CheckoutPage() {
   }
 
   const handleAddNewAddress = newAddress => {
+    console.log(newAddress)
     const newAddressWithId = { ...newAddress, _id: Date.now().toString() }
     setAddresses([...addresses, newAddressWithId])
     setSelectedAddress(newAddressWithId)
+    refetch()
   }
+  useEffect(() => {
+    console.log(addresses)
+  }, [addresses])
 
   const handleEditAddress = address => {
     setIsModalOpen(true)
@@ -165,15 +169,15 @@ function CheckoutPage() {
                           <div>
                             {' '}
                             <p className='text-sm font-medium text-gray-900'>
-                              ${(item.discountPrice * item.quantity).toFixed(2)}
+                              ₹{(item.discountPrice * item.quantity).toFixed(2)}
                             </p>
                             <p className='text-sm font-medium line-through text-gray-900'>
-                              ${(item.productPrice * item.quantity).toFixed(2)}
+                              ₹{(item.productPrice * item.quantity).toFixed(2)}
                             </p>
                           </div>
                         ) : (
                           <p className='text-sm font-medium text-gray-900'>
-                            ${(item.productPrice * item.quantity).toFixed(2)}
+                            ₹{(item.productPrice * item.quantity).toFixed(2)}
                           </p>
                         )}
                         {item.quantity === 0 && (
@@ -205,16 +209,16 @@ function CheckoutPage() {
               <div className='bg-gray-50 px-4 py-5 sm:px-6'>
                 <div className='flex justify-between text-sm font-medium text-gray-900'>
                   <p>Subtotal</p>
-                  <p>${subtotal.toFixed(2)}</p>
+                  <p>₹{subtotal.toFixed(2)}</p>
                 </div>
                 <div className='flex justify-between text-sm font-medium text-gray-900'>
                   <p>Total Discount</p>
-                  <p>-${discount.toFixed(2)}</p>
+                  <p>-₹{discount.toFixed(2)}</p>
                 </div>
 
                 <div className='mt-2 flex justify-between text-base font-semibold text-gray-900'>
                   <p>Total</p>
-                  <p>${totalPrice.toFixed(2)}</p>
+                  <p>₹{totalPrice.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -317,7 +321,9 @@ function CheckoutPage() {
       <AddressModal
         editData={addressData ? addressData : null}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false), setAddressData(null)
+        }}
         onAddAddress={handleAddNewAddress}
       />
       <Snackbar

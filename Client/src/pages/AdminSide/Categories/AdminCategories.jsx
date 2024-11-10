@@ -29,11 +29,12 @@ const AdminCategory = () => {
     { value: 'styles', label: 'Styles' },
     { value: 'techniques', label: 'Techniques' }
   ]
-  const AddButton = () => {
+  const AddButton = ({ type = 'themes' }) => {
+    console.log(type)
     return (
       <motion.button
         onClick={() => {
-          navigate('/dashboard/category/add-categories')
+          navigate('/dashboard/category/add-categories', { state: { type } })
         }}
         whileTap={{ scale: 0.9 }}
         whileHover={{ scale: 1.05 }}
@@ -88,10 +89,14 @@ const AdminCategory = () => {
         </div>
         {/* Tab Content */}
         <div className='p-4 '>
-          {selectedTab === 'themes' && <ThemeCategory AddButton={AddButton} />}
-          {selectedTab === 'styles' && <StyleCategory AddButton={AddButton} />}
+          {selectedTab === 'themes' && (
+            <ThemeCategory AddButton={<AddButton type={'Theme'} />} />
+          )}
+          {selectedTab === 'styles' && (
+            <StyleCategory AddButton={<AddButton type={'Style'} />} />
+          )}
           {selectedTab === 'techniques' && (
-            <TechniquesCategory AddButton={AddButton} />
+            <TechniquesCategory AddButton={<AddButton type={'Technique'} />} />
           )}
         </div>
       </div>

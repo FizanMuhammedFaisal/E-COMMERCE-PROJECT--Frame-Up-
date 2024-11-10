@@ -19,24 +19,6 @@ const DashboardLayout = () => {
           <div
             className={`p-6 ${isCompact ? 'md:ml-28' : 'md:ml-72'} transition-all duration-300 ease-in-out`}
           >
-            <Toaster
-              position='top-right'
-              toastOptions={{
-                success: {
-                  className:
-                    'text-dark bg-green-500 shadow-lg rounded-lg px-4 py-3 font-medium',
-                  duration: 4000
-                },
-                error: {
-                  className:
-                    'text-dark bg-red-500 shadow-lg rounded-lg px-4 py-3 font-medium',
-                  duration: 4000
-                },
-                className:
-                  'text-dark bg-customP2BackgroundW_700 dark:bg-customP2ForegroundD_200 shadow-lg rounded-lg px-4 py-3 font-medium'
-              }}
-            />
-
             <div className='mt-14'>
               <Breadcrumb showHome={false} type='admin' />
               <Outlet />

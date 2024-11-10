@@ -1,138 +1,181 @@
-'use client'
-
 import { useState, useEffect } from 'react'
-import { Share2, Copy, CheckCircle, Users, Gift } from 'lucide-react'
+import { Share2, Copy, CheckCircle, Mail } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import apiClient from '../../../../services/api/apiClient'
+import { FiTwitter } from 'react-icons/fi'
+import { SiWhatsapp } from 'react-icons/si'
 
-export default function TailwindReferralPage() {
+export default function Referral() {
   const [copied, setCopied] = useState(false)
   const [progress, setProgress] = useState(0)
-  const referralCode = 'FRIEND2023'
   const sharingLimit = 10
-  const currentShares = 5
-  const yourCreditAmount = 50
-  const friendCreditAmount = 100
 
-  const fetchData = async () => {
-    const res = await apiClient.get()
-  }
-  const { data } = useQuery({
-    queryFn: fetchData
+  const {
+    data: coupon,
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['referral'],
+    queryFn: async () => {
+      const res = await apiClient.get('/api/users/referral')
+      return res.data.referral
+    }
   })
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProgress((currentShares / sharingLimit) * 100)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [])
+    if (coupon) {
+      const timer = setTimeout(() => {
+        setProgress((coupon.usedCount / sharingLimit) * 100)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [coupon])
+
+  const shareableText = `Hey! Use my referral code ${coupon?.code} to sign up and get a reward!`
+  const shareUrl = `${import.meta.env.VITE_FRONTEND_URL}`
+
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(shareableText + ' ' + shareUrl)}`
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareableText + ' ' + shareUrl)}`
+  const emailShareUrl = `mailto:?subject=Join%20My%20Referral%20Program!&body=${encodeURIComponent(shareableText + ' ' + shareUrl)}`
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    if (coupon?.code) {
+      navigator.clipboard.writeText(coupon.code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: 'Join My Referral Program!',
+          text: shareableText,
+          url: shareUrl
+        })
+        .then(() => console.log('Successful share'))
+        .catch(error => {
+          console.error('Error sharing:', error)
+          copyToClipboard()
+        })
+    } else {
+      copyToClipboard()
+      alert('Referral link copied! You can share it manually.')
+    }
+  }
+
+  if (isLoading)
+    return (
+      <div className='flex items-center justify-center h-screen text-lg'>
+        Loading...
+      </div>
+    )
+  if (error)
+    return (
+      <div className='flex items-center justify-center h-screen text-lg text-red-500'>
+        Error loading referral data
+      </div>
+    )
+
   return (
-    <div className='flex items-center justify-center p-4 sm:p-8'>
-      <div className='bg-white rounded-lg p-6 w-full max-w-4xl transition-all duration-300 ease-in-out transform '>
-        <h1 className='text-3xl font-bold text-center mb-8 text-customColorTertiaryDark'>
+    <div className=' flex items-center justify-center p-2'>
+      <div className='bg-white rounded-lg p-4 w-full '>
+        <h1 className='text-2xl font-bold text-center mb-6 text-gray-800'>
           Your Referral Program
         </h1>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-          <div className='space-y-6'>
-            <div className='bg-customColorTertiarypop/20 rounded-lg p-6 transition-all duration-300 ease-in-out transform hover:shadow-md'>
-              <p className='text-lg text-customColorTertiary mb-2 font-semibold'>
-                Your Referral Code
-              </p>
-              <div className='flex items-center justify-between bg-white rounded border-2 border-indigo-200 p-3'>
-                <span className='text-2xl font-mono font-bold text-customColorTertiary'>
-                  {referralCode}
-                </span>
-                <button
-                  onClick={copyToClipboard}
-                  className='text-indigo-500 hover:text-indigo-700 transition-colors duration-200 focus:outline-none'
-                >
-                  {copied ? (
-                    <CheckCircle className='h-6 w-6 animate-pulse' />
-                  ) : (
-                    <Copy className='h-6 w-6 hover:scale-110 transition-transform duration-200' />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className='space-y-4'>
-              <p className='text-lg font-semibold text-gray-700'>
-                Sharing Progress
-              </p>
-              <div className='flex items-center justify-between'>
-                <span className='text-sm text-gray-600'>Invites Sent</span>
-                <span className='font-semibold text-customColorTertiary'>
-                  {currentShares} / {sharingLimit}
-                </span>
-              </div>
-              <div className='w-full bg-gray-200 rounded-full h-2.5'>
-                <div
-                  className='bg-customColorTertiary h-2.5 rounded-full transition-all duration-1000 ease-out'
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
+        <div className='space-y-6'>
+          <div className='bg-gray-100 rounded-lg p-4'>
+            <p className='text-sm text-gray-600 mb-2'>Your Referral Code</p>
+            <div className='flex items-center justify-between'>
+              <span className='text-xl font-mono font-semibold text-gray-800'>
+                {coupon?.code}
+              </span>
+              <button
+                onClick={copyToClipboard}
+                className='text-customColorTertiary hover:text-customColorTertiarypop 0 transition-colors duration-200 focus:outline-none'
+                aria-label={copied ? 'Copied' : 'Copy to clipboard'}
+              >
+                {copied ? (
+                  <CheckCircle className='h-5 w-5' />
+                ) : (
+                  <Copy className='h-5 w-5' />
+                )}
+              </button>
             </div>
           </div>
 
-          <div className='space-y-6'>
-            <div className='bg-green-50 rounded-lg p-6 transition-all duration-300 ease-in-out transform hover:shadow-md'>
-              <p className='text-lg font-semibold text-green-700 mb-4'>
-                Referral Rewards
-              </p>
-              <div className='space-y-3'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-green-600'>You Get</span>
-                  <span className='text-xl font-bold text-green-700'>
-                    ${yourCreditAmount}
-                  </span>
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm text-green-600'>
-                    Your Friend Gets
-                  </span>
-                  <span className='text-xl font-bold text-green-700'>
-                    ${friendCreditAmount}
-                  </span>
-                </div>
-              </div>
+          <div>
+            <div className='flex items-center justify-between mb-2'>
+              <span className='text-sm text-gray-600'>Invites Sent</span>
+              <span className='text-sm font-semibold text-gray-800'>
+                {coupon?.usedCount} / {sharingLimit}
+              </span>
             </div>
-
-            <div className='bg-yellow-50 rounded-lg p-6 transition-all duration-300 ease-in-out transform hover:shadow-md'>
-              <p className='text-lg font-semibold text-yellow-700 mb-4'>
-                How It Works
-              </p>
-              <ul className='list-disc list-inside space-y-2 text-sm text-gray-600'>
-                <li>Share your unique code with friends</li>
-                <li>They get ${friendCreditAmount} when they sign up</li>
-                <li>
-                  You get ${yourCreditAmount} when they make their first
-                  purchase
-                </li>
-                <li>
-                  Invite up to {sharingLimit} friends for maximum rewards!
-                </li>
-              </ul>
+            <div className='w-full bg-gray-200 rounded-full h-2'>
+              <div
+                className='bg-customColorTertiary h-2 rounded-full transition-all duration-1000 ease-out'
+                style={{ width: `${progress}%` }}
+              ></div>
             </div>
           </div>
-        </div>
 
-        <div className='mt-8'>
-          <button className='w-full bg-customColorTertiary hover:bg-customColorTertiaryLight text-white text-lg py-4 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50'>
-            <Share2 className='inline-block mr-2 h-5 w-5' /> Share Your Code Now
+          <div className='bg-green-50 rounded-lg p-4'>
+            <p className='text-sm font-semibold text-green-800 mb-2'>
+              Referral Rewards
+            </p>
+            <div className='flex justify-between items-center'>
+              <span className='text-sm text-gray-600'>You Get</span>
+              <span className='text-lg font-semibold text-green-600'>
+                ₹{coupon?.rewardAmount}
+              </span>
+            </div>
+            <div className='flex justify-between items-center mt-2'>
+              <span className='text-sm text-gray-600'>Your Friend Gets</span>
+              <span className='text-lg font-semibold text-green-600'>
+                ₹{coupon?.referrerRewardAmount}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleShare}
+            className='w-full bg-customColorTertiary hover:bg-customColorTertiaryLight text-white py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center'
+          >
+            <Share2 className='mr-2 h-5 w-5' /> Share Your Code
           </button>
+
+          <div className='flex justify-center space-x-4'>
+            <a
+              href={whatsappShareUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-green-500 hover:text-green-600'
+            >
+              <SiWhatsapp className='h-6 w-6' />
+            </a>
+            <a
+              href={twitterShareUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-400 hover:text-customColorTertiary'
+            >
+              <FiTwitter className='h-6 w-6' />
+            </a>
+            <a
+              href={emailShareUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-gray-500 hover:text-gray-600'
+            >
+              <Mail className='h-6 w-6' />
+            </a>
+          </div>
         </div>
 
-        <p className='text-sm text-gray-500 text-center mt-6'>
-          Start sharing and watch your rewards grow! The more friends you
-          invite, the more you both earn.
+        <p className='text-xs text-gray-500 text-center mt-6'>
+          Share with friends and earn rewards together!
         </p>
       </div>
     </div>

@@ -108,7 +108,7 @@ export default function PaintingChatbot({ toggleChat, id }) {
       </div>
       <div className='flex-1 flex flex-col overflow-hidden'>
         <div className='flex-1 p-3 overflow-y-auto' ref={chatContainerRef}>
-          <AnimatePresence initial={false}>
+          <AnimatePresence>
             {messages.length > 0 ? (
               messages.map((message, index) => (
                 <motion.div
@@ -202,11 +202,11 @@ export default function PaintingChatbot({ toggleChat, id }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               placeholder='Ask about this painting...'
-              className='flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-customColorTertiary transition-shadow'
+              className='w-full p-2 border-2   border-customColorTertiaryLight  rounded-md text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
             />
             <button
               type='submit'
-              className='bg-customColorTertiary hover:bg-customColorTertiaryLight text-white p-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-customColorTertiary'
+              className='bg-customColorTertiary hover:bg-customColorTertiaryLight text-white px-3 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-customColorTertiary'
             >
               <Send size={20} />
             </button>
@@ -219,7 +219,7 @@ export default function PaintingChatbot({ toggleChat, id }) {
   return (
     <AnimatePresence>
       <motion.div
-        className=' inset-x-0 bottom-0 z-50 w-full sm:w-96  sm:left-auto sm:bottom-4'
+        className=' fixed sm:relative inset-x-0 bottom-0 z-50 w-full sm:w-96  sm:left-auto sm:bottom-4'
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}

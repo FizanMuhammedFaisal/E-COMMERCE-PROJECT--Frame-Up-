@@ -1,25 +1,31 @@
 import axios from 'axios'
 import apiClient from '../api/apiClient'
 apiClient
-// Cloudinary configuration
+
 const cloudinaryPreset = import.meta.env.VITE_CLOUDINARY_PRESET
+const cloudinaryPresetThumbnail = import.meta.env
+  .VITE_CLOUDINARY_PRESET_THUMBNAIL
 const cloudinaryURL = import.meta.env.VITE_CLOUDINARY_URL
 
-// Function to upload an array of images to Cloudinary and return their URLs
-export const uploadImagesToCloudinary = async files => {
+export const uploadImagesToCloudinary = async (files, isThumbnail = false) => {
   try {
     const uploadedImages = await Promise.all(
       files.map(async file => {
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('upload_preset', cloudinaryPreset)
 
+        // Use different upload presets based on whether it's a thumbnail
+        const uploadPreset = isThumbnail
+          ? cloudinaryPresetThumbnail
+          : cloudinaryPreset
+        formData.append('upload_preset', uploadPreset)
         const res = await axios.post(cloudinaryURL, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         })
-        return res.data.secure_url // Return only the image URL
+
+        return res.data.secure_url //  image URL
       })
     )
 
@@ -33,7 +39,6 @@ export const uploadImagesToCloudinary = async files => {
 
 export const delteImagesFromCloudinary = async (files, type, index, id) => {
   //files will be array of urls
-  console.log(id)
   const deleteViaServer = async urls => {
     try {
       const result = await apiClient.post('/api/admin/delete-Images', {

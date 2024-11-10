@@ -30,6 +30,7 @@ function ProductDetails({ product, discount }) {
   const closeModal = () => setIsModalOpen(false)
 
   const handleAddToCart = async () => {
+    console.log('asdf')
     if (!isAuthenticated) {
       return setSnackbarData({
         open: true,
@@ -80,6 +81,31 @@ function ProductDetails({ product, discount }) {
       })
     }
   }
+  const handleRemoveFromWishlist = async productId => {
+    if (!isAuthenticated) {
+      return setSnackbarData({
+        open: true,
+        message: 'Login to add items to your Wishlist',
+        severity: 'error'
+      })
+    }
+    try {
+      await apiClient.post('/api/wishlist/remove', { productId })
+      setAdded(true)
+      setSnackbarData({
+        open: true,
+        message: 'Product removed From Wishlist!',
+        severity: 'success'
+      })
+    } catch (error) {
+      console.log(error)
+      setSnackbarData({
+        open: true,
+        message: error?.response?.data?.message,
+        severity: 'error'
+      })
+    }
+  }
 
   const handleCloseSnackbar = () =>
     setSnackbarData({ ...snackbarData, open: false })
@@ -96,6 +122,7 @@ function ProductDetails({ product, discount }) {
       </div>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
         <ProductDetailsSection
+          handleRemoveFromWishlist={handleRemoveFromWishlist}
           handleAddToWishlist={handleAddToWishlist}
           handleThumbnailClick={handleThumbnailClick}
           product={product}

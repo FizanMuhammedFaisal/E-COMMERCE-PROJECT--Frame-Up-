@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-
 import {
   EmptyWishlist,
   NotLoggedInWishlist,
   WishlistGrid
 } from '../../../components/layout/UserSide/Wishlist/WishlistComponents'
 import { useSelector } from 'react-redux'
-import { useQuery } from '@tanstack/react-query'
-import apiClient from '../../../services/api/apiClient'
 import { Alert, Snackbar } from '@mui/material'
 import Breadcrumb from '../../../components/common/Breadcrumb'
+import { useFetchWishlist } from '../../../hooks/useFetchWishlist'
+import Spinner from '../../../components/common/Animations/Spinner'
 
 export default function WishlistPage() {
   const { isAuthenticated } = useSelector(state => state.auth)
@@ -24,16 +23,7 @@ export default function WishlistPage() {
     setWishlistItems(wishlistItems.filter(item => item.id !== id))
   }
   ///
-
-  const fetchWishlist = async () => {
-    const res = await apiClient.get('/api/wishlist/get')
-    console.log(res.data)
-    return res.data.wishlist
-  }
-  const { data } = useQuery({
-    queryFn: fetchWishlist,
-    queryKey: ['wishlist']
-  })
+  const { data, loading, error } = useFetchWishlist()
   useEffect(() => {
     if (data) {
       setWishlistItems(data.items)
@@ -41,7 +31,6 @@ export default function WishlistPage() {
   }, [data])
   ///
   const handleSetItems = items => {
-    console.log('asdf')
     setWishlistItems(items)
   }
   //
@@ -50,6 +39,12 @@ export default function WishlistPage() {
   }
   const handleCloseSnackbar = () =>
     setSnackbarData({ ...snackbarData, open: false })
+  if (loading) {
+    return <Spinner center={true} />
+  }
+  if (error) {
+    return <p className='text-red-400'>{error}</p>
+  }
   return (
     <>
       <Breadcrumb />

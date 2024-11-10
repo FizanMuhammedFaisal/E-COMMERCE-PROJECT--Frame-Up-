@@ -26,7 +26,7 @@ function ProductDiscount() {
         </h2>
         <motion.button
           onClick={() => {
-            navigate('/dashboard/discounts/add', { state: { type: 'product' } })
+            navigate('/dashboard/discounts/add', { state: { type: 'Product' } })
           }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}

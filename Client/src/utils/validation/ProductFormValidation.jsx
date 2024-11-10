@@ -1,4 +1,3 @@
-import { EraserIcon } from 'lucide-react'
 import { setFormData } from '../../redux/slices/Admin/AdminProducts/productSlice'
 
 const validateProductForm = (
@@ -19,46 +18,37 @@ const validateProductForm = (
   if (!formData.productPrice || formData.productPrice <= 0) {
     errors.productPrice = 'Product price must be greater than zero'
   }
-  // Validate product price
-  if (!formData.discountPrice || formData.discountPrice <= 0) {
-    errors.discountPrice = 'Product price must be greater than zero'
-  }
-  if (
-    formData.discountPrice <= 0 ||
-    formData.discountPrice >= formData.productPrice
-  ) {
-    errors.discountPrice = 'Product price must be less than actuall price'
+
+  // Validate discount price (optional, only if provided)
+  if (formData.discountPrice && formData.discountPrice <= 0) {
+    errors.discountPrice =
+      'Discount price must be greater than zero if provided'
   }
 
   // Validate product category
   const productCategories = formData.productCategory || {}
-
-  // Check if at least one category type is non-empty
   const hasAtLeastOneCategory = Object.values(productCategories).some(
     categoryArray => Array.isArray(categoryArray) && categoryArray.length > 0
   )
 
   if (!hasAtLeastOneCategory) {
-    errors.productCategory =
-      'At least one product category (themes, styles, or techniques) is required'
+    errors.productCategory = 'At least one product category is required'
   }
 
-  // Validate product description (optional but can have min length)
+  // Validate product description
   if (!formData.productDescription.trim()) {
     errors.productDescription = 'Product description is required'
   } else if (formData.productDescription.length < 10) {
     errors.productDescription =
       'Description should be at least 10 characters long'
   }
-  const artist = formData.artist || []
-  console.log(artist)
-  // Check if at least one element in the artist array is an object
-
-  if (!artist) {
-    errors.artist = 'At least one artist Name is required'
+  console.log(formData.artistName)
+  // Validate artist (single object, not an array)
+  if (!formData.artistName || typeof formData.artistName !== 'object') {
+    errors.artist = 'Artist information is required'
   }
 
-  // Validate product information (optional but can have min length)
+  // Validate product information
   if (!formData.productInformation.trim()) {
     errors.productInformation = 'Product information is required'
   } else if (formData.productInformation.length < 20) {
@@ -66,16 +56,20 @@ const validateProductForm = (
       'Product information should be at least 20 characters long'
   }
 
+  // Validate product year
   const currentYear = new Date().getFullYear()
   const year = formData.productYear
   if (year < 1000 || year > currentYear) {
     errors.productYear = `Product year must be a valid year between 1000 and ${currentYear}`
   }
+
+  // Validate product stock
   if (!formData.productStock.trim()) {
     errors.productStock = 'Add Product Stock Number'
-  } else if (formData.productStock && formData.productStock < 0) {
-    errors.productStock = 'Stock Number Cannot be Negative'
+  } else if (formData.productStock < 0) {
+    errors.productStock = 'Stock Number cannot be negative'
   }
+
   // Validate product images
   if (!DBError) {
     if (
@@ -85,7 +79,6 @@ const validateProductForm = (
       errors.productImages = 'At least one product image is required'
     }
 
-    // Validate thumbnail image
     if (
       !Array.isArray(formData.thumbnailImage) ||
       formData.thumbnailImage.length === 0
@@ -97,25 +90,24 @@ const validateProductForm = (
       errors.productImages = 'At least one product image is required'
     }
 
-    // Validate thumbnail image
     if (!Array.isArray(thumbnailImage) || thumbnailImage.length === 0) {
       errors.thumbnailImage = 'Thumbnail image is required'
     }
   }
 
-  // Validate weight (optional, but can check for proper value)
+  // Validate weight (optional, but must be greater than zero if provided)
   if (formData.weight && formData.weight <= 0) {
     errors.weight = 'Weight must be greater than zero'
   }
-
+  // Expanded regex for both raw and formatted dimension inputs
   const dimensionsRegex =
-    /^(\d+)(?:\s*["']?\s*[hH]\s*)?\s*x\s*(\d+)(?:\s*["']?\s*[wW]\s*)?\s*x\s*(\d+)(?:\s*["']?\s*[dD]\s*)?$/i
-
+    /^(\d+(\.\d+)?)(?:\s*x\s*)(\d+(\.\d+)?)(?:\s*x\s*)(\d+(\.\d+)?)$|^(\d+(\.\d+)?)"\s*h\s*x\s*(\d+(\.\d+)?)"\s*w\s*x\s*(\d+(\.\d+)?)"\s*d$/i
   if (formData.dimensions) {
     if (!dimensionsRegex.test(formData.dimensions)) {
       errors.dimensions =
-        'Dimensions should be in format: width x height x depth (e.g., 10x20x30)'
+        'Dimensions should be in format: width x height x depth (e.g., 10.5x20.75x30 or 10" h x 20" w x 30" d)'
     } else if (!formData.dimensions.includes('"')) {
+      // Only format if the dimensions are not already formatted
       const formattedDimensions = formatDimensionsFromString(
         formData.dimensions
       )
@@ -129,11 +121,10 @@ const validateProductForm = (
 }
 
 export default validateProductForm
-const formatDimensionsFromString = dimensionString => {
-  // Remove any trailing 'x' and split the string by 'x'
-  const dimensions = dimensionString.replace(/x$/, '').split('x').map(Number)
 
-  // Check if we have exactly 3 dimensions (height, width, depth)
+// Helper function to format raw dimensions into the required format
+const formatDimensionsFromString = dimensionString => {
+  const dimensions = dimensionString.replace(/x$/, '').split('x').map(Number)
   if (dimensions.length !== 3 || dimensions.some(isNaN)) {
     return 'Invalid dimensions. Please provide three numeric values.'
   }

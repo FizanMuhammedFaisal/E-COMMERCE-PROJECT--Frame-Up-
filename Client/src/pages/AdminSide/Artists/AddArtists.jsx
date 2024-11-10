@@ -1,4 +1,3 @@
-import React from 'react'
 import AddArtistForm from '../../../components/layout/AdminSide/Artist/AddArtistForm'
 
 function AddArtists() {

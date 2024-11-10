@@ -1,23 +1,19 @@
 import { useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import MovingBanner from '../../components/common/Animations/MovingBanner'
+import MovingBanner from '../../../components/common/Animations/MovingBanner'
 import {
   AnimatedCarousalSection,
   FeaturedArtSection,
   ArtistsComponent,
   SomeArtPieces
-} from '../../components/layout/UserSide/Home/HomePageComponents'
-import Sample from '../../components/common/Animations/Sample'
+} from '../../../components/layout/UserSide/Home/HomePageComponents'
+import Sample from '../../../components/common/Animations/Sample'
 import { useState } from 'react'
 
 function HomePage() {
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen)
-  }
+
   const navigate = useNavigate()
 
-  const [hoveredId, setHoveredId] = useState(null)
   return (
     <>
       <div className='min-h-screen bg-white'>
@@ -28,7 +24,6 @@ function HomePage() {
         <section className=''>
           {/* <Sample text={'Fizan Muhammed Faisal , how is that'} /> */}
         </section>
-
         <section>
           <FeaturedArtSection />
         </section>

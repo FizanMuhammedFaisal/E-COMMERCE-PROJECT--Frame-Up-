@@ -50,8 +50,6 @@ function ArtistSelect({ handleInputChange, value }) {
 
   const { artistName } = useSelector(state => state.product)
 
-  console.log(artistName)
-
   const loadOptions = async (inputValue, callback) => {
     setSearchTerm(inputValue)
     const res = await fetchArtists({ search: inputValue, page: 1 })

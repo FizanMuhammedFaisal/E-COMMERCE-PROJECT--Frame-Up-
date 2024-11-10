@@ -98,20 +98,21 @@ export default function InfiniteScrollSelect({
   }
 
   return (
-    <div className='relative w-64' ref={dropdownRef}>
+    <div className='relative ' ref={dropdownRef}>
       <button
-        className='w-full px-4 py-2 text-left bg-white dark:bg-customP2ForegroundD_100 border border-gray-300 dark:border-customP2ForegroundD_400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:text-slate-50'
+        type='button'
+        className='w-full px-4 py-2 text-left bg-white dark:bg-customP2BackgroundD_darkest border border-gray-300 dark:border-customP2ForegroundD_400 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:text-slate-50'
         onClick={() => setIsOpen(!isOpen)}
       >
         {selectedOption ? selectedOption.label : placeholder}
         <ChevronUpDownIcon className='absolute right-2 top-2.5 h-5 w-5 text-gray-400 dark:text-slate-300' />
       </button>
       {isOpen && (
-        <div className='absolute z-10 w-full mt-1 bg-white dark:bg-customP2ForegroundD_100 border border-gray-300 dark:border-customP2ForegroundD_400 rounded-md shadow-lg'>
+        <div className='absolute z-10 w-full mt-1 bg-white dark:bg-customP2BackgroundD border border-gray-300 dark:border-customP2ForegroundD_400 rounded-md shadow-lg'>
           <div className='form-group'>
             <input
               type='text'
-              className='w-full px-4 py-2 border-b border-gray-300 dark:border-customP2ForegroundD_400 focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:bg-customP2ForegroundD_100 dark:text-slate-50'
+              className='w-full px-4 py-2 border-b rounded-md border-gray-300 dark:border-customP2ForegroundD_400 focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:bg-customP2ForegroundD_100 dark:text-slate-50'
               placeholder='Search products...'
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}

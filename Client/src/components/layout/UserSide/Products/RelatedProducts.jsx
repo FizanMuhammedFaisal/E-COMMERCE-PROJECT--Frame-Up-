@@ -2,6 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import apiClient from '../../../../services/api/apiClient'
 import ProductCard from './ProductCard'
 import Spinner from '../../../common/Animations/Spinner'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  addToWishlist,
+  removeFromWishlist
+} from '../../../../redux/slices/Users/Wishlist/wishlistSlice'
+import { toast } from 'sonner'
 
 function RelatedProducts({ productId }) {
   const fetchRelatedProducts = async () => {
@@ -9,11 +15,40 @@ function RelatedProducts({ productId }) {
       const response = await apiClient.get(
         `/api/products/get-related-products/${productId}`
       )
-      console.log(response.data)
       return response.data
     } catch (error) {
       console.error('Error fetching related products:', error)
       throw error
+    }
+  }
+  const wishlistItems = useSelector(state => state.wishlist.items)
+  const { isAuthenticated } = useSelector(state => state.auth)
+  const dispatch = useDispatch()
+  const handleAddToWishlist = async productId => {
+    if (!isAuthenticated) {
+      return toast.error('Login to Add To Wislist')
+    }
+    try {
+      const res = await apiClient.post('/api/wishlist/add', { productId })
+      console.log(res.data)
+      if (res.status) {
+        dispatch(addToWishlist(productId))
+      }
+    } catch (error) {
+      //handle error case
+      console.log(error)
+    }
+  }
+  const handleRemoveFromWishlist = async productId => {
+    try {
+      const res = await apiClient.post('/api/wishlist/remove', { productId })
+      console.log(res.data)
+      if (res.status) {
+        dispatch(removeFromWishlist(productId))
+      }
+    } catch (error) {
+      //handle error case
+      console.log(error)
     }
   }
 
@@ -56,7 +91,13 @@ function RelatedProducts({ productId }) {
             key={`${product._id}relatedProducts`}
             className='flex-shrink-0 flex flex-col w-64'
           >
-            <ProductCard viewMode='grid' product={product} />
+            <ProductCard
+              addToWishlist={handleAddToWishlist}
+              removeFromWishlist={handleRemoveFromWishlist}
+              wishlistItems={wishlistItems}
+              viewMode='grid'
+              product={product}
+            />
           </div>
         ))}
       </div>

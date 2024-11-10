@@ -205,7 +205,7 @@ export default function OrderEditPage() {
               <div>
                 <p className='text-sm text-gray-400'>Total Amount</p>
                 <p className='text-green-400 font-bold'>
-                  ${order.totalAmount?.toFixed(2)}
+                  ₹{order.totalAmount?.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -285,9 +285,9 @@ export default function OrderEditPage() {
                     </td>
                     <td className='p-2'>{item.status}</td>
                     <td className='p-2'>{item.quantity}</td>
-                    <td className='p-2'>${item.price.toFixed(2)}</td>
+                    <td className='p-2'>₹{item.price.toFixed(2)}</td>
                     <td className='p-2'>
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </td>
                     <td className='p-2'>
                       {getStatusIndex(item.status) <= 1 && (
@@ -307,37 +307,37 @@ export default function OrderEditPage() {
                   <td colSpan='5' className='p-2 text-right'>
                     Subtotal:
                   </td>
-                  <td className='p-2'>${order.subtotal?.toFixed(2)}</td>
+                  <td className='p-2'>₹{order.subtotal?.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td colSpan='5' className='p-2 text-right'>
                     Shipping:
                   </td>
-                  <td className='p-2'>${order.shippingCost?.toFixed(2)}</td>
+                  <td className='p-2'>₹{order.shippingCost?.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td colSpan='5' className='p-2 text-right'>
                     Tax:
                   </td>
-                  <td className='p-2'>${order.taxAmount?.toFixed(2)}</td>
+                  <td className='p-2'>₹{order.taxAmount?.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td colSpan='5' className='p-2 text-right'>
                     Discount:
                   </td>
-                  <td className='p-2'>-${order.discount?.toFixed(2)}</td>
+                  <td className='p-2'>-₹{order.discount?.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td colSpan='5' className='p-2 text-right'>
                     Coupon Discount:
                   </td>
-                  <td className='p-2'>-${order.couponAmount?.toFixed(2)}</td>
+                  <td className='p-2'>-₹{order.couponAmount?.toFixed(2)}</td>
                 </tr>
                 <tr className='font-bold'>
                   <td colSpan='5' className='p-2 text-right'>
                     Total:
                   </td>
-                  <td className='p-2'>${order.totalAmount?.toFixed(2)}</td>
+                  <td className='p-2'>₹{order.totalAmount?.toFixed(2)}</td>
                 </tr>
               </tfoot>
             </table>

@@ -26,7 +26,7 @@ function CategoryDiscount() {
         <motion.button
           onClick={() => {
             navigate('/dashboard/discounts/add', {
-              state: { type: 'category' }
+              state: { type: 'Category' }
             })
           }}
           whileTap={{ scale: 0.9 }}

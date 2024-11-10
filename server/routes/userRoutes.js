@@ -23,7 +23,9 @@ import {
   deleteAddress,
   updateAddress,
   uploadProfile,
-  logoutUser
+  logoutUser,
+  getUserReferral,
+  applyReferral
 } from '../controllers/userController.js'
 import verifyResetToken from '../middlewares/authResetTokenMiddleware.js'
 router.post('/checkUser', checkUser)
@@ -48,5 +50,7 @@ router.post('/upload-profile', protect, uploadProfile)
 router.post('/update-password', protect, updatePassword)
 router.delete('/delete-address/:id', protect, deleteAddress)
 router.post('/update-address', protect, updateAddress)
-
+//
+router.get('/referral', protect, getUserReferral)
+router.post('/referral', protect, applyReferral)
 export default router

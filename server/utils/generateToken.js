@@ -1,9 +1,13 @@
 import jwt from 'jsonwebtoken'
 
-const generateToken = userId => {
-  const token = jwt.sign({ userId }, process.env.JWT_SECRET_ACCESS, {
-    expiresIn: '15m'
-  })
+const generateToken = userInfo => {
+  const token = jwt.sign(
+    { _id: userInfo._id, role: userInfo.role, status: userInfo.status },
+    process.env.JWT_SECRET_ACCESS,
+    {
+      expiresIn: '5m'
+    }
+  )
   return token
 }
 

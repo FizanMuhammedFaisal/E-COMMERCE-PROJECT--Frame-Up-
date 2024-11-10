@@ -11,11 +11,13 @@ const referralSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  referredUser: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
+  referredUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    }
+  ],
   usedCount: {
     type: Number,
     default: 0

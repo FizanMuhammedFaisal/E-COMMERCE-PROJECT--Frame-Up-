@@ -123,7 +123,6 @@ const AdminAddProducts = () => {
       thumbnailImage,
       dispatch
     )
-
     if (Object.keys(validationErrors).length > 0) {
       return setErrorMessages(validationErrors)
     }
@@ -157,7 +156,7 @@ const AdminAddProducts = () => {
       const [uploadedProductImages, uploadedThumbnailImages] =
         await Promise.all([
           uploadImagesToCloudinary(fetchedProductImages),
-          uploadImagesToCloudinary(fetchedThumbnailImages)
+          uploadImagesToCloudinary(fetchedThumbnailImages, true)
         ])
 
       const data = {
@@ -167,6 +166,7 @@ const AdminAddProducts = () => {
       }
 
       try {
+        console.log(data)
         const res = await api.post('/products/add', data)
         toast.success('Product added', {
           className:

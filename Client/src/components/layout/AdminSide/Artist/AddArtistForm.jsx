@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'sonner'
 import 'react-toastify/dist/ReactToastify.css'
 import api from '../../../../services/api/api'
 import { uploadImagesToCloudinary } from '../../../../services/Cloudinary/UploadImages'
+import { useNavigate } from 'react-router-dom'
 
 function AddArtistForm() {
   const [artistName, setArtistName] = useState('')
@@ -12,7 +12,7 @@ function AddArtistForm() {
   const [picture, setPicture] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const onDrop = acceptedFiles => {
     setPicture(acceptedFiles[0])
@@ -32,16 +32,10 @@ function AddArtistForm() {
       console.log(picture)
       const url = await uploadImagesToCloudinary([picture])
       const data = { name: artistName, description, image: url[0] }
-      console.log(data)
-      const result = await api.post('/artists/add', { data })
+      await api.post('/artists/add', { data })
 
-      toast.success('Artist Created Successfully', {
-        className:
-          'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white'
-      })
-
-      console.log('Artist added successfully:', result)
-
+      toast.success('Artist Created Successfully')
+      navigate('/dashboard/artists')
       // Clear the form and error
       setArtistName('')
       setDescription('')
@@ -166,15 +160,6 @@ function AddArtistForm() {
           </button>
         </div>
       </form>
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-      />
     </div>
   )
 }

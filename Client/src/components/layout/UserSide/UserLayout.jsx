@@ -1,23 +1,21 @@
-import { useEffect } from 'react'
-import Navbar from '../../common/Navbar'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 
 import { useSelector } from 'react-redux'
 
 import { useFetchCart } from '../../../hooks/useFetchCart'
+import { useFetchWishlist } from '../../../hooks/useFetchWishlist'
 import { useScrollToTop } from '../../../hooks/useScrollToTop'
 
 const UserLayout = () => {
-  const { isAuthenticated, role } = useSelector(state => state.auth)
-
+  const { isAuthenticated, status } = useSelector(state => state.auth)
   useScrollToTop()
   useFetchCart()
+  useFetchWishlist()
+  if (isAuthenticated && status === 'Blocked') {
+    return <Navigate to='/blocked' replace />
+  }
   return (
     <>
-      <div className='pb-16'>
-        <Navbar />
-      </div>
-
       <Outlet />
     </>
   )

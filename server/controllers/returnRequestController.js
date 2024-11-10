@@ -210,7 +210,6 @@ const createSingleReturnRequest = asyncHandler(async (req, res) => {
   }
 
   const order = await Order.findById(orderId)
-  console.log(order)
   if (!order) {
     const error = new Error('Order not found')
     error.statusCode = 404
@@ -221,12 +220,12 @@ const createSingleReturnRequest = asyncHandler(async (req, res) => {
   )
   order.items[itemIndex].status = 'Return Initialized'
   await order.save()
-  console.log(itemId)
+
   console.log(order.items)
   const returnRequest = await Return.create({
     orderId,
     productId: itemId,
-    userId: req.user.id,
+    userId: order.userId,
     reason,
     requestedAt: Date.now()
   })

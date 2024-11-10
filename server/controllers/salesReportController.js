@@ -65,8 +65,12 @@ const generateSalesReport = async (startDate, endDate, period) => {
       summary.totalDelivered += 1
     } else if (order.orderStatus === 'Cancelled') {
       summary.totalCancelled += 1
+    } else if (
+      order.orderStatus === 'Delivered' &&
+      order.paymentStatus === 'Paid'
+    ) {
+      summary.totalOrderAmount += order.subtotal || 0
     }
-    summary.totalOrderAmount += order.subtotal || 0
     summary.totalDiscount += order.discount || 0
     summary.totalCouponDiscount += order.couponAmount || 0
     summary.totalShippingCharges += order.shippingCost || 0

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 let initialState = {
   productName: '',
   productPrice: '',
@@ -6,7 +6,7 @@ let initialState = {
   productYear: '',
   productStock: '',
   productCategory: { themes: [], styles: [], techniques: [] },
-  artist: '',
+  artistName: '',
   productDescription: '',
   productInformation: '',
   productImages: [],
@@ -20,7 +20,7 @@ const productSlice = createSlice({
   reducers: {
     setFormData: (state, action) => {
       const { id, value } = action.payload
-
+      console.log(id, value)
       if (['themes', 'styles', 'techniques'].includes(id)) {
         state.productCategory[id] = value
       } else {

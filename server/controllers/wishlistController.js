@@ -54,7 +54,12 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
 const getWishlist = asyncHandler(async (req, res, next) => {
   const user = req.user
 
-  let wishlist = await Wishlist.findOne({ userId: user._id }).populate('items')
+  let wishlist = await Wishlist.findOne({ userId: user._id }).populate({
+    path: 'items',
+    populate: {
+      path: 'artist'
+    }
+  })
 
   if (!wishlist) {
     wishlist = await Wishlist.create({ userId: user._id, items: [] })

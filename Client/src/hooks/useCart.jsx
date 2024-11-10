@@ -15,7 +15,7 @@ const useCart = () => {
   const addToCart = async (productId, quantity = 0) => {
     setLoading(true)
     setError(null)
-
+    console.log(quantity)
     try {
       const res = await apiClient.post('/api/cart/add-to-cart', {
         productId,

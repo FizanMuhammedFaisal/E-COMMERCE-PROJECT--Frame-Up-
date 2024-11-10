@@ -5,11 +5,12 @@ import Order from '../models/orderModel.js'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
-import { getCartDetails, applyCoupon } from '../utils/cartUtils.js'
+import { getCartDetails, applyCoupon } from '../utils/helperUtils.js'
 import Wallet from '../models/walletModel.js'
 import PDFDocument from 'pdfkit'
-import fs from 'fs'
+
 import mongoose, { isValidObjectId } from 'mongoose'
+import Coupon from '../models/couponModel.js'
 
 ///
 //
@@ -34,7 +35,8 @@ const getOrdersAdmin = asyncHandler(async (req, res) => {
 //
 const cancelOrder = asyncHandler(async (req, res, next) => {
   const { orderId } = req.body
-  const userId = req.user.id
+  const userId = req.user._id
+  let Message
   if (!orderId) {
     const error = new Error('Order ID is required for cancellation.')
     error.statusCode = 400
@@ -48,7 +50,6 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
     error.statusCode = 404
     return next(error)
   }
-
   if (order.userId.toString() !== userId) {
     const error = new Error('You are not authorized to cancel this order.')
     error.statusCode = 403
@@ -90,7 +91,9 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   }
 
   order.orderStatus = 'Cancelled'
+
   for (const item of order.items) {
+    item.status = 'Cancelled'
     const product = await Product.findById(item.productId)
     if (product) {
       product.stock += item.quantity
@@ -100,7 +103,7 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   await order.save()
 
   return res.status(200).json({
-    message: 'Cancellation successful and amount refunded to  wallet.',
+    message: Message,
     order,
     walletBalance: wallet.balance
   })
@@ -168,7 +171,7 @@ const getUserOrders = asyncHandler(async (req, res) => {
       .limit(limit)
       .sort({ createdAt: -1 })
 
-    const totalOrders = await Order.countDocuments()
+    const totalOrders = await Order.countDocuments({ userId: userId })
     const totalPages = Math.ceil(totalOrders / limit)
     let hasMore = true
     if (page > totalPages) {
@@ -268,7 +271,8 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     appliedCouponCode
   } = req.body.data
   const user = req.user
-
+  const userId = new mongoose.Types.ObjectId(req.user._id)
+  console.log(userId)
   try {
     let outOfStock = false
     const productIds = items.map(item => item.productId)
@@ -296,17 +300,18 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       })
     }
 
-    const cartDetails = await getCartDetails(user._id)
+    const cartDetails = await getCartDetails(userId)
+    console.log(cartDetails)
     if (!cartDetails) {
       const error = new Error('Order creation failed')
       error.statusCode = 400
       return next(error)
     }
 
-    const subtotal = Math.ceil(cartDetails[0].subtotal)
-    const discount = Math.ceil(cartDetails[0].discount)
+    const subtotal = Math.ceil(cartDetails[0]?.subtotal)
+    const discount = Math.ceil(cartDetails[0]?.discount)
     console.log(discount)
-    const totalPrice = Math.ceil(cartDetails[0].totalPrice)
+    const totalPrice = Math.ceil(cartDetails[0]?.totalPrice)
     let totalAmount = Math.ceil(totalPrice + taxAmount + shippingCost)
 
     //apply coupons if provided
@@ -393,9 +398,8 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     taxAmount,
     appliedCouponCode
   } = req.body.data
-  console.log(req.body.data)
   const user = req.user
-
+  const userId = new mongoose.Types.ObjectId(req.user._id)
   let updatedCart = []
   let originalCartItems = []
 
@@ -434,8 +438,8 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       })
     }
 
-    const cartDetails = await getCartDetails(user._id)
-
+    const cartDetails = await getCartDetails(userId)
+    console.log(cartDetails)
     if (!cartDetails) {
       const error = new Error('order creation Failed')
       error.statusCode = 400
@@ -459,7 +463,6 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       }
     }
 
-    console.log(totalAmount)
     const newOrder = await Order.create({
       userId: user._id,
       items: updatedCart,
@@ -532,11 +535,35 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
 
 //
 //
-const verifyPayment = async (req, res) => {
+const verifyPayment = asyncHandler(async (req, res, next) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
     req.body.paymentResponse
   const { orderId } = req.body
-
+  if (
+    !orderId ||
+    !razorpay_order_id ||
+    !razorpay_payment_id ||
+    !razorpay_signature
+  ) {
+    const error = new Error('Required Fields Missing')
+    error.statusCode = 400
+    return next(error)
+  }
+  const order = await Order.findById(orderId)
+  if (order.orderStatus === 'Cancelled') {
+    //issue a refund
+    console.log('issue refundedd')
+    const amount = order.totalAmount
+    console.log(amount)
+    const wallet = await Wallet.findOne({ userId: order.userId })
+    wallet.balance += amount
+    wallet.transactions.push({
+      type: 'refund',
+      amount,
+      description: `Refund added to wallet ${amount} for order Cancelled ${order._id}`
+    })
+    wallet.save()
+  }
   const expectedSignature = crypto
     .createHmac('sha256', process.env.RAZOR_PAY_KEY_SECRET)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -572,14 +599,21 @@ const verifyPayment = async (req, res) => {
       .status(500)
       .json({ success: false, message: 'Failed to update order' })
   }
-}
+})
 //
 const retryPayment = asyncHandler(async (req, res, next) => {
   const { orderId } = req.body
   try {
+    console.log(orderId)
     const order = await Order.findById(orderId)
 
-    if (!order || order.paymentStatus === 'Paid') {
+    if (!order) {
+      const error = new Error('No order has been made.')
+      error.statusCode = 400
+      return next(error)
+    }
+
+    if (order.paymentStatus === 'Paid') {
       const error = new Error('Invalid or Already Paid.')
       error.statusCode = 400
       return next(error)
@@ -678,8 +712,7 @@ const cancelOrderAdmin = asyncHandler(async (req, res, next) => {
 //
 const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   const { id: orderId } = req.params
-  console.log('asdfasdf')
-  console.log(req.params)
+
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
     return res.status(400).json({ message: 'Invalid order ID' })
   }
@@ -687,12 +720,14 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   const order = await Order.findById(orderId)
     .populate('items.productId')
     .populate('userId')
+
   if (!order) {
     return res.status(404).json({ message: 'Order not found' })
   }
 
   const pdfDoc = new PDFDocument({ margin: 50 })
 
+  // Set headers for the PDF
   res.setHeader('Content-Type', 'application/pdf')
   res.setHeader(
     'Content-Disposition',
@@ -701,8 +736,23 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
 
   pdfDoc.pipe(res)
 
-  pdfDoc.fontSize(20).text('Order Invoice', { align: 'center' }).moveDown(0.5)
+  // ====== Header Section ======
+  pdfDoc
+    .fontSize(26)
+    .fillColor('#2B5D6E')
+    .text('Frame Up', { align: 'left' })
+    .fontSize(14)
+    .fillColor('black')
+    .text('1234 Main Street, Kochi, Kerala')
+    .text('Email: support@frameup.com')
+    .moveDown(1)
 
+  pdfDoc
+    .fontSize(20)
+    .text('Order Invoice', { align: 'center', underline: true })
+    .moveDown(0.5)
+
+  // ====== Order Details ======
   pdfDoc
     .fontSize(12)
     .text(`Order ID: ${orderId}`, { align: 'right' })
@@ -711,9 +761,12 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
     })
     .moveDown(1.5)
 
+  // ====== Billing Information ======
   pdfDoc
     .fontSize(14)
+    .fillColor('#007ACC')
     .text('Billing Information:', { underline: true })
+    .fillColor('black')
     .moveDown(0.5)
     .fontSize(12)
     .text(`Name: ${order.shippingAddress.name}`)
@@ -725,34 +778,61 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
     .text(`Phone: ${order.shippingAddress.phoneNumber}`)
     .moveDown(1.5)
 
-  pdfDoc.fontSize(14).text('Order Summary:', { underline: true }).moveDown(0.5)
+  // ====== Order Summary Header ======
+  pdfDoc
+    .fontSize(14)
+    .fillColor('#007ACC')
+    .text('Order Summary:', { underline: true })
+    .fillColor('black')
+    .moveDown(0.5)
 
+  // ====== Table Headers ======
+  const tableTop = pdfDoc.y
+  pdfDoc
+    .fontSize(12)
+    .text('Item', 50, tableTop, { continued: true, underline: true })
+    .text('Quantity', 250, tableTop, { continued: true, underline: true })
+    .text('Price', 350, tableTop, { continued: true, underline: true })
+    .text('Total', 450, tableTop, { underline: true })
+
+  const formatCurrency = amount =>
+    `Rs ${amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`
+
+  // ====== Items Loop ======
+  let positionY = tableTop + 20
   order.items.forEach((item, index) => {
     pdfDoc
       .fontSize(12)
-      .text(`${index + 1}. ${item.productName}`)
-      .text(`   Quantity: ${item.quantity} x $${item.price.toFixed(2)}`)
-      .text(`   Total: $${(item.quantity * item.price).toFixed(2)}`)
-      .moveDown(0.5)
+      .text(`${index + 1}. ${item.productName}`, 50, positionY)
+      .text(`${item.quantity}`, 250, positionY)
+      .text(formatCurrency(item.price), 350, positionY) // Format each price
+      .text(formatCurrency(item.quantity * item.price), 450, positionY) // Format total
+    positionY += 20
   })
 
+  // ====== Order Totals ======
   pdfDoc
     .moveDown(1)
     .fontSize(14)
+    .fillColor('#007ACC')
     .text('Order Details:', { underline: true })
+    .fillColor('black')
     .fontSize(12)
-    .text(`Subtotal: $${order.subtotal.toFixed(2)}`)
-    .text(`Shipping Cost: $${order.shippingCost.toFixed(2)}`)
-    .text(`Discount: -$${order.discount.toFixed(2)}`)
-    .text(`Coupon Discount: -$${order.couponAmount.toFixed(2)}`)
-    .text(`Tax: $${order.taxAmount.toFixed(2)}`)
     .moveDown(0.5)
-    .fontSize(14)
-    .text(`Total Amount: $${order.totalAmount.toFixed(2)}`, { align: 'right' })
-
+    .text(`Subtotal: ${formatCurrency(order.subtotal)}`, 400)
+    .text(`Shipping Cost: ${formatCurrency(order.shippingCost)}`, 400)
+    .text(`Discount: -${formatCurrency(order.discount)}`, 400)
+    .text(`Coupon Discount: -${formatCurrency(order.couponAmount)}`, 400)
+    .text(`Tax: ${formatCurrency(order.taxAmount)}`, 400)
+    .moveDown(0.5)
+    .fontSize(16)
+    .fillColor('#007ACC')
+    .text(`Total Amount: ${formatCurrency(order.totalAmount)}`, 400)
+  // ====== Footer Section ======
   pdfDoc
     .moveDown(2)
     .fontSize(10)
+    .fillColor('black')
     .text(
       'Thank you for your order! For any questions, please contact our support team.',
       { align: 'center', lineGap: 6 }
@@ -868,11 +948,20 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
   const { orderId, itemId } = req.body
 
   if (!orderId || !itemId) {
-    const error = new Error('id Required for cancelling')
+    const error = new Error(
+      'Order ID and Item ID are required for cancellation'
+    )
     error.statusCode = 400
     return next(error)
   }
+
   const order = await Order.findById(orderId)
+  if (!order) {
+    const error = new Error('Order not found')
+    error.statusCode = 404
+    return next(error)
+  }
+
   if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
     const error = new Error(
       'Order cannot be cancelled. It has already been shipped or delivered.'
@@ -884,22 +973,51 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
   const itemIndex = order.items.findIndex(
     item => item._id.toString() === itemId
   )
-
   if (itemIndex === -1) {
-    const error = new Error('item Not Found.')
+    const error = new Error('Item not found in order.')
     error.statusCode = 404
     return next(error)
   }
 
-  order.items[itemIndex].status = 'Cancelled'
+  const canceledItem = order.items[itemIndex]
+  canceledItem.status = 'Cancelled'
+
+  let refundAmount = canceledItem.price
+
+  if (order.couponCode) {
+    const coupon = await Coupon.findOne({ code: order.couponCode })
+
+    if (coupon) {
+      const couponProportion = order.couponAmount / order.subtotal
+
+      if (coupon.discountType === 'percentage') {
+        const itemDiscount = canceledItem.price * couponProportion
+        refundAmount = canceledItem.price - itemDiscount
+      } else if (coupon.discountType === 'fixed') {
+        const itemFixedDiscount =
+          (canceledItem.price / order.subtotal) * coupon.discountAmount
+        refundAmount = canceledItem.price - itemFixedDiscount
+      }
+
+      // Re-check if remaining order qualifies for coupon usage
+      const remainingOrderTotal = order.subtotal - canceledItem.price
+      if (remainingOrderTotal < coupon.minPurchaseAmount) {
+        refundAmount += order.couponAmount
+        order.couponAmount = 0 // Reset coupon amount if eligibility is lost
+      }
+    }
+  }
+
   const allItemsCanceled = order.items.every(
     item => item.status === 'Cancelled'
   )
-  console.log(allItemsCanceled)
   if (allItemsCanceled) {
     order.orderStatus = 'Cancelled'
   }
+
   await order.save()
+
+  // Process refund in wallet if payment is paid
   if (order.paymentStatus === 'Paid') {
     let wallet = await Wallet.findOne({ userId: order.userId })
 
@@ -910,25 +1028,20 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
         transactions: []
       })
     }
-    const amount =
-      order.subtotal +
-      order.taxAmount +
-      order.shippingCost -
-      order.couponAmount -
-      order.discount
-    wallet.balance += amount
+
+    wallet.balance += refundAmount
     wallet.transactions.push({
       type: 'refund',
-      amount: order.totalAmount,
-      description: `Refund for order ${order._id}`
+      amount: refundAmount,
+      description: `Partial refund for item ${canceledItem.productName} in order ${order._id}`
     })
 
     await wallet.save()
   }
-  if (order) {
-    res.status(200).json({ message: 'cancellation successfull', order })
-  }
+
+  res.status(200).json({ message: 'Cancellation successful', order })
 })
+
 export {
   initiateOrder,
   getOrdersAdmin,

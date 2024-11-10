@@ -58,6 +58,8 @@ function OrderDetails() {
         return 'bg-green-100 text-green-800 border-green-300'
       case 'cancelled':
         return 'bg-red-100 text-red-800 border-red-300'
+      case 'Return Accepted':
+        return 'bg-pink-100 text-red-800 border-red-300'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300'
     }
@@ -194,7 +196,7 @@ function OrderDetails() {
 
       {(successMessage || errorMessage) && (
         <div
-          className={`mb-6 p-4 rounded-md ${
+          className={`mb-6 p-4 rounded-md ₹{
             successMessage
               ? 'bg-green-50 text-green-800'
               : 'bg-red-50 text-red-800'
@@ -218,7 +220,7 @@ function OrderDetails() {
             </p>
           </div>
           <div
-            className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.orderStatus)}`}
+            className={`px-3 py-1 rounded-full text-sm font-semibold ₹{getStatusColor(order.orderStatus)}`}
           >
             {order.orderStatus}
           </div>
@@ -255,7 +257,7 @@ function OrderDetails() {
                       </div>
                       <div className='flex items-center'>
                         <p className='text-sm font-medium text-gray-900 mr-4'>
-                          ${item.price.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
                         </p>
                         {getStatusIndex(item.status) <= 1 ? (
                           <button
@@ -271,7 +273,17 @@ function OrderDetails() {
                           >
                             Return
                           </button>
-                        ) : null}
+                        ) : (
+                          <div>
+                            {
+                              <div
+                                className={`₹{getStatusColor(item.status)} p-2`}
+                              >
+                                {item.status}
+                              </div>
+                            }
+                          </div>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -286,23 +298,23 @@ function OrderDetails() {
                 <div className='space-y-2'>
                   <div className='flex justify-between'>
                     <span>Subtotal:</span>
-                    <span>${order.subtotal.toFixed(2)}</span>
+                    <span>₹{order.subtotal.toFixed(2)}</span>
                   </div>
                   <div className='flex justify-between'>
                     <span>Shipping:</span>
-                    <span>${order.shippingCost.toFixed(2)}</span>
+                    <span>₹{order.shippingCost.toFixed(2)}</span>
                   </div>
                   <div className='flex justify-between'>
                     <span>Tax:</span>
-                    <span>${order.taxAmount.toFixed(2)}</span>
+                    <span>₹{order.taxAmount.toFixed(2)}</span>
                   </div>
                   <div className='flex justify-between text-green-600'>
                     <span>Discount:</span>
-                    <span>-${order.discount.toFixed(2)}</span>
+                    <span>-₹{order.discount.toFixed(2)}</span>
                   </div>
                   <div className='flex justify-between font-medium text-lg border-t pt-2'>
                     <span>Total:</span>
-                    <span>${order.totalAmount.toFixed(2)}</span>
+                    <span>₹{order.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               </dd>

@@ -15,29 +15,19 @@ import { HeartIcon } from 'lucide-react'
 import AccountNavbar from '../common/AccountNavbar'
 const products = [
   {
-    name: 'Shop',
+    name: 'Artists',
     description: 'Get a better understanding of your traffic',
-    href: '/shop'
+    href: '/artists'
   },
   {
-    name: 'Engagement',
+    name: 'Orders',
     description: 'Speak directly to your customers',
-    href: '/engagement'
+    href: '/account/order-history'
   },
   {
-    name: 'Security',
+    name: 'WishList',
     description: 'Your customers data will be safe and secure',
-    href: '/security'
-  },
-  {
-    name: 'Integrations',
-    description: 'Connect with third-party tools',
-    href: '/integrations'
-  },
-  {
-    name: 'Automations',
-    description: 'Build strategic funnels that will convert',
-    href: '/automations'
+    href: '/wishlist'
   }
 ]
 

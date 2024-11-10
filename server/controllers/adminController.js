@@ -10,6 +10,8 @@ import {
 } from '../services/cloudinaryServices.js'
 import Discount from '../models/discoundModel.js'
 import Product from '../models/productModel.js'
+import mongoose, { isValidObjectId } from 'mongoose'
+import { validationResult } from 'express-validator'
 
 //@ discp   login route
 //route      api/admin/login
@@ -24,7 +26,7 @@ const login = asyncHandler(async (req, res, next) => {
   }
   if (user && (await user.matchPassword(password))) {
     generateCookie(res, user._id)
-    const accessToken = generateToken(user._id)
+    const accessToken = generateToken(user)
     return res.status(200).json({
       message: 'user validated',
       _id: user._id,
@@ -175,13 +177,6 @@ const updateStatus = asyncHandler(async (req, res) => {
 const addCategory = asyncHandler(async (req, res, next) => {
   const { name, type, description } = req.body
 
-  // Ensure all required fields are provided
-  if (!name || !type || !description) {
-    const error = new Error('All fields are required')
-    error.statusCode = 400
-    return next(error)
-  }
-
   const categoryExists = await Category.findOne({
     name: { $regex: new RegExp(`^${name}$`, 'i') },
     type
@@ -256,7 +251,7 @@ const updateArtistStatus = asyncHandler(async (req, res, next) => {
 //
 //
 
-const updateCategories = asyncHandler(async (req, res, next) => {
+const updateCategoryStatus = asyncHandler(async (req, res, next) => {
   const { id, newStatus } = req.body
   console.log(id, newStatus)
   const category = await Category.findOneAndUpdate(
@@ -277,9 +272,43 @@ const updateCategories = asyncHandler(async (req, res, next) => {
 })
 //
 //
+const updateCategory = asyncHandler(async (req, res, next) => {
+  const { _id, name, type, description } = req.body
+  const categoryExist = await Category.findOne({
+    name: { $regex: new RegExp(`^${name}$`, 'i') },
+    _id: { $ne: _id }
+  })
+  if (categoryExist) {
+    const error = new Error('This Category Already Exists')
+    error.statusCode = 400
+    return next(error)
+  }
+  try {
+    const updatedCategory = await Category.findByIdAndUpdate(
+      _id,
+      { name, type, description },
+      { new: true }
+    )
+
+    if (!updatedCategory) {
+      const error = new Error('Category not found')
+      error.statusCode = 404
+      return next(error)
+    }
+
+    return res.status(200).json({
+      message: 'Category updated successfully',
+      category: updatedCategory
+    })
+  } catch (err) {
+    return next(err)
+  }
+})
+//
+//
 const getProductDiscounds = asyncHandler(async (req, res, next) => {
   const productDiscounts = await Discount.find({
-    discountTarget: 'Products'
+    discountTarget: 'Product'
   })
   if (productDiscounts) {
     return res.status(200).json({
@@ -320,23 +349,10 @@ const addDiscount = asyncHandler(async (req, res, next) => {
       startDate,
       endDate,
       targetId,
+      minValue,
       status
     } = req.body.discountData
     console.log(req.body)
-    if (
-      !name ||
-      !discountTarget ||
-      !discountType ||
-      !discountValue ||
-      !startDate ||
-      !endDate ||
-      !targetId
-    ) {
-      const error = new Error('All required fields must be provided')
-      error.statusCode = 500
-      return next(error)
-    }
-    console.log(status)
     const discount = new Discount({
       name,
       discountTarget,
@@ -345,6 +361,7 @@ const addDiscount = asyncHandler(async (req, res, next) => {
       startDate,
       endDate,
       targetId,
+      minValue,
       status: status || 'Active'
     })
 
@@ -443,8 +460,19 @@ const deleteCloudinaryImages = asyncHandler(async (req, res, next) => {
     return next(error)
   }
 })
-export default updateDiscountStatus
+//
+//
+const getCategory = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
 
+  if (!id || !mongoose.isValidObjectId(id)) {
+    const error = new Error('Invalid or no Id')
+    error.statusCode = 400
+    return next(error)
+  }
+  const category = await Category.findById(id).select('-__v,status')
+  res.status(200).json({ category })
+})
 // end
 export {
   login,
@@ -459,10 +487,12 @@ export {
   fetchStyles,
   fetchTechniques,
   updateArtistStatus,
-  updateCategories,
+  updateCategoryStatus,
   getCategoryDiscounds,
   getProductDiscounds,
   addDiscount,
   updateDiscountStatus,
-  deleteCloudinaryImages
+  deleteCloudinaryImages,
+  updateCategory,
+  getCategory
 }

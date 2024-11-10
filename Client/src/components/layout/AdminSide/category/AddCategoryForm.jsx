@@ -1,14 +1,21 @@
-import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { addCategory } from '../../../../redux/slices/Admin/AdminCategory/adminCategorySlice'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
+import { useLocation } from 'react-router-dom'
+import {
+  fetchStyles,
+  fetchTechniques,
+  fetchThemes
+} from '../../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
 function AddCategoryForm() {
+  const location = useLocation()
+  const { type } = location.state || { type: null }
   const [categoryName, setCategoryName] = useState('')
-  const [categoryType, setCategoryType] = useState('')
+  const [categoryType, setCategoryType] = useState(type)
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const dispatch = useDispatch()
-
   const handleSubmit = async e => {
     e.preventDefault()
 
@@ -23,23 +30,40 @@ function AddCategoryForm() {
       description: description
     }
     try {
-      const result = await dispatch(addCategory(newCategory)).unwrap()
+      await dispatch(addCategory(newCategory)).unwrap()
 
       toast.success('Category Created ', {
         className:
           'bg-white dark:bg-customP2ForegroundD_400 font-primary dark:text-white'
       })
-
-      console.log('Category added successfully:', result)
-
+      switch (categoryType) {
+        case 'Theme':
+          dispatch(fetchThemes())
+          break
+        case 'Style':
+          dispatch(fetchStyles())
+          break
+        case 'Technique':
+          dispatch(fetchTechniques())
+          break
+        default:
+          break
+      }
       setCategoryName('')
       setCategoryType('')
       setDescription('')
       setError('')
     } catch (err) {
       console.error('Failed to add category:', err)
-
-      setError(err.message)
+      console.error('Failed to update category:', err)
+      if (err && err.errors) {
+        const errorMessages = err.errors.map(error => error.msg).join(', ')
+        setError(errorMessages)
+      } else if (err && err.message) {
+        setError(err.message)
+      } else {
+        setError('An error occurred')
+      }
     }
   }
 
@@ -51,7 +75,7 @@ function AddCategoryForm() {
 
       {/* Display any error messages */}
       {error && (
-        <div className='dark:bg-customP2ForegroundD_400 border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
+        <div className='dark:bg-customP2BackgroundD border-customP2ForegroundD_600 border bg-customP2ForeGroundW_500 py-2 mb-4 rounded-lg'>
           <p className='text-red-900 dark:text-red-500 ms-4 text-start'>
             {error}
           </p>

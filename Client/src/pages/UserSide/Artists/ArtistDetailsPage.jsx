@@ -5,7 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import api from '../../../services/api/api'
 
-const LINK = motion(Link)
+const LINK = motion.create(Link)
 
 const StarRating = ({ rating, onRate }) => {
   return (

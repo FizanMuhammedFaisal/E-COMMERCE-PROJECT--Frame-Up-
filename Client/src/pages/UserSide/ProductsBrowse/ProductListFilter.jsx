@@ -245,7 +245,7 @@ function ProductListFilter({
           <input
             type='range'
             min='0'
-            max='10000'
+            max='100000'
             step='100'
             value={filters.priceRange[1]}
             onChange={e => handlePriceChange(parseInt(e.target.value))}

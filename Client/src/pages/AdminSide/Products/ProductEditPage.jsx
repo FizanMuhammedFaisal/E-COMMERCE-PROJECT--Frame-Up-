@@ -8,7 +8,7 @@ import EditProductTab from '../../../components/layout/AdminSide/Products/EditPr
 import Spinner from '../../../components/common/Animations/Spinner'
 import DetailsProductTab from '../../../components/layout/AdminSide/Products/DetailsProductTab'
 import { uploadImagesToCloudinary } from '../../../services/Cloudinary/UploadImages'
-
+import { validateEditProductForm } from '../../../utils/validation/FormValidation'
 export default function ProductEditPage() {
   const { productId } = useParams()
   const [product, setProduct] = useState(null)
@@ -21,6 +21,7 @@ export default function ProductEditPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('details')
   const [error, setError] = useState(null)
+  const [formErrors, setFormErrors] = useState(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function ProductEditPage() {
       try {
         const res = await apiClient.get(`/api/products/${productId}`)
         console.log(res.data)
+        console.log('sdfaf')
         setProduct(res.data.product[0])
       } catch (error) {
         setError('Failed to load product details.')
@@ -70,13 +72,25 @@ export default function ProductEditPage() {
   }
 
   const handleInputChange = e => {
-    const { name, value } = e.target
-    console.log(name, value)
-    setProduct(prev => ({ ...prev, [name]: value }))
+    const { name, value, type } = e.target
+    const processedValue = type === 'number' ? e.target.valueAsNumber : value
+
+    setProduct(prev => ({
+      ...prev,
+      [name]: processedValue
+    }))
+
+    console.log(name, processedValue)
   }
 
   const handleSubmit = async e => {
     e.preventDefault()
+    const validationErrors = validateEditProductForm(product, newImages)
+    console.log(validationErrors)
+    if (Object.keys(validationErrors).length !== 0) {
+      return setFormErrors(validationErrors)
+    }
+    setFormErrors(null)
     setIsLoading(true)
     setError(null)
     const isThumbnailChanged = newImages.thumbnailImage.length > 0
@@ -84,7 +98,8 @@ export default function ProductEditPage() {
     const updatedProduct = { ...product }
 
     if (isThumbnailChanged) {
-      const url = await uploadImagesToCloudinary(newImages.thumbnailImage)
+      console.log('asdfaf')
+      const url = await uploadImagesToCloudinary(newImages.thumbnailImage, true)
       updatedProduct.thumbnailImage = [...url]
     }
 
@@ -104,6 +119,8 @@ export default function ProductEditPage() {
           thumbnailImage: [],
           productImages: []
         })
+        setErrorMessages(null)
+        setError(null)
         dispatch(deleteData())
         setActiveTab('details')
       } else {
@@ -177,6 +194,7 @@ export default function ProductEditPage() {
 
                 {activeTab === 'edit' && (
                   <EditProductTab
+                    formErrors={formErrors}
                     product={product}
                     handleInputChange={handleInputChange}
                     handleSubmit={handleSubmit}

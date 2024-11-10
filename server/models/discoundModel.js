@@ -8,7 +8,7 @@ const discountSchema = new mongoose.Schema(
     },
     discountTarget: {
       type: String,
-      enum: ['Category', 'Products'],
+      enum: ['Category', 'Product'],
       required: true
     },
     discountType: {
@@ -20,6 +20,10 @@ const discountSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0
+    },
+    minValue: {
+      type: Number,
+      default: 0
     },
     startDate: {
       type: Date,

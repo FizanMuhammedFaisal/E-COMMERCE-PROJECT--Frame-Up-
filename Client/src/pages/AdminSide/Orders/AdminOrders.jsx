@@ -146,7 +146,13 @@ const AdminOrders = () => {
     ],
     []
   )
-  const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered']
+  const statusOptions = [
+    'Pending',
+    'Processing',
+    'Shipped',
+    'Delivered',
+    'Cancelled'
+  ]
   const ordersData = useMemo(() => {
     if (!orders) return []
 
@@ -157,7 +163,7 @@ const AdminOrders = () => {
         number: <p className='ms-5'>{index + 1}</p>,
         orderNo: order._id.slice(-6).toUpperCase(),
         customerName: order.shippingAddress.name || 'No name available',
-        totalPrice: `$${order.totalAmount.toFixed(2)}`,
+        totalPrice: `₹${order.totalAmount.toFixed(2)}`,
         orderDate: new Date(order.createdAt).toLocaleDateString(),
         status: <OrderStatusBadge status={order.orderStatus} />,
         action: (

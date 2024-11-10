@@ -20,7 +20,8 @@ function EditProductTab({
   setProduct,
   setNewImages,
   newImages,
-  setErrorMessages
+  setErrorMessages,
+  formErrors
 }) {
   const [cropperOpen, setCropperOpen] = useState({ state: false, type: null })
   const [imageForCrop, setImageForCrop] = useState(null)
@@ -145,7 +146,6 @@ function EditProductTab({
 
   const handleThumbnailUpdate = async (e, url) => {
     const { id, value, files } = e.target
-    console.log(typeof url)
     if (Object.keys(url).length !== 0) {
       const image = { id: 0, url: url[0] }
       handleImageDelete(image, [id])
@@ -182,6 +182,13 @@ function EditProductTab({
         <h2 className='text-2xl font-bold mb-4'>Edit Product</h2>
         <form onSubmit={handleSubmit} className='space-y-4'>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.productName}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='productName'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -194,11 +201,17 @@ function EditProductTab({
               name='productName'
               value={product.productName}
               onChange={handleInputChange}
-              required
               className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.productDescription}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='productDescription'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -210,12 +223,18 @@ function EditProductTab({
               name='productDescription'
               value={product.productDescription}
               onChange={handleInputChange}
-              required
               rows={3}
               className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.productPrice}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='productPrice'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -228,13 +247,19 @@ function EditProductTab({
               name='productPrice'
               value={product.productPrice}
               onChange={handleInputChange}
-              required
               className='p-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-customP2Primary focus:border-customP2Primary dark:border-customP2ForegroundD_400 dark:bg-customP2BackgroundD_darkest sm:text-sm dark:text-slate-50'
             />
           </div>
           <div className='flex flex-col'>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.artist}
+                </p>
+              )}
+            </div>
             <label
-              htmlFor='productCategory'
+              htmlFor='artist'
               className='dark:text-slate-100 text-slate-900 mb-2 font-medium text-xl my-2'
             >
               Product Artist
@@ -253,6 +278,13 @@ function EditProductTab({
             </div>
           </div>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.categories}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='categories'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -280,6 +312,13 @@ function EditProductTab({
           </div>
           <div>
             <div className='flex p-2 justify-between'>
+              <div className='pt-2 font-tertiary'>
+                {formErrors && (
+                  <p className='text-red-500 hover:text-red-300'>
+                    {formErrors.thumbnailImage}
+                  </p>
+                )}
+              </div>
               <label
                 htmlFor='thumbnailImage'
                 className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -336,6 +375,13 @@ function EditProductTab({
           </div>
           <div>
             <div className='p-3 flex justify-between'>
+              <div className='pt-2 font-tertiary'>
+                {formErrors && (
+                  <p className='text-red-500 hover:text-red-300'>
+                    {formErrors.productImages}
+                  </p>
+                )}
+              </div>
               <label
                 htmlFor='productImages'
                 className='dark:text-slate-200 text-slate-900 mb-2 font-medium '
@@ -360,7 +406,6 @@ function EditProductTab({
               className='hidden'
               onChange={handleFileInput}
             />
-            {console.log(product.productImages)}
             <ImageCarousel
               imageIds={product.productImages}
               cloudinaryMode={true}
@@ -384,6 +429,13 @@ function EditProductTab({
             </div>
           )}
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.dimensions}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='dimensions'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -400,6 +452,13 @@ function EditProductTab({
             />
           </div>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.weight}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='weight'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -407,7 +466,7 @@ function EditProductTab({
               Weight
             </label>
             <input
-              type='text'
+              type='number'
               id='weight'
               name='weight'
               value={product.weight || ''}
@@ -416,6 +475,13 @@ function EditProductTab({
             />
           </div>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.productYear}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='productYear'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'
@@ -423,7 +489,7 @@ function EditProductTab({
               Year
             </label>
             <input
-              type='text'
+              type='number'
               id='productYear'
               name='productYear'
               value={product.productYear || ''}
@@ -432,6 +498,13 @@ function EditProductTab({
             />
           </div>
           <div>
+            <div className='pt-2 font-tertiary'>
+              {formErrors && (
+                <p className='text-red-500 hover:text-red-300'>
+                  {formErrors.productStock}
+                </p>
+              )}
+            </div>
             <label
               htmlFor='inStock'
               className='block mb-2 text-sm font-medium dark:text-slate-100 text-gray-700'

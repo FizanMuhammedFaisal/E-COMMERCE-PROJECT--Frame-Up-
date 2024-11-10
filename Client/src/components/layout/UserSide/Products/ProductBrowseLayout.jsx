@@ -4,6 +4,12 @@ import ProductCard from './ProductCard'
 import apiClient from '../../../../services/api/apiClient'
 import Spinner from '../../../common/Animations/Spinner'
 import Pagination from '../../../common/Pagination'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  addToWishlist,
+  removeFromWishlist
+} from '../../../../redux/slices/Users/Wishlist/wishlistSlice'
+import { toast } from 'sonner'
 
 function ProductBrowseLayout({
   sortedProducts,
@@ -17,10 +23,30 @@ function ProductBrowseLayout({
   handlePageChange
 }) {
   const [viewMode, setViewMode] = useState('grid')
-
-  const handleAddToWishlist = async productId => {
+  const wishlistItems = useSelector(state => state.wishlist.items)
+  const { isAuthenticated } = useSelector(state => state.auth)
+  const dispatch = useDispatch()
+  const handleAddToWishlist = async productIsd => {
+    if (!isAuthenticated) {
+      return toast.error('Login to Add To Wislist')
+    }
     try {
       const res = await apiClient.post('/api/wishlist/add', { productId })
+      console.log(res.data)
+      if (res.status) {
+        dispatch(addToWishlist(productId))
+      }
+    } catch (error) {
+      //handle error case
+      console.log(error)
+    }
+  }
+  const handleRemoveFromWishlist = async productId => {
+    try {
+      const res = await apiClient.post('/api/wishlist/remove', { productId })
+      if (res.status) {
+        dispatch(removeFromWishlist(productId))
+      }
     } catch (error) {
       //handle error case
       console.log(error)
@@ -97,6 +123,8 @@ function ProductBrowseLayout({
             ) : (
               sortedProducts.map(product => (
                 <ProductCard
+                  removeFromWishlist={handleRemoveFromWishlist}
+                  wishlistItems={wishlistItems}
                   addToWishlist={handleAddToWishlist}
                   key={product._id}
                   product={product}

@@ -3,19 +3,19 @@ import Wallet from '../models/walletModel.js'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 const getWallet = asyncHandler(async (req, res, next) => {
-  const user = req.user
+  const userId = req.user._id
 
-  if (!user) {
+  if (!userId) {
     const error = new Error('User not authenticated.')
     error.statusCode = 401
     return next(error)
   }
 
-  let wallet = await Wallet.findOne({ userId: user.id })
+  let wallet = await Wallet.findOne({ userId })
 
   if (!wallet) {
     wallet = new Wallet({
-      userId: user.id,
+      userId,
       balance: 0,
       transactions: []
     })

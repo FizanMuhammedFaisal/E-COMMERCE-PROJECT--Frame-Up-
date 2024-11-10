@@ -140,7 +140,7 @@ function OrderCard({ order, onRetryPayment, setOrderPage, index }) {
             <div className='flex flex-col items-end'>
               <span className='text-xs text-gray-500 mb-1'>Order Status</span>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(order.orderStatus)}`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border ₹{getStatusColor(order.orderStatus)}`}
               >
                 {order.orderStatus}
               </span>
@@ -148,7 +148,7 @@ function OrderCard({ order, onRetryPayment, setOrderPage, index }) {
             <div className='flex flex-col items-end'>
               <span className='text-xs text-gray-500 mb-1'>Payment Status</span>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(order.paymentStatus)}`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border ₹{getStatusColor(order.paymentStatus)}`}
               >
                 {order.paymentStatus}
               </span>
@@ -161,7 +161,7 @@ function OrderCard({ order, onRetryPayment, setOrderPage, index }) {
             Placed on: {formatDate(order.createdAt)}
           </p>
           <p className='font-semibold text-lg text-blue-600'>
-            Total: ${order.totalAmount.toFixed(2)}
+            Total: ₹{order.totalAmount.toFixed(2)}
           </p>
         </div>
         <div className='flex justify-between items-center'>

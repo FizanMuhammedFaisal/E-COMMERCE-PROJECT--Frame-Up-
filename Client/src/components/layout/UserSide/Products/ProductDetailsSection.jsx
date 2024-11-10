@@ -1,17 +1,22 @@
-'use client'
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import {
   CheckIcon,
   XIcon,
   HeartIcon,
   ShoppingCartIcon,
-  StarIcon
+  StarIcon,
+  Heart
 } from 'lucide-react'
 import ChatComponent from './ChatComponent'
 import ChatButton from '../../../common/Animations/ChatButton'
+import { useDispatch, useSelector } from 'react-redux'
+import { toast } from 'sonner'
+import {
+  addToWishlist,
+  removeFromWishlist
+} from '../../../../redux/slices/Users/Wishlist/wishlistSlice'
 
 function ProductDetailsSection({
   product,
@@ -22,12 +27,48 @@ function ProductDetailsSection({
   handleThumbnailClick,
   loading,
   handleAddToCart,
-  added
+  added,
+  handleRemoveFromWishlist
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false)
-
+  const wishlistItems = useSelector(state => state.wishlist.items)
+  const isInWishlist = wishlistItems.includes(product._id)
   const toggleChat = () => setIsChatOpen(!isChatOpen)
-
+  const { isAuthenticated } = useSelector(state => state.auth)
+  const dispatch = useDispatch()
+  const handleWishlistClick = () => {
+    if (!isAuthenticated) {
+      return toast.error('Login to Add To Wislist')
+    }
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product._id))
+      handleRemoveFromWishlist(product._id)
+    } else {
+      dispatch(addToWishlist(product._id))
+      handleAddToWishlist(product._id)
+    }
+    heartAnimation.start({
+      scale: [1, 1.2, 1],
+      transition: { duration: 0.3 }
+    })
+    bgAnimation.start({
+      backgroundColor: isInWishlist ? '#f3f4f6' : '#fee2e2',
+      transition: { duration: 0.3 }
+    })
+  }
+  const heartAnimation = useAnimation()
+  const bgAnimation = useAnimation()
+  useEffect(() => {
+    if (isInWishlist) {
+      const interval = setInterval(() => {
+        heartAnimation.start({
+          scale: [1, 1.1, 1],
+          transition: { duration: 1, ease: 'easeInOut' }
+        })
+      }, 2000)
+      return () => clearInterval(interval)
+    }
+  }, [isInWishlist, heartAnimation])
   return (
     <section className='py-8 md:py-16 font-primary'>
       <div className='container mx-auto px-4'>
@@ -60,7 +101,7 @@ function ProductDetailsSection({
 
             <div className='mt-4'>
               <h2 className='text-xl font-semibold mb-4'>Product Images</h2>
-              <div className='flex space-x-4 overflow-x-auto pb-2 scrollbar-hidden'>
+              <div className='flex space-x-4 px-3 overflow-x-auto pb-2 scrollbar-hidden'>
                 {allImages.map((image, index) => (
                   <motion.div
                     key={index}
@@ -95,11 +136,11 @@ function ProductDetailsSection({
             <h1 className='text-3xl md:text-4xl font-semibold text-customColorTertiaryDark'>
               {product.productName}
             </h1>
-            <p className='text-lg sm:text-center text-gray-600'>
+            <div className='text-lg sm:text-center text-gray-600'>
               {product.productDescription.split(',').map((description, i) => {
-                return <p key={i}>{description}</p>
+                return <div key={i}>{description}</div>
               })}
-            </p>
+            </div>
 
             <div>
               <h2 className='text-xl font-semibold mb-2'>Categories:</h2>
@@ -116,14 +157,15 @@ function ProductDetailsSection({
             </div>
 
             <div>
-              {product.discountPrice ? (
+              {product.discountPrice &&
+              product.discountPrice !== product.productPrice ? (
                 <>
-                  <p className='text-2xl md:text-3xl font-bold text-red-600'>
-                    ${product.discountPrice.toFixed(2)}
+                  <div className='text-2xl md:text-3xl font-bold text-red-600'>
+                    ₹{product.discountPrice.toFixed(2)}
                     <span className='ml-2 text-lg line-through text-gray-500'>
-                      ${product.productPrice.toFixed(2)}
+                      ₹{product.productPrice.toFixed(2)}
                     </span>
-                  </p>
+                  </div>
                   {product.appliedDiscount && (
                     <p className='text-sm text-green-600 mt-1'>
                       Discount ({product.appliedDiscount.name}) - Ends on{' '}
@@ -142,7 +184,7 @@ function ProductDetailsSection({
                 </>
               ) : (
                 <p className='text-2xl md:text-3xl font-bold'>
-                  ${product.productPrice.toFixed(2)}
+                  ₹{product.productPrice.toFixed(2)}
                 </p>
               )}
             </div>
@@ -182,7 +224,7 @@ function ProductDetailsSection({
               <motion.button
                 disabled={loading || added || product.productStock === 0}
                 onClick={handleAddToCart}
-                className={`sm:flex-1 bg-customColorTertiary text-white h-12 px-8  rounded-md font-medium ${
+                className={`sm:flex-1 bg-customColorTertiary cursor-pointer text-white h-12 px-8  rounded-md font-medium ${
                   loading || added || product.productStock === 0
                     ? 'opacity-50 cursor-not-allowed'
                     : 'hover:bg-customColorTertiaryLight'
@@ -198,14 +240,36 @@ function ProductDetailsSection({
                     ? 'Added to Cart'
                     : 'Add to Cart'}
               </motion.button>
+
               <motion.button
-                onClick={() => handleAddToWishlist(product._id)}
-                className='sm:flex-1 bg-gray-200 text-gray-700 h-12 px-8 rounded-md font-medium hover:bg-gray-300 transition duration-300'
+                onClick={handleWishlistClick}
+                className='relative sm:flex-1 flex items-center justify-center h-12 px-8  rounded-md font-medium text-gray-700 transition duration-300 overflow-hidden'
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                animate={bgAnimation}
+                initial={{ backgroundColor: '#f3f4f6' }}
               >
-                <HeartIcon className='w-5 h-5 mr-2 inline' />
-                Wishlist
+                <motion.div animate={heartAnimation}>
+                  <Heart
+                    className={`w-6 h-6 mr-2 transition-colors duration-300 ${
+                      isInWishlist
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-gray-400'
+                    }`}
+                  />
+                </motion.div>
+                <span className='relative z-10'>
+                  {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
+                </span>
+                {isInWishlist && (
+                  <motion.div
+                    className='absolute inset-0 bg-red-100 opacity-20'
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
               </motion.button>
             </div>
 
@@ -223,7 +287,7 @@ function ProductDetailsSection({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.5 }}
-            className='fixed bottom-4 right-4 z-50'
+            className='fixed bottom-4 sm:right-4 z-50'
           >
             <ChatComponent toggleChat={toggleChat} id={product._id} />
           </motion.div>
