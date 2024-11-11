@@ -192,9 +192,15 @@ const getCartDetails = async userId => {
               thumbnailImage: '$productDetails.thumbnailImage',
               quantity: '$items.quantity',
               productPrice: '$productDetails.productPrice',
-              discountPrice: '$productDetails.discountPrice',
-              maxDiscount: '$productDetails.maxDiscount',
-              appliedDiscount: '$productDetails.appliedDiscount'
+              discountPrice: '$productDetails.discountPrice', // Price after discount
+              maxDiscount: '$productDetails.maxDiscount', // Maximum discount applied
+              appliedDiscount: '$productDetails.appliedDiscount',
+              individualDiscount: {
+                $multiply: [
+                  '$items.quantity',
+                  { $ifNull: ['$productDetails.maxDiscount', 0] }
+                ]
+              } // Total discount for this specific item based on quantity
             }
           },
           subtotal: {

@@ -88,9 +88,11 @@ const validateAddProduct = [
     .withMessage('Product price must be greater than zero'),
 
   body('discountPrice')
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ gt: 0 })
-    .withMessage('Discount price must be greater than zero if provided'),
+    .withMessage('Discount price must be greater than zero if provided')
+    .custom(value => value === null || value >= 0)
+    .withMessage('Discount price must be a non-negative number if provided'),
 
   body('productCategory')
     .notEmpty()
@@ -186,8 +188,8 @@ const validateEditProduct = [
     .withMessage('Product year must be a valid year up to the current year'),
 
   body('productStock')
-    .isInt({ min: 1 })
-    .withMessage('Product stock must be a positive integer'),
+    .isInt({ min: 0 })
+    .withMessage('Product stock must be positive or zero'),
 
   body('weight')
     .notEmpty()

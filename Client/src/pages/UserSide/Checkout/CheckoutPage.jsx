@@ -171,9 +171,15 @@ function CheckoutPage() {
                             <p className='text-sm font-medium text-gray-900'>
                               ₹{(item.discountPrice * item.quantity).toFixed(2)}
                             </p>
-                            <p className='text-sm font-medium line-through text-gray-900'>
-                              ₹{(item.productPrice * item.quantity).toFixed(2)}
-                            </p>
+                            {item?.discountPrice &&
+                              item.discountPrice !== item.productPrice && (
+                                <p className='text-sm font-medium line-through text-gray-900'>
+                                  ₹
+                                  {(item.productPrice * item.quantity).toFixed(
+                                    2
+                                  )}
+                                </p>
+                              )}
                           </div>
                         ) : (
                           <p className='text-sm font-medium text-gray-900'>

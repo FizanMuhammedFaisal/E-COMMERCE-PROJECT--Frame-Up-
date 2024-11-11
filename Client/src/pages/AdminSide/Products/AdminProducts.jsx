@@ -11,7 +11,6 @@ import {
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import 'react-toastify/dist/ReactToastify.css'
 import { Select } from '@headlessui/react'
 import CircularProgress from '@mui/material/CircularProgress'
 

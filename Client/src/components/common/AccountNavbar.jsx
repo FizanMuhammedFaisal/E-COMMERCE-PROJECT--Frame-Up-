@@ -9,6 +9,7 @@ import apiClient from '../../services/api/apiClient'
 import { logoutUser } from '../../redux/slices/authSlice'
 import { clearCart } from '../../redux/slices/Users/Cart/cartSlice'
 import { clearWishlist } from '../../redux/slices/Users/Wishlist/wishlistSlice'
+import { toast } from 'sonner'
 
 export default function AccountNavbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,6 +25,7 @@ export default function AccountNavbar() {
       dispatch(clearCart())
       dispatch(clearWishlist())
       dispatch(logoutUser())
+      toast.success('Logout Successfull')
     }
   }
   //

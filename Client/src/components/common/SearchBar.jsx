@@ -177,11 +177,10 @@ function SearchBar({ setIsSearchFocused, isSearchFocused }) {
       <AnimatePresence>
         {isSearchFocused && (
           <motion.div
-            className='absolute top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20'
+            className='absolute -right-16  sm:right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20'
             style={{
               width: '384px',
-              maxWidth: '100vw',
-              right: 0
+              maxWidth: '100vw'
             }}
             initial='hidden'
             animate='visible'

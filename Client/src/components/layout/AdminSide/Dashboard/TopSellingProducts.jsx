@@ -77,7 +77,7 @@ function TopSellingProducts({ COLORS }) {
                       color: 'red'
                     }}
                   >
-                    {`Sales: $${payload[0].payload.sales.toFixed(2)}`}
+                    {`Sales: ₹${payload[0].payload.sales.toFixed(2)}`}
                   </p>
                 </div>
               )

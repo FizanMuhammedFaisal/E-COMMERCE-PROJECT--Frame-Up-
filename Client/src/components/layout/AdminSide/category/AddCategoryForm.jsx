@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { addCategory } from '../../../../redux/slices/Admin/AdminCategory/adminCategorySlice'
-import { toast } from 'react-toastify'
+
 import { useLocation } from 'react-router-dom'
 import {
   fetchStyles,
   fetchTechniques,
   fetchThemes
 } from '../../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
+import { toast } from 'sonner'
 function AddCategoryForm() {
   const location = useLocation()
   const { type } = location.state || { type: null }

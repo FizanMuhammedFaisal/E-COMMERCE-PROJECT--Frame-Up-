@@ -119,7 +119,7 @@ const getOrderDetails = asyncHandler(async (req, res) => {
     return next(error)
   }
   const order = await Order.findById(orderId)
-  console.log(order)
+
   res.status(200).json({ success: true, order })
 })
 const getOrders = asyncHandler(async (req, res) => {
@@ -216,12 +216,14 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
     ) {
       order.paymentStatus = 'Paid'
     }
+    order.items.forEach(item => {
+      if (item.status === order.orderStatus) {
+        item.status = newStatus
+      }
+    })
     order.orderStatus = newStatus
 
-    // Update the status of each item in the order
-    order.items.forEach(item => {
-      item.status = newStatus
-    })
+    // Update the status of each item in the order which matched the order status
 
     const updatedOrder = await order.save()
     if (!updatedOrder) {
@@ -272,7 +274,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
   } = req.body.data
   const user = req.user
   const userId = new mongoose.Types.ObjectId(req.user._id)
-  console.log(userId)
+
   try {
     let outOfStock = false
     const productIds = items.map(item => item.productId)
@@ -282,11 +284,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       const product = products.find(p => p._id.equals(item.productId))
       if (!product || product.productStock === 0) {
         outOfStock = true
-        return {
-          ...item,
-          quantity: 0,
-          price: product ? product.productPrice : 0
-        }
+        return { ...item }
       }
       const updatedQuantity = Math.min(product.productStock, item.quantity)
       return { ...item, quantity: updatedQuantity, price: product.productPrice }
@@ -301,25 +299,43 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     }
 
     const cartDetails = await getCartDetails(userId)
-    console.log(cartDetails)
-    if (!cartDetails) {
+
+    if (!cartDetails || !cartDetails[0]) {
       const error = new Error('Order creation failed')
       error.statusCode = 400
       return next(error)
     }
 
-    const subtotal = Math.ceil(cartDetails[0]?.subtotal)
-    const discount = Math.ceil(cartDetails[0]?.discount)
-    console.log(discount)
-    const totalPrice = Math.ceil(cartDetails[0]?.totalPrice)
+    const orderItems = updatedCart.map(item => {
+      const cartItem = cartDetails[0].items.find(
+        cartItem => cartItem.productId.toString() === item.productId.toString()
+      )
+
+      // Calculate individual item discount
+      const itemDiscount = cartItem.maxDiscount || 0
+
+      return {
+        productId: item.productId,
+        productName: cartItem.productName,
+        quantity: item.quantity,
+        price: cartItem.productPrice,
+        thumbnailImage: cartItem.thumbnailImage,
+        discount: itemDiscount, // Individual item discount
+        status: 'Pending' // Default status as per schema
+      }
+    })
+
+    const subtotal = Math.ceil(cartDetails[0].subtotal)
+    const discount = Math.ceil(cartDetails[0].discount)
+    const totalPrice = Math.ceil(cartDetails[0].totalPrice)
     let totalAmount = Math.ceil(totalPrice + taxAmount + shippingCost)
 
-    //apply coupons if provided
-    let couponDiscount = 0
+    // Apply coupons if provided
+    let couponAmount = 0
     if (appliedCouponCode) {
       try {
-        couponDiscount = await applyCoupon(appliedCouponCode, totalPrice)
-        totalAmount -= Math.ceil(couponDiscount)
+        couponAmount = await applyCoupon(appliedCouponCode, totalPrice)
+        totalAmount -= Math.ceil(couponAmount)
       } catch (err) {
         const error = new Error(err)
         error.statusCode = 400
@@ -327,7 +343,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       }
     }
 
-    // Cheking wallet balnce and if not balance then rejecting
+    // Checking wallet balance and setting payment status
     let paymentStatus = 'Pending'
     const wallet = await Wallet.findOne({ userId: user._id })
     if (paymentMethod === 'Wallet') {
@@ -339,24 +355,24 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       paymentStatus = 'Paid'
     }
 
-    // Create the new order
+    // Create the new order matching the schema structure
     const newOrder = await Order.create({
       userId: user._id,
-      items: updatedCart,
+      items: orderItems,
       shippingAddress,
       paymentMethod,
-      shippingCost,
-      discount,
-      taxAmount,
-      totalAmount,
-      orderStatus: 'Pending',
       paymentStatus,
+      orderStatus: 'Pending',
       subtotal,
+      totalAmount,
+      shippingCost,
+      discount, // Product-level discounts from cart
+      taxAmount,
       couponCode: appliedCouponCode,
-      couponAmount: couponDiscount
+      couponAmount // Coupon discount amount
     })
 
-    //Deduct amount
+    // Deduct amount from wallet if applicable
     if (paymentMethod === 'Wallet') {
       wallet.balance -= totalAmount
       wallet.transactions.push({
@@ -402,13 +418,16 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
   const userId = new mongoose.Types.ObjectId(req.user._id)
   let updatedCart = []
   let originalCartItems = []
+  let newOrder = null
 
   try {
+    // Get original cart items for rollback if needed
     const originalCart = await Cart.findOne({ userId: user._id })
     if (originalCart) {
       originalCartItems = originalCart.items
     }
 
+    // Check product stock
     const productIds = items.map(item => item.productId)
     const products = await Product.find({ _id: { $in: productIds } }).lean()
 
@@ -421,12 +440,9 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
           ...item,
           quantity: 0,
           price: product ? product.productPrice : 0
-        } // Out of stock
+        }
       }
-      const updatedQuantity =
-        product.productStock < item.quantity
-          ? product.productStock
-          : item.quantity
+      const updatedQuantity = Math.min(product.productStock, item.quantity)
       return { ...item, quantity: updatedQuantity, price: product.productPrice }
     })
 
@@ -438,24 +454,46 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       })
     }
 
+    // Get cart details for pricing and discount information
     const cartDetails = await getCartDetails(userId)
-    console.log(cartDetails)
-    if (!cartDetails) {
-      const error = new Error('order creation Failed')
+    if (!cartDetails || !cartDetails[0]) {
+      const error = new Error('Order creation failed')
       error.statusCode = 400
       return next(error)
     }
+
+    // Map cart items to match the itemsSchema structure
+    const orderItems = updatedCart.map(item => {
+      const cartItem = cartDetails[0].items.find(
+        cartItem => cartItem.productId.toString() === item.productId.toString()
+      )
+
+      // Get individual item discount
+      const itemDiscount = cartItem.maxDiscount || 0
+
+      return {
+        productId: item.productId,
+        productName: cartItem.productName,
+        quantity: item.quantity,
+        price: cartItem.productPrice,
+        thumbnailImage: cartItem.thumbnailImage,
+        discount: itemDiscount, // Individual item discount
+        status: 'Pending' // Default status as per schema
+      }
+    })
+
+    // Calculate order totals
     const subtotal = Math.ceil(cartDetails[0].subtotal)
     const discount = Math.ceil(cartDetails[0].discount)
     const totalPrice = Math.ceil(cartDetails[0].totalPrice)
     let totalAmount = Math.ceil(totalPrice + taxAmount + shippingCost)
 
-    //apply coupons if provided
-    let couponDiscount = 0
+    // Apply coupon if provided
+    let couponAmount = 0
     if (appliedCouponCode) {
       try {
-        couponDiscount = await applyCoupon(appliedCouponCode, totalPrice)
-        totalAmount -= Math.ceil(couponDiscount)
+        couponAmount = await applyCoupon(appliedCouponCode, totalPrice)
+        totalAmount -= Math.ceil(couponAmount)
       } catch (err) {
         const error = new Error(err)
         error.statusCode = 400
@@ -463,31 +501,42 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       }
     }
 
-    const newOrder = await Order.create({
+    // Create order with schema-matched structure
+    newOrder = await Order.create({
       userId: user._id,
-      items: updatedCart,
+      items: orderItems,
       shippingAddress,
       paymentMethod,
-      shippingCost,
-      discount,
-      taxAmount,
-      totalAmount,
-      orderStatus: 'Pending',
       paymentStatus: 'Pending',
+      orderStatus: 'Pending',
+      shippingCost,
       subtotal,
+      totalAmount,
+      discount, // Product-level discounts from cart
+      taxAmount,
       couponCode: appliedCouponCode,
-      couponAmount: couponDiscount
+      couponAmount // Coupon discount amount
     })
+
     await clearCart(user._id)
+
+    // Handle Razorpay order creation
     if (paymentMethod === 'Razor Pay') {
       try {
         const options = {
-          amount: newOrder.totalAmount * 100,
+          amount: totalAmount * 100, // Amount in paise
           currency: 'INR',
           receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
           payment_capture: 1
         }
+
         const razorpayOrder = await razorpay.orders.create(options)
+
+        // Update order with razorpay order ID
+        await Order.findByIdAndUpdate(newOrder._id, {
+          razorpayOrderId: razorpayOrder.id
+        })
+
         const orderData = {
           razorpayOrderId: razorpayOrder.id,
           amount: razorpayOrder.amount,
@@ -495,6 +544,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
           name: newOrder.shippingAddress.name,
           contact: newOrder.shippingAddress.phoneNumber
         }
+
         return res.status(200).json({ orderData })
       } catch (err) {
         console.error(err)
@@ -509,10 +559,12 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
   } catch (error) {
     console.error('Error placing order:', error)
 
+    // Rollback changes if order was created
     if (newOrder) {
       await Order.findByIdAndDelete(newOrder._id)
     }
 
+    // Restore product stock
     for (const item of updatedCart) {
       if (item.quantity > 0) {
         await Product.findByIdAndUpdate(item.productId, {
@@ -521,6 +573,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       }
     }
 
+    // Restore original cart
     await Cart.findOneAndUpdate(
       { userId: user._id },
       { items: originalCartItems }
@@ -842,10 +895,49 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
 })
 
 //
+
+// Helper function to calculate the refund amount for an order item
+const calculateRefundAmount = (order, canceledItem) => {
+  // Basic item calculations
+  const itemSubtotal = canceledItem.price * canceledItem.quantity
+  const itemDiscount = canceledItem.discount * canceledItem.quantity
+
+  // Calculate item's proportion of total order
+  const itemProportion = itemSubtotal / order.subtotal
+
+  // Calculate proportional coupon amount
+  const itemCouponAmount =
+    order.couponAmount > 0 ? order.couponAmount * itemProportion : 0
+
+  // Calculate proportional tax and shipping
+  const itemTaxAmount = order.taxAmount * itemProportion
+
+  // Calculate final refund
+  const refundAmount = Math.ceil(
+    itemSubtotal + // Base price * quantity
+      itemTaxAmount - // Proportional tax
+      itemDiscount - // Item discount
+      itemCouponAmount // Proportional coupon discount
+  )
+
+  return {
+    total: refundAmount,
+    breakdown: {
+      itemSubtotal,
+      itemDiscount,
+      couponAmount: itemCouponAmount,
+      proportionalTax: itemTaxAmount
+    }
+  }
+}
+
+// Main controller function for cancelling order item
 const cancelOrderItem = asyncHandler(async (req, res, next) => {
   const { orderId, itemId } = req.body
   const userId = req.user._id
-  let Message = ''
+  let message = ''
+
+  // Input validation
   if (
     !orderId ||
     !itemId ||
@@ -856,93 +948,123 @@ const cancelOrderItem = asyncHandler(async (req, res, next) => {
     error.statusCode = 400
     return next(error)
   }
+
+  // Find order and wallet
   const order = await Order.findById(orderId)
+  const wallet = await Wallet.findOne({ userId })
 
   if (!order) {
     const error = new Error('Order Not Found.')
     error.statusCode = 400
     return next(error)
   }
-  if (order.userId.toString() !== userId.toString()) {
-    const error = new Error('You are not authorized to cancel this order.')
-    error.statusCode = 403
-    return next(error)
-  }
 
-  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
-    const error = new Error(
-      'Order cannot be cancelled. It has already been shipped or delivered.'
-    )
+  if (!wallet) {
+    const error = new Error('Wallet Not Found.')
     error.statusCode = 400
     return next(error)
   }
 
+  // Find the item to cancel
   const itemIndex = order.items.findIndex(
     item => item._id.toString() === itemId
   )
-
   if (itemIndex === -1) {
-    const error = new Error('item Not Found.')
+    const error = new Error('Item Not Found.')
     error.statusCode = 404
     return next(error)
   }
 
+  const canceledItem = order.items[itemIndex]
+
+  // Validate item can be cancelled
+  if (canceledItem.status === 'Cancelled') {
+    const error = new Error('Item is already cancelled.')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  if (
+    [
+      'Return Initialized',
+      'Return Accepted',
+      'Return Rejected',
+      'Return Completed'
+    ].includes(canceledItem.status)
+  ) {
+    const error = new Error('Cannot cancel item in return process.')
+    error.statusCode = 400
+    return next(error)
+  }
+
+  // Update item status to 'Cancelled'
   order.items[itemIndex].status = 'Cancelled'
+  let refundAmount
+  // Check if all items are canceled
   const allItemsCanceled = order.items.every(
     item => item.status === 'Cancelled'
   )
+  // all item calcele
+  if (allItemsCanceled) {
+    refundAmount = order.totalAmount - order.cancelledAmount
+  } else {
+    // Calculate refund using helper function
+    let { total, breakdown } = calculateRefundAmount(order, canceledItem)
+    refundAmount = total
+  }
+
+  // Update order totals
+  order.cancelledAmount += refundAmount
+  order.discount -= canceledItem.discount * canceledItem.quantity
+
+  // For fixed coupon amount, reduce proportionally
+  if (order.couponAmount > 0) {
+    const itemProportion =
+      (canceledItem.price * canceledItem.quantity) / order.subtotal
+    order.couponAmount -= order.couponAmount * itemProportion
+  }
+
+  // Prevent negative values
+  order.totalAmount = Math.max(0, order.totalAmount)
+  order.subtotal = Math.max(0, order.subtotal)
+  order.discount = Math.max(0, order.discount)
+  order.couponAmount = Math.max(0, order.couponAmount)
 
   if (allItemsCanceled) {
     order.orderStatus = 'Cancelled'
-  }
-  // need to do calcuationhere
-
-  // const canceledItem = order.items[itemIndex]
-  // order.totalAmount -= canceledItem.price // Adjust this based on your schema
-  // if (order.totalAmount < 0) order.totalAmount = 0 // To avoid negative totals
-  Message = 'Cancellation successfull'
-  let wallet = await Wallet.findOne({ userId: order.userId })
-  if (order.paymentStatus === 'Paid') {
-    if (!wallet) {
-      wallet = new Wallet({
-        userId: order.userId,
-        balance: 0,
-        transactions: []
-      })
+    order.couponAmount = 0
+  } else {
+    // Update order status to reflect partial cancellation
+    const hasDelivered = order.items.some(item => item.status === 'Delivered')
+    if (hasDelivered) {
+      order.orderStatus = 'Partially Returned'
     }
-
-    wallet.balance +=
-      order.subtotal +
-      order.taxAmount +
-      order.shippingCost -
-      order.couponAmount -
-      order.discount
-
-    wallet.transactions.push({
-      type: 'refund',
-      amount: order.totalAmount,
-      description: `Refund for order item ${order._id}`
-    })
-
-    await wallet.save()
-    Message = 'Cancellation successful and amount refunded to  wallet.'
   }
 
-  const product = await Product.findById(itemId)
-  if (product) {
-    product.stock += item.quantity
-    await product.save()
-  }
+  // Add refund to wallet
+  wallet.balance += refundAmount
+  wallet.transactions.push({
+    type: 'refund',
+    amount: refundAmount,
+    description: `Refund for cancelled item from order ${orderId}`,
+    orderId: order._id
+  })
 
-  await order.save()
+  // Save changes
+  await Promise.all([order.save(), wallet.save()])
+
+  message = `Order item cancelled successfully. ₹${refundAmount} credited to wallet.`
 
   return res.status(200).json({
-    message: Message,
+    success: true,
+    message,
     order,
-    walletBalance: wallet.balance
+    walletBalance: wallet.balance,
+    refundAmount
   })
 })
-//
+
+export default cancelOrderItem
 //
 const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
   const { orderId, itemId } = req.body

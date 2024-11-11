@@ -1,5 +1,3 @@
-'use client'
-
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import {
@@ -140,14 +138,14 @@ export default function WalletPage() {
     <div className=' min-h-screen p-4 sm:p-6 lg:p-8'>
       <div className='mx-auto'>
         <div className='bg-white border rounded-xl min-h-screen overflow-hidden'>
-          <div className='p-6 sm:p-8 flex justify-between bg-gradient-to-b from-customColorTertiary to bg-customColorTertiarypop'>
+          <div className='p-6 sm:p-8 flex-1 gap-3 justify-between bg-gradient-to-b from-customColorTertiary to bg-customColorTertiarypop'>
             <div>
               <h1 className='text-2xl sm:text-3xl font-bold text-white mb-2'>
                 My Wallet
               </h1>
               <div className='flex items-baseline'>
                 <span className='text-4xl sm:text-5xl font-bold text-white'>
-                  ₹{balance.toLocaleString()}
+                  ₹{balance.toFixed(2)}
                 </span>
                 <span className='ml-2 text-blue-100'>Available Balance</span>
               </div>

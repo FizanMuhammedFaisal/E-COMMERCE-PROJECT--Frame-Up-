@@ -1,13 +1,13 @@
 import { Select } from '@headlessui/react'
 import apiClient from '../../../../services/api/apiClient'
 import CategoriesTable from '../../../common/ReusableTable'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import AlertDialog from '../../../common/AlertDialog'
-import { toast } from 'react-toastify'
 import { useDispatch } from 'react-redux'
 import { updateStatus } from '../../../../redux/slices/Admin/AdminCategory/categoriesFetchSlice'
 import { FaEdit } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 function CategoryTable({ data, type }) {
   const [modal, setModal] = useState({ isOpen: false, newStatus: '', id: '' })

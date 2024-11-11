@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ArtistsTable from '../../../components/common/ReusableTable'
-import { ToastContainer } from 'react-toastify'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import CircularProgress from '@mui/material/CircularProgress'
 import { Select } from '@headlessui/react'
 import AlertDialog from '../../../components/common/AlertDialog'
 import { useDispatch, useSelector } from 'react-redux'
@@ -15,6 +11,7 @@ import {
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../../../components/common/Animations/Spinner'
+import { toast } from 'sonner'
 
 const AdminArtists = () => {
   const navigate = useNavigate()

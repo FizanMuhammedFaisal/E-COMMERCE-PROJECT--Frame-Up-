@@ -11,9 +11,14 @@ const orderStatuses = [
   'Processing',
   'Shipped',
   'Delivered',
-  'Cancelled'
+  'Cancelled',
+  'Return Initialized',
+  'Return Accepted',
+  'Return Rejected',
+  'Return Processing',
+  'Partially Returned',
+  'Return Completed'
 ]
-
 export default function OrderEditPage() {
   const { orderId } = useParams()
   const [isExpanded, setIsExpanded] = useState(false)

@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../../services/api/apiClient'
@@ -9,6 +7,7 @@ import UsersTable from '../../../components/common/ReusableTable'
 import AlertDialog from '../../../components/common/AlertDialog'
 
 import Spinner from '../../../components/common/Animations/Spinner'
+import { toast } from 'sonner'
 
 const AdminCouponsPage = () => {
   const [coupons, setCoupons] = useState([])

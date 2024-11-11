@@ -7,7 +7,8 @@ const authSlice = createSlice({
     accessToken: null,
     isAuthenticated: false,
     role: null,
-    status: null
+    status: null,
+    signUpStatus: null
   },
   reducers: {
     setUser: (state, action) => {
@@ -22,9 +23,14 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.accessToken = null
       state.role = null
+    },
+    setSignUpStatus: (state, action) => {
+      const data = action.payload
+      console.log(data)
+      state.signUpStatus = data
     }
   }
 })
 
 export default authSlice.reducer
-export const { setUser, logoutUser } = authSlice.actions
+export const { setUser, logoutUser, setSignUpStatus } = authSlice.actions

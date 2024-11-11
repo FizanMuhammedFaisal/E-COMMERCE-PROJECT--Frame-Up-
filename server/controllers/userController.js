@@ -178,8 +178,6 @@ const googleAuth = asyncHandler(async (req, res, next) => {
   if (updatedUser || newUser) {
     const user = updatedUser || newUser
     const id = user._id.toString(user._id)
-
-    console.log(id)
     if (!user) {
       // Handle case where neither user is available
       return res.status(404).json({ message: 'User not found' })
@@ -193,7 +191,8 @@ const googleAuth = asyncHandler(async (req, res, next) => {
       email: user.email,
       role: user.role,
       status: user.status,
-      accessToken
+      accessToken,
+      newUser: !!newUser
     })
   }
   const error = new Error('Please Retry Login')

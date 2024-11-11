@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { uploadImagesToCloudinary } from '../../../services/Cloudinary/UploadImages'
 import Spinner from '../../../components/common/Animations/Spinner'
 import apiClient from '../../../services/api/apiClient'
-
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { setSignUpStatus } from '../../../redux/slices/authSlice'
 export default function SetUpPage() {
   const [step, setStep] = useState(1)
   const [referralCode, setReferralCode] = useState('')
@@ -14,12 +17,17 @@ export default function SetUpPage() {
   const [success, setSuccess] = useState({ referral: null, profile: null })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { pathname } = useLocation()
+  const { signUpStatus } = useSelector(state => state.auth)
+  useEffect(() => {
+    if (!signUpStatus) {
+      navigate('/')
+    }
+  }, [pathname, navigate])
 
   const handleNextStep = async () => {
-    console.log('asdf')
-    console.log(profileFile)
     if (step === 2 && profileFile) {
-      console.log('asdfsad')
       await uploadProfilePicture()
     } else {
       setStep(prevStep => prevStep + 1)
@@ -34,7 +42,7 @@ export default function SetUpPage() {
     setLoading(true)
     try {
       const url = await uploadImagesToCloudinary(profileFile)
-      console.log(url)
+
       const res = await apiClient.post('/api/users/upload-profile', { url })
       if (res.status === 200) {
         setError(prev => ({ ...prev, profile: null }))
@@ -94,6 +102,7 @@ export default function SetUpPage() {
   }
 
   const handleFinish = () => {
+    dispatch(setSignUpStatus(false))
     navigate('/')
   }
 

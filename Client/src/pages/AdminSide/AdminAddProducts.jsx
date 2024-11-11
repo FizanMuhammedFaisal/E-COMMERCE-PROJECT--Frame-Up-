@@ -4,8 +4,6 @@ import api from '../../services/api/api'
 import validataImages from '../../utils/validation/ImageValidation'
 import { uploadImagesToCloudinary } from '../../services/Cloudinary/UploadImages'
 import { useDispatch, useSelector } from 'react-redux'
-
-import { toast } from 'react-toastify'
 import {
   addDeletedImageUrl,
   deleteImage,
@@ -23,6 +21,7 @@ import {
 } from '../../utils/indexedDB/adminImageDB'
 import validateProductForm from '../../utils/validation/ProductFormValidation'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 const AdminAddProducts = () => {
   const [imageForCrop, setImageForCrop] = useState('')
   const [productImages, setProductImages] = useState([])

@@ -3,7 +3,7 @@ import { FcGoogle } from 'react-icons/fc'
 import api from '../../../services/api/api'
 import { validateLoginForm } from '../../../utils/validation/FormValidation'
 import { Link, useNavigate } from 'react-router-dom'
-import { setUser } from '../../../redux/slices/authSlice'
+import { setSignUpStatus, setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 import { provider, auth } from '../../../services/firebase/firebase'
 import { signInWithPopup } from 'firebase/auth'
@@ -36,8 +36,14 @@ function LoginForm() {
         status: res.data.status,
         accessToken: res.data.accessToken
       }
-      dispatch(setUser(data))
-      toast.success('Login Successfull')
+      if (res.data.newUser) {
+        dispatch(setSignUpStatus(true))
+        navigate('/set-up', { replace: true })
+        setTimeout(() => dispatch(setUser(data)), 100)
+      } else {
+        toast.success('Login Successfull')
+        dispatch(setUser(data))
+      }
     } catch (error) {
       // Handle Errors here.
       console.error('Error code:', error.code)

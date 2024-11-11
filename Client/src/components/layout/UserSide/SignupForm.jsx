@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import { validateRegisterForm } from '../../../utils/validation/FormValidation'
 import api from '../../../services/api/api'
-import { setUser } from '../../../redux/slices/authSlice'
+import { setSignUpStatus, setUser } from '../../../redux/slices/authSlice'
 import { useDispatch } from 'react-redux'
 import { provider, auth } from '../../../services/firebase/firebase'
 import { signInWithPopup } from 'firebase/auth'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 function SignupForm() {
   const [form, setForm] = useState({
     username: '',
@@ -36,9 +37,14 @@ function SignupForm() {
         status: res.data.status,
         accessToken
       }
-      navigate('/set-up')
-
-      dispatch(setUser(data))
+      if (res.data.newUser) {
+        dispatch(setSignUpStatus(true))
+        navigate('/set-up', { replace: true })
+        setTimeout(() => dispatch(setUser(data)), 100)
+      } else {
+        toast.success('Login Successfull')
+        dispatch(setUser(data))
+      }
     } catch (error) {
       // Handle Errors here.
       console.error('Error code:', error.code)
@@ -60,7 +66,7 @@ function SignupForm() {
       const res = await api.post('/users/checkuser', form)
       console.log(res)
       sessionStorage.setItem('x-timer', res.data.token)
-
+      dispatch(setSignUpStatus(true))
       navigate('/send-otp', { replace: true })
     } catch (error) {
       const responseError = error?.response?.data?.message || error

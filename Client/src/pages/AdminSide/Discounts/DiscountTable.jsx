@@ -1,14 +1,11 @@
 import { Select } from '@headlessui/react'
-
 import { useMemo, useState } from 'react'
-
-import { toast } from 'react-toastify'
 import { useDispatch } from 'react-redux'
-
 import apiClient from '../../../services/api/apiClient'
 import ReusableTable from '../../../components/common/ReusableTable'
 import AlertDialog from '../../../components/common/AlertDialog'
 import { updateDiscountStatus } from '../../../redux/slices/Admin/AdminDiscount/adminDiscountSlice'
+import { toast } from 'sonner'
 
 function DiscountTable({ data, type }) {
   const [modal, setModal] = useState({

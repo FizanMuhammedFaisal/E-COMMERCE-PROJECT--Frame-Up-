@@ -109,10 +109,34 @@ const fetchCart = asyncHandler(async (req, res, next) => {
     return next(error)
   }
   const cart = await getCartDetails(userId)
+  console.log(cart)
   if (!cart) {
     const error = new Error('cart Not Fount')
     error.statusCode = 400
     return next(error)
+  }
+  let outOfStock = false // Initialize the out-of-stock flag
+  const productIds = cart[0].items.map(item => item.productId)
+  const products = await Product.find({ _id: { $in: productIds } }).lean()
+
+  const updatedItems = cart[0].items.map(item => {
+    const product = products.find(p => p._id.equals(item.productId))
+    if (!product || product.productStock === 0) {
+      outOfStock = true
+      return {
+        ...item,
+        quantity: 0
+      }
+    }
+    return item
+  })
+
+  if (outOfStock) {
+    return res.status(200).json({
+      cart: { ...cart[0], items: updatedItems },
+      message: 'Some items are out of stock',
+      outOfStock
+    })
   }
 
   res.status(200).json({

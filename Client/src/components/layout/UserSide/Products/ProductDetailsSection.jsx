@@ -62,7 +62,7 @@ function ProductDetailsSection({
     if (isInWishlist) {
       const interval = setInterval(() => {
         heartAnimation.start({
-          scale: [1, 1.1, 1],
+          scale: [1, 1.2, 1.1, 1],
           transition: { duration: 1, ease: 'easeInOut' }
         })
       }, 2000)
@@ -133,7 +133,7 @@ function ProductDetailsSection({
 
           {/* Product Details */}
           <div className='w-full lg:w-1/2 space-y-6'>
-            <h1 className='text-3xl md:text-4xl font-semibold text-customColorTertiaryDark'>
+            <h1 className='text-3xl text-center md:text-4xl font-semibold text-customColorTertiaryDark'>
               {product.productName}
             </h1>
             <div className='text-lg sm:text-center text-gray-600'>

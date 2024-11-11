@@ -53,7 +53,7 @@ const UserRoutes = [
       },
       {
         path: '/set-up',
-        element: <OtpProtectedRoute element={<SetUpPage />} />
+        element: <SetUpPage />
       },
 
       {

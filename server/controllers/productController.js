@@ -131,6 +131,166 @@ const getProducts = asyncHandler(async (req, res, next) => {
   console.log(sortOption)
   try {
     // Fetch filtered, paginated, and sorted products
+    // const productsQuery = Product.aggregate([
+    //   {
+    //     $lookup: {
+    //       from: 'discounts',
+    //       let: { productId: '$_id', categoryIds: '$productCategories' },
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $or: [
+    //                 { $eq: ['$targetId', '$$productId'] }, // product discount
+    //                 { $in: ['$targetId', '$$categoryIds'] } // category discount
+    //               ]
+    //             }
+    //           }
+    //         },
+    //         {
+    //           $match: {
+    //             $and: [
+    //               { status: 'Active' },
+    //               {
+    //                 $or: [
+    //                   {
+    //                     startDate: { $lte: new Date() },
+    //                     endDate: { $gte: new Date() }
+    //                   },
+    //                   {
+    //                     startDate: { $exists: false },
+    //                     endDate: { $exists: false }
+    //                   }
+    //                 ]
+    //               }
+    //             ]
+    //           }
+    //         }
+    //       ],
+    //       as: 'discounts'
+    //     }
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: '$discounts',
+    //       preserveNullAndEmptyArrays: true
+    //     }
+    //   },
+    //   {
+    //     $addFields: {
+    //       productDiscount: {
+    //         $cond: [
+    //           { $eq: ['$discounts.targetId', '$_id'] },
+    //           {
+    //             $cond: [
+    //               { $eq: ['$discounts.discountType', 'percentage'] },
+    //               {
+    //                 $multiply: [
+    //                   '$productPrice',
+    //                   { $divide: ['$discounts.discountValue', 100] }
+    //                 ]
+    //               },
+    //               '$discounts.discountValue'
+    //             ]
+    //           },
+    //           0
+    //         ]
+    //       },
+    //       categoryDiscount: {
+    //         $cond: [
+    //           { $in: ['$discounts.targetId', '$productCategories'] },
+    //           {
+    //             $cond: [
+    //               { $eq: ['$discounts.discountType', 'percentage'] },
+    //               {
+    //                 $multiply: [
+    //                   '$productPrice',
+    //                   { $divide: ['$discounts.discountValue', 100] }
+    //                 ]
+    //               },
+    //               '$discounts.discountValue'
+    //             ]
+    //           },
+    //           0
+    //         ]
+    //       }
+    //     }
+    //   },
+    //   {
+    //     $addFields: {
+    //       maxDiscount: {
+    //         $cond: [
+    //           { $gt: ['$productDiscount', '$categoryDiscount'] },
+    //           '$productDiscount',
+    //           '$categoryDiscount'
+    //         ]
+    //       }
+    //     }
+    //   },
+    //   {
+    //     $addFields: {
+    //       discountPrice: {
+    //         $cond: [
+    //           { $gt: ['$maxDiscount', 0] },
+    //           { $subtract: ['$productPrice', '$maxDiscount'] },
+    //           '$productPrice'
+    //         ]
+    //       },
+    //       finalPrice: {
+    //         $cond: [
+    //           { $lt: [{ $subtract: ['$productPrice', '$maxDiscount'] }, 0] },
+    //           0,
+    //           { $subtract: ['$productPrice', '$maxDiscount'] }
+    //         ]
+    //       }
+    //     }
+    //   },
+    //   {
+    //     $group: {
+    //       _id: '$_id',
+    //       mergedProduct: { $mergeObjects: '$$ROOT' },
+    //       maxDiscount: { $first: '$maxDiscount' },
+    //       finalPrice: { $first: '$finalPrice' }
+    //     }
+    //   },
+    //   {
+    //     $replaceRoot: {
+    //       newRoot: {
+    //         $mergeObjects: [
+    //           '$mergedProduct',
+    //           {
+    //             discountPrice: '$finalPrice'
+    //           }
+    //         ]
+    //       }
+    //     }
+    //   },
+    //   { $sort: sortOption },
+    //   { $skip: skip },
+    //   { $limit: limit },
+    //   {
+    //     $lookup: {
+    //       from: 'categories',
+    //       localField: 'productCategories',
+    //       foreignField: '_id',
+    //       as: 'productCategories'
+    //     }
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: 'artists',
+    //       localField: 'artist',
+    //       foreignField: '_id',
+    //       as: 'artist'
+    //     }
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: '$artist',
+    //       preserveNullAndEmptyArrays: true
+    //     }
+    //   }
+    // ]).collation({ locale: 'en', strength: 2 })
     const productsQuery = Product.aggregate([
       { $match: filter },
       {
@@ -142,8 +302,8 @@ const getProducts = asyncHandler(async (req, res, next) => {
               $match: {
                 $expr: {
                   $or: [
-                    { $eq: ['$targetId', '$$productId'] }, // product discount
-                    { $in: ['$targetId', '$$categoryIds'] } // category discount
+                    { $eq: ['$targetId', '$$productId'] },
+                    { $in: ['$targetId', '$$categoryIds'] }
                   ]
                 }
               }
@@ -168,62 +328,111 @@ const getProducts = asyncHandler(async (req, res, next) => {
               }
             }
           ],
-          as: 'discounts'
-        }
-      },
-      {
-        $unwind: {
-          path: '$discounts',
-          preserveNullAndEmptyArrays: true
+          as: 'allDiscounts'
         }
       },
       {
         $addFields: {
-          productDiscount: {
-            $cond: [
-              { $eq: ['$discounts.targetId', '$_id'] },
-              {
-                $cond: [
-                  { $eq: ['$discounts.discountType', 'percentage'] },
-                  {
-                    $multiply: [
-                      '$productPrice',
-                      { $divide: ['$discounts.discountValue', 100] }
+          validDiscountsWithAmount: {
+            $map: {
+              input: {
+                $filter: {
+                  input: '$allDiscounts',
+                  as: 'discount',
+                  cond: {
+                    $and: [
+                      {
+                        $cond: [
+                          { $eq: ['$$discount.discountType', 'percentage'] },
+                          {
+                            $and: [
+                              { $lte: ['$$discount.discountValue', 100] },
+                              {
+                                $lt: [
+                                  {
+                                    $multiply: [
+                                      '$productPrice',
+                                      {
+                                        $divide: [
+                                          '$$discount.discountValue',
+                                          100
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  '$productPrice'
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            $and: [
+                              {
+                                $lt: [
+                                  '$$discount.discountValue',
+                                  '$productPrice'
+                                ]
+                              },
+                              {
+                                $gte: [
+                                  '$productPrice',
+                                  { $ifNull: ['$$discount.minValue', 0] }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     ]
-                  },
-                  '$discounts.discountValue'
-                ]
+                  }
+                }
               },
-              0
-            ]
-          },
-          categoryDiscount: {
-            $cond: [
-              { $in: ['$discounts.targetId', '$productCategories'] },
-              {
-                $cond: [
-                  { $eq: ['$discounts.discountType', 'percentage'] },
+              as: 'discount',
+              in: {
+                $mergeObjects: [
+                  '$$discount',
                   {
-                    $multiply: [
-                      '$productPrice',
-                      { $divide: ['$discounts.discountValue', 100] }
-                    ]
-                  },
-                  '$discounts.discountValue'
+                    calculatedAmount: {
+                      $cond: [
+                        { $eq: ['$$discount.discountType', 'percentage'] },
+                        {
+                          $multiply: [
+                            '$productPrice',
+                            { $divide: ['$$discount.discountValue', 100] }
+                          ]
+                        },
+                        '$$discount.discountValue'
+                      ]
+                    }
+                  }
                 ]
-              },
-              0
-            ]
+              }
+            }
           }
+        }
+      },
+      {
+        $addFields: {
+          validDiscounts: {
+            $sortArray: {
+              input: '$validDiscountsWithAmount',
+              sortBy: { calculatedAmount: -1 }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          activeDiscount: { $arrayElemAt: ['$validDiscounts', 0] }
         }
       },
       {
         $addFields: {
           maxDiscount: {
             $cond: [
-              { $gt: ['$productDiscount', '$categoryDiscount'] },
-              '$productDiscount',
-              '$categoryDiscount'
+              { $ne: ['$activeDiscount', null] },
+              '$activeDiscount.calculatedAmount',
+              0
             ]
           }
         }
@@ -237,12 +446,8 @@ const getProducts = asyncHandler(async (req, res, next) => {
               '$productPrice'
             ]
           },
-          finalPrice: {
-            $cond: [
-              { $lt: [{ $subtract: ['$productPrice', '$maxDiscount'] }, 0] },
-              0,
-              { $subtract: ['$productPrice', '$maxDiscount'] }
-            ]
+          appliedDiscount: {
+            $cond: [{ $gt: ['$maxDiscount', 0] }, '$activeDiscount', null]
           }
         }
       },
@@ -251,7 +456,7 @@ const getProducts = asyncHandler(async (req, res, next) => {
           _id: '$_id',
           mergedProduct: { $mergeObjects: '$$ROOT' },
           maxDiscount: { $first: '$maxDiscount' },
-          finalPrice: { $first: '$finalPrice' }
+          appliedDiscount: { $first: '$appliedDiscount' }
         }
       },
       {
@@ -260,7 +465,7 @@ const getProducts = asyncHandler(async (req, res, next) => {
             $mergeObjects: [
               '$mergedProduct',
               {
-                discountPrice: '$finalPrice'
+                discountPrice: '$discountPrice'
               }
             ]
           }
@@ -292,7 +497,6 @@ const getProducts = asyncHandler(async (req, res, next) => {
         }
       }
     ]).collation({ locale: 'en', strength: 2 })
-
     // Total number of items after applying filters (for pagination purposes)
     const countQuery = Product.countDocuments(filter)
 

@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import apiClient from '../../../services/api/apiClient'
 import AlertDialog from '../../../components/common/AlertDialog'
@@ -12,6 +10,7 @@ import { FaEdit } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../../../components/common/Animations/Spinner'
 import { ListCheck } from 'lucide-react'
+import { toast } from 'sonner'
 const OrderStatusBadge = ({ status }) => {
   const statusColors = {
     pending:
@@ -151,7 +150,13 @@ const AdminOrders = () => {
     'Processing',
     'Shipped',
     'Delivered',
-    'Cancelled'
+    'Cancelled',
+    'Return Initialized',
+    'Return Accepted',
+    'Return Rejected',
+    'Return Processing',
+    'Partially Returned',
+    'Return Completed'
   ]
   const ordersData = useMemo(() => {
     if (!orders) return []
@@ -176,11 +181,17 @@ const AdminOrders = () => {
               {order.orderStatus}
             </option>
 
-            {statusOptions.slice(currentStatusIndex + 1).map(status => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
+            {currentStatusIndex < 5
+              ? statusOptions.slice(currentStatusIndex + 1, 5).map(status => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))
+              : statusOptions.slice(currentStatusIndex + 1).map(status => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
           </select>
         ),
         details: (

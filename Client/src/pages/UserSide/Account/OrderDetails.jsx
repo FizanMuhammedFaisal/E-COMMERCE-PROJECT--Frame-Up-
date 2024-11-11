@@ -1,9 +1,10 @@
-import { ArrowLeft, Download, Package, Truck, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import apiClient from '../../../services/api/apiClient'
 import OrderModal from '../../../components/modals/OrderModal'
+import Spinner from '../../../components/common/Animations/Spinner'
 
 function OrderDetails() {
   const [orderId, setOrderId] = useState(null)
@@ -27,7 +28,10 @@ function OrderDetails() {
     'Cancelled',
     'Return Initialized',
     'Return Accepted',
-    'Return Rejected'
+    'Return Rejected',
+    'Return Processing',
+    'Partially Returned',
+    'Return Completed'
   ]
 
   const handleDownloadInvoice = async id => {
@@ -74,7 +78,8 @@ function OrderDetails() {
     setLoading(true)
     try {
       const res = await apiClient.post('/api/order/cancel', { orderId })
-      setSuccessMessage(res.data.message)
+      setSuccessMessage(res?.data?.message)
+      setOrder(res.data.order)
     } catch (error) {
       setErrorMessage(
         error?.response?.data?.message ||
@@ -99,6 +104,7 @@ function OrderDetails() {
         itemId: selectedItemId
       })
       setSuccessMessage(res.data.message)
+      setOrder(res?.data?.order)
     } catch (error) {
       setErrorMessage(
         error?.response?.data?.message ||
@@ -124,6 +130,7 @@ function OrderDetails() {
       })
       setErrorMessage(null)
       setSuccessMessage(res.data.message)
+      setOrder(res?.data?.order)
     } catch (error) {
       console.error(error)
       setErrorMessage(
@@ -150,6 +157,7 @@ function OrderDetails() {
         reason
       })
       setSuccessMessage(res.data.message)
+      setOrder(res?.data?.order)
     } catch (error) {
       setErrorMessage(
         error?.response?.data?.message ||
@@ -168,7 +176,7 @@ function OrderDetails() {
     return res.data.order
   }
 
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryFn: fetchData,
     queryKey: ['order', id]
   })
@@ -178,9 +186,18 @@ function OrderDetails() {
       setOrder(data)
     }
   }, [data])
-
+  if (isLoading) {
+    return <Spinner center={true} />
+  }
   if (!order) return null
-
+  if (isError) {
+    return (
+      <p className='text-red-300 flex justify-center items-center'>
+        {' '}
+        cannot Load History
+      </p>
+    )
+  }
   return (
     <div className='max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8'>
       <div className='mb-8 flex items-center justify-between'>
@@ -220,7 +237,7 @@ function OrderDetails() {
             </p>
           </div>
           <div
-            className={`px-3 py-1 rounded-full text-sm font-semibold ₹{getStatusColor(order.orderStatus)}`}
+            className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.orderStatus)}`}
           >
             {order.orderStatus}
           </div>
@@ -312,10 +329,20 @@ function OrderDetails() {
                     <span>Discount:</span>
                     <span>-₹{order.discount.toFixed(2)}</span>
                   </div>
+                  <div className='flex justify-between text-green-600'>
+                    <span>Discount:</span>
+                    <span>-₹{order.couponAmount.toFixed(2)}</span>
+                  </div>
                   <div className='flex justify-between font-medium text-lg border-t pt-2'>
                     <span>Total:</span>
                     <span>₹{order.totalAmount.toFixed(2)}</span>
                   </div>
+                  {order?.cancelledAmount && order.cancelledAmount !== 0 && (
+                    <div className='flex justify-between font-medium text-lg border-t pt-2'>
+                      <span>Cancelled Total Amount:</span>
+                      <span>-₹{order?.cancelledAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
               </dd>
             </div>

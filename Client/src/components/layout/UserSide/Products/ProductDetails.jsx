@@ -64,9 +64,7 @@ function ProductDetails({ product, discount }) {
       })
     }
     try {
-      const res = await apiClient.post('/api/wishlist/add', { productId })
-      console.log(res.data)
-      setAdded(true)
+      await apiClient.post('/api/wishlist/add', { productId })
       setSnackbarData({
         open: true,
         message: 'Product added to Wishlist!',
@@ -91,7 +89,7 @@ function ProductDetails({ product, discount }) {
     }
     try {
       await apiClient.post('/api/wishlist/remove', { productId })
-      setAdded(true)
+
       setSnackbarData({
         open: true,
         message: 'Product removed From Wishlist!',
@@ -162,6 +160,7 @@ function ProductDetails({ product, discount }) {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbarData.severity}
+          variant='filled'
           sx={{ width: '100%' }}
           action={
             !isAuthenticated ? (

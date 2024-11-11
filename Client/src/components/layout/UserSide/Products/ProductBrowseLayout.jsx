@@ -26,7 +26,7 @@ function ProductBrowseLayout({
   const wishlistItems = useSelector(state => state.wishlist.items)
   const { isAuthenticated } = useSelector(state => state.auth)
   const dispatch = useDispatch()
-  const handleAddToWishlist = async productIsd => {
+  const handleAddToWishlist = async productId => {
     if (!isAuthenticated) {
       return toast.error('Login to Add To Wislist')
     }

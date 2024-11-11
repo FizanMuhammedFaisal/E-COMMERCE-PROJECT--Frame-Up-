@@ -156,9 +156,6 @@ export default function NewOrderPayment({
   const { data, isLoading, isError } = useQuery({
     queryFn: async () => {
       const res = await apiClient.get('api/wallet/')
-      console.log(res.data.wallet.balance)
-      console.log(res.data.wallet.balance)
-      console.log(res.data.wallet.balance)
       return res.data.wallet.balance
     },
     queryKey: ['walletBalance']
@@ -247,7 +244,10 @@ export default function NewOrderPayment({
                     {isLoading ? (
                       <Spinner size={-1} speed={2} />
                     ) : (
-                      <p className='text-blue-900'> Balance Amount : ₹{data}</p>
+                      <p className='text-blue-900'>
+                        {' '}
+                        Balance Amount : ₹{data.toFixed(2)}
+                      </p>
                     )}
                   </div>
                 </div>

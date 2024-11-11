@@ -7,7 +7,6 @@ const wishlistSlice = createSlice({
   },
   reducers: {
     addToWishlist: (state, action) => {
-      console.log('asfasfsafasfasdf')
       const itemIds = Array.isArray(action.payload)
         ? action.payload
         : [action.payload]
@@ -31,7 +30,6 @@ const wishlistSlice = createSlice({
       })
     },
     removeFromWishlist: (state, action) => {
-      console.log('asdfasdf')
       const itemId = action.payload
       state.items = state.items.filter(id => id !== itemId)
     },

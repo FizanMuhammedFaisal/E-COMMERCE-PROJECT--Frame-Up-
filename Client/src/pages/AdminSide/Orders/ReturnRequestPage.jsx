@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import apiClient from '../../../services/api/apiClient'
 import ReusableTable from '../../../components/common/ReusableTable'
 import Spinner from '../../../components/common/Animations/Spinner'
 import AlertDialog from '../../../components/common/AlertDialog'
+import { toast } from 'sonner'
 
 const ReturnStatusBadge = ({ status }) => {
   const statusColors = {

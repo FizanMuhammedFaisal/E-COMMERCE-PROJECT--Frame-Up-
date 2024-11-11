@@ -114,7 +114,7 @@ const getArtist = asyncHandler(async (req, res) => {
         currentPage: Number(page),
         totalPages
       })
-    }, 4000)
+    }, 1000)
   }
 })
 //@ discp   to fetch artist detials

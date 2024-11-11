@@ -46,31 +46,33 @@ const EmptyWishlist = () => {
 
 const WishlistCard = ({ item, removeItem, handleAddToCard }) => {
   return (
-    <Link
+    <div
       to={`/all/${item._id}`}
       className='relative flex flex-col justify-between w-full h-96 bg-white rounded-lg overflow-hidden'
     >
-      <div className='relative h-48 w-full overflow-hidden'>
-        <img
-          src={item.thumbnailImage[0]}
-          alt={item.productName}
-          className='w-full h-full object-cover object-center'
-        />
-        {item.productStock === 0 && (
-          <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
-            <span className='text-white font-semibold'>Out of Stock</span>
-          </div>
-        )}
-      </div>
-      <div className='p-4 '>
-        <h2 className='text-lg font-semibold text-gray-900 mb-1 truncate'>
-          {item.productName}
-        </h2>
-        <p className='text-sm text-gray-500 mb-2'>Year: {item.productYear}</p>
-        <p className='text-sm text-gray-500 font-semibold mb-2'>
-          Artist: {item.artist.name}
-        </p>
-      </div>
+      <Link to={`/all/${item._id}`}>
+        <div className='relative h-48 w-full overflow-hidden'>
+          <img
+            src={item.thumbnailImage[0]}
+            alt={item.productName}
+            className='w-full h-full object-cover object-center'
+          />
+          {item.productStock === 0 && (
+            <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
+              <span className='text-white font-semibold'>Out of Stock</span>
+            </div>
+          )}
+        </div>
+        <div className='p-4 '>
+          <h2 className='text-lg font-semibold text-gray-900 mb-1 truncate'>
+            {item.productName}
+          </h2>
+          <p className='text-sm text-gray-500 mb-2'>Year: {item.productYear}</p>
+          <p className='text-sm text-gray-500 font-semibold mb-2'>
+            Artist: {item.artist.name}
+          </p>
+        </div>
+      </Link>
       <button
         onClick={() => removeItem(item._id)}
         className='absolute top-2 right-2 p-2 rounded-full bg-white bg-opacity-70 text-gray-600 hover:text-red-500 transition-colors duration-300'
@@ -88,7 +90,7 @@ const WishlistCard = ({ item, removeItem, handleAddToCard }) => {
         <ShoppingCart size={18} className='mr-2' />
         {item.productStock === 0 ? 'Out of Stock' : 'Add to Cart'}
       </button>
-    </Link>
+    </div>
   )
 }
 const WishlistGrid = ({ wishlistItems, setSnackbarData, setWishlistItems }) => {

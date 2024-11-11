@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
-import 'react-toastify/dist/ReactToastify.css'
 import api from '../../../../services/api/api'
 import { uploadImagesToCloudinary } from '../../../../services/Cloudinary/UploadImages'
 import { useNavigate } from 'react-router-dom'

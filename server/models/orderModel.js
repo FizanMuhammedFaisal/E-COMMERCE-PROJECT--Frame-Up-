@@ -23,16 +23,22 @@ const itemsSchema = {
     type: [String],
     required: false
   },
+  discount: {
+    type: Number,
+    default: 0
+  },
   status: {
     type: String,
     enum: [
       'Pending',
+      'Processing',
       'Shipped',
       'Delivered',
       'Cancelled',
       'Return Initialized',
       'Return Accepted',
-      'Return Rejected'
+      'Return Rejected',
+      'Return Completed'
     ],
     default: 'Pending'
   }
@@ -71,6 +77,7 @@ const orderSchema = new mongoose.Schema(
       default: 'Pending',
       required: true
     },
+
     orderStatus: {
       type: String,
       enum: [
@@ -81,7 +88,10 @@ const orderSchema = new mongoose.Schema(
         'Cancelled',
         'Return Initialized',
         'Return Accepted',
-        'Return Rejected'
+        'Return Rejected',
+        'Return Processing',
+        'Partially Returned',
+        'Return Completed'
       ],
       default: 'Pending',
       required: true
@@ -107,7 +117,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-
+    cancelledAmount: {
+      type: Number,
+      default: 0
+    },
     couponCode: {
       type: String
     },

@@ -8,8 +8,8 @@ export const validateLoginForm = inputLogin => {
     newError.email = 'Invalid email format'
   if (!inputLogin.email) newError.email = 'Email is required*'
   if (!inputLogin.password) newError.password = 'Password is required*'
-  // if (!passwordRegex.test(inputLogin.password))
-  //   newError.password = 'Incorrect Password'
+  if (!passwordRegex.test(inputLogin.password))
+    newError.password = 'Incorrect Password'
   // for development purpose
   return newError
 }
@@ -37,8 +37,9 @@ export const validateRegisterForm = input => {
   if (!input.password) {
     errors.password = 'Password is required*'
     // For development purpose
-    // } else if (!passwordRegex.test(input.password)) {
-    //   errors.password = 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a digit, and a special character'
+  } else if (!passwordRegex.test(input.password)) {
+    errors.password =
+      'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a digit, and a special character'
   }
 
   if (!input.cPassword) {

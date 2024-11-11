@@ -81,7 +81,7 @@ function CategorySales({ COLORS }) {
                       color
                     }}
                   >
-                    {`Sales: $${payload[0].value.toFixed(2)}`}
+                    {`Sales: ₹${payload[0].value.toFixed(2)}`}
                   </p>
                 </div>
               )
