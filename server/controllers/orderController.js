@@ -1,36 +1,36 @@
-import asyncHandler from 'express-async-handler'
-import Cart from '../models/cartModel.js'
-import Product from '../models/productModel.js'
-import Order from '../models/orderModel.js'
-import Razorpay from 'razorpay'
-import crypto from 'crypto'
-import { v4 as uuidv4 } from 'uuid'
-import { getCartDetails, applyCoupon } from '../utils/helperUtils.js'
-import Wallet from '../models/walletModel.js'
-import PDFDocument from 'pdfkit'
+import asyncHandler from "express-async-handler"
+import Cart from "../models/cartModel.js"
+import Product from "../models/productModel.js"
+import Order from "../models/orderModel.js"
+import Razorpay from "razorpay"
+import crypto from "crypto"
+import { v4 as uuidv4 } from "uuid"
+import { getCartDetails, applyCoupon } from "../utils/helperUtils.js"
+import Wallet from "../models/walletModel.js"
+import PDFDocument from "pdfkit"
 
-import mongoose, { isValidObjectId } from 'mongoose'
-import Coupon from '../models/couponModel.js'
+import mongoose, { isValidObjectId } from "mongoose"
+import Coupon from "../models/couponModel.js"
 
 ///
 //
 const getOrdersAdmin = asyncHandler(async (req, res) => {
   const user = req.user
   if (!user) {
-    const error = new Error('No userId')
+    const error = new Error("No userId")
     error.statusCode = 400
     return next(error)
   }
   const orders = await Order.find({ userId: user._id })
-    .select('-userId')
+    .select("-userId")
     .sort({ createdAt: -1 })
   console.log(orders)
   if (!orders) {
-    const error = new Error('No Orders')
+    const error = new Error("No Orders")
     error.statusCode = 400
     return next(error)
   }
-  res.status(200).json({ message: 'orders served', orders })
+  res.status(200).json({ message: "orders served", orders })
 })
 //
 const cancelOrder = asyncHandler(async (req, res, next) => {
@@ -38,7 +38,7 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   const userId = req.user._id
   let Message
   if (!orderId) {
-    const error = new Error('Order ID is required for cancellation.')
+    const error = new Error("Order ID is required for cancellation.")
     error.statusCode = 400
     return next(error)
   }
@@ -46,31 +46,31 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(orderId)
 
   if (!order) {
-    const error = new Error('Order not found.')
+    const error = new Error("Order not found.")
     error.statusCode = 404
     return next(error)
   }
   if (order.userId.toString() !== userId) {
-    const error = new Error('You are not authorized to cancel this order.')
+    const error = new Error("You are not authorized to cancel this order.")
     error.statusCode = 403
     return next(error)
   }
 
-  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+  if (order.orderStatus === "Shipped" || order.orderStatus === "Delivered") {
     const error = new Error(
-      'Order cannot be cancelled. It has already been shipped or delivered.'
+      "Order cannot be cancelled. It has already been shipped or delivered.",
     )
     error.statusCode = 400
     return next(error)
   }
 
   let wallet = await Wallet.findOne({ userId: order.userId })
-  if (order.paymentStatus === 'Paid') {
+  if (order.paymentStatus === "Paid") {
     if (!wallet) {
       wallet = new Wallet({
         userId: order.userId,
         balance: 0,
-        transactions: []
+        transactions: [],
       })
     }
 
@@ -82,18 +82,18 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
       order.discount
 
     wallet.transactions.push({
-      type: 'refund',
+      type: "refund",
       amount: order.totalAmount,
-      description: `Refund for order ${order._id}`
+      description: `Refund for order ${order._id}`,
     })
 
     await wallet.save()
   }
 
-  order.orderStatus = 'Cancelled'
+  order.orderStatus = "Cancelled"
 
   for (const item of order.items) {
-    item.status = 'Cancelled'
+    item.status = "Cancelled"
     const product = await Product.findById(item.productId)
     if (product) {
       product.stock += item.quantity
@@ -105,7 +105,7 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   return res.status(200).json({
     message: Message,
     order,
-    walletBalance: wallet.balance
+    walletBalance: wallet.balance,
   })
 })
 
@@ -114,7 +114,7 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
 const getOrderDetails = asyncHandler(async (req, res) => {
   const { orderId } = req.params
   if (!orderId) {
-    const error = new Error('No Order Id')
+    const error = new Error("No Order Id")
     error.statusCode = 400
     return next(error)
   }
@@ -145,10 +145,10 @@ const getOrders = asyncHandler(async (req, res) => {
       currentPage: page,
       totalPages,
       totalOrders,
-      hasMore
+      hasMore,
     })
   } catch (err) {
-    const error = new Error('error fetching orders')
+    const error = new Error("error fetching orders")
     error.statusCode = 400
     return next(error)
   }
@@ -156,7 +156,7 @@ const getOrders = asyncHandler(async (req, res) => {
 const getUserOrders = asyncHandler(async (req, res) => {
   const userId = req.user._id
   if (!userId) {
-    const error = new Error('No User')
+    const error = new Error("No User")
     error.statusCode = 400
     return next(error)
   }
@@ -182,10 +182,10 @@ const getUserOrders = asyncHandler(async (req, res) => {
       currentPage: page,
       totalPages,
       totalOrders,
-      hasMore
+      hasMore,
     })
   } catch (err) {
-    const error = new Error('error fetching orders')
+    const error = new Error("error fetching orders")
     error.statusCode = 400
     return next(error)
   }
@@ -199,24 +199,24 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      const error = new Error('Order not found')
+      const error = new Error("Order not found")
       error.statusCode = 404
       return next(error)
     }
 
-    if (order.orderStatus === 'Cancelled') {
+    if (order.orderStatus === "Cancelled") {
       return res.status(400).json({
-        message: 'Cannot update a canceled order'
+        message: "Cannot update a canceled order",
       })
     }
 
     if (
-      order.paymentMethod === 'Cash on Delivery' &&
-      newStatus === 'Delivered'
+      order.paymentMethod === "Cash on Delivery" &&
+      newStatus === "Delivered"
     ) {
-      order.paymentStatus = 'Paid'
+      order.paymentStatus = "Paid"
     }
-    order.items.forEach(item => {
+    order.items.forEach((item) => {
       if (item.status === order.orderStatus) {
         item.status = newStatus
       }
@@ -227,28 +227,28 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
 
     const updatedOrder = await order.save()
     if (!updatedOrder) {
-      const error = new Error('order not found')
+      const error = new Error("order not found")
       error.statusCode = 404
       return next(error)
     }
 
     res.status(200).json({
-      message: 'Order status updated successfully',
-      order: updatedOrder
+      message: "Order status updated successfully",
+      order: updatedOrder,
     })
   } catch (er) {
     console.log(er)
-    const error = new Error('failed to update user status')
+    const error = new Error("failed to update user status")
     error.statusCode = 500
     return next(error)
   }
 })
 //
-const updateProductStock = async updatedCart => {
+const updateProductStock = async (updatedCart) => {
   for (const item of updatedCart) {
     if (item.quantity > 0) {
       const result = await Product.findByIdAndUpdate(item.productId, {
-        $inc: { productStock: -item.quantity }
+        $inc: { productStock: -item.quantity },
       })
       if (!result) {
         throw new Error(`Stock update failed for product ${item.productId}`)
@@ -257,10 +257,10 @@ const updateProductStock = async updatedCart => {
   }
 }
 
-const clearCart = async userId => {
+const clearCart = async (userId) => {
   const result = await Cart.findOneAndUpdate({ userId }, { items: [] })
   if (!result) {
-    throw new Error('Failed to clear cart')
+    throw new Error("Failed to clear cart")
   }
 }
 const initiateOrder = asyncHandler(async (req, res, next) => {
@@ -270,45 +270,50 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     paymentMethod,
     shippingCost,
     taxAmount,
-    appliedCouponCode
+    appliedCouponCode,
   } = req.body.data
   const user = req.user
   const userId = new mongoose.Types.ObjectId(req.user._id)
 
   try {
     let outOfStock = false
-    const productIds = items.map(item => item.productId)
+    const productIds = items.map((item) => item.productId)
     const products = await Product.find({ _id: { $in: productIds } }).lean()
 
-    const updatedCart = items.map(item => {
-      const product = products.find(p => p._id.equals(item.productId))
+    const updatedCart = items.map((item) => {
+      const product = products.find((p) => p._id.equals(item.productId))
       if (!product || product.productStock === 0) {
         outOfStock = true
         return { ...item }
       }
       const updatedQuantity = Math.min(product.productStock, item.quantity)
-      return { ...item, quantity: updatedQuantity, price: product.productPrice }
+      return {
+        ...item,
+        quantity: updatedQuantity,
+        price: product.productPrice,
+      }
     })
 
     if (outOfStock) {
       return res.status(400).json({
         updatedCart,
-        message: 'Some items are out of stock',
-        outOfStock
+        message: "Some items are out of stock",
+        outOfStock,
       })
     }
 
     const cartDetails = await getCartDetails(userId)
 
     if (!cartDetails || !cartDetails[0]) {
-      const error = new Error('Order creation failed')
+      const error = new Error("Order creation failed")
       error.statusCode = 400
       return next(error)
     }
 
-    const orderItems = updatedCart.map(item => {
+    const orderItems = updatedCart.map((item) => {
       const cartItem = cartDetails[0].items.find(
-        cartItem => cartItem.productId.toString() === item.productId.toString()
+        (cartItem) =>
+          cartItem.productId.toString() === item.productId.toString(),
       )
 
       // Calculate individual item discount
@@ -321,7 +326,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
         price: cartItem.productPrice,
         thumbnailImage: cartItem.thumbnailImage,
         discount: itemDiscount, // Individual item discount
-        status: 'Pending' // Default status as per schema
+        status: "Pending", // Default status as per schema
       }
     })
 
@@ -344,15 +349,15 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
     }
 
     // Checking wallet balance and setting payment status
-    let paymentStatus = 'Pending'
+    let paymentStatus = "Pending"
     const wallet = await Wallet.findOne({ userId: user._id })
-    if (paymentMethod === 'Wallet') {
+    if (paymentMethod === "Wallet") {
       if (wallet.balance < totalAmount) {
-        const error = new Error('Not enough Balance in Wallet.')
+        const error = new Error("Not enough Balance in Wallet.")
         error.statusCode = 400
         return next(error)
       }
-      paymentStatus = 'Paid'
+      paymentStatus = "Paid"
     }
 
     // Create the new order matching the schema structure
@@ -362,23 +367,23 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
       shippingAddress,
       paymentMethod,
       paymentStatus,
-      orderStatus: 'Pending',
+      orderStatus: "Pending",
       subtotal,
       totalAmount,
       shippingCost,
       discount, // Product-level discounts from cart
       taxAmount,
       couponCode: appliedCouponCode,
-      couponAmount // Coupon discount amount
+      couponAmount, // Coupon discount amount
     })
 
     // Deduct amount from wallet if applicable
-    if (paymentMethod === 'Wallet') {
+    if (paymentMethod === "Wallet") {
       wallet.balance -= totalAmount
       wallet.transactions.push({
-        type: 'order',
+        type: "order",
         amount: totalAmount,
-        description: `Made Order ${newOrder._id}`
+        description: `Made Order ${newOrder._id}`,
       })
       await wallet.save()
     }
@@ -388,13 +393,13 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
       order: newOrder,
-      message: 'Order placed successfully and cart cleared!'
+      message: "Order placed successfully and cart cleared!",
     })
   } catch (error) {
-    console.error('Error placing order:', error)
+    console.error("Error placing order:", error)
     res
       .status(500)
-      .json({ message: 'An error occurred while placing the order', error })
+      .json({ message: "An error occurred while placing the order", error })
   }
 })
 
@@ -402,7 +407,7 @@ const initiateOrder = asyncHandler(async (req, res, next) => {
 //for razor pay order intiating
 const razorpay = new Razorpay({
   key_id: process.env.RAZOR_PAY_KEY_ID,
-  key_secret: process.env.RAZOR_PAY_KEY_SECRET
+  key_secret: process.env.RAZOR_PAY_KEY_SECRET,
 })
 
 const createRazorpayOrder = asyncHandler(async (req, res, next) => {
@@ -412,7 +417,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     paymentMethod,
     shippingCost,
     taxAmount,
-    appliedCouponCode
+    appliedCouponCode,
   } = req.body.data
   const user = req.user
   const userId = new mongoose.Types.ObjectId(req.user._id)
@@ -428,44 +433,49 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     }
 
     // Check product stock
-    const productIds = items.map(item => item.productId)
+    const productIds = items.map((item) => item.productId)
     const products = await Product.find({ _id: { $in: productIds } }).lean()
 
     let outOfStock = false
-    updatedCart = items.map(item => {
-      const product = products.find(p => p._id.equals(item.productId))
+    updatedCart = items.map((item) => {
+      const product = products.find((p) => p._id.equals(item.productId))
       if (!product || product.productStock === 0) {
         outOfStock = true
         return {
           ...item,
           quantity: 0,
-          price: product ? product.productPrice : 0
+          price: product ? product.productPrice : 0,
         }
       }
       const updatedQuantity = Math.min(product.productStock, item.quantity)
-      return { ...item, quantity: updatedQuantity, price: product.productPrice }
+      return {
+        ...item,
+        quantity: updatedQuantity,
+        price: product.productPrice,
+      }
     })
 
     if (outOfStock) {
       return res.status(400).json({
         updatedCart,
-        message: 'Some items are out of stock',
-        outOfStock
+        message: "Some items are out of stock",
+        outOfStock,
       })
     }
 
     // Get cart details for pricing and discount information
     const cartDetails = await getCartDetails(userId)
     if (!cartDetails || !cartDetails[0]) {
-      const error = new Error('Order creation failed')
+      const error = new Error("Order creation failed")
       error.statusCode = 400
       return next(error)
     }
 
     // Map cart items to match the itemsSchema structure
-    const orderItems = updatedCart.map(item => {
+    const orderItems = updatedCart.map((item) => {
       const cartItem = cartDetails[0].items.find(
-        cartItem => cartItem.productId.toString() === item.productId.toString()
+        (cartItem) =>
+          cartItem.productId.toString() === item.productId.toString(),
       )
 
       // Get individual item discount
@@ -478,7 +488,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
         price: cartItem.productPrice,
         thumbnailImage: cartItem.thumbnailImage,
         discount: itemDiscount, // Individual item discount
-        status: 'Pending' // Default status as per schema
+        status: "Pending", // Default status as per schema
       }
     })
 
@@ -507,34 +517,34 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
       items: orderItems,
       shippingAddress,
       paymentMethod,
-      paymentStatus: 'Pending',
-      orderStatus: 'Pending',
+      paymentStatus: "Pending",
+      orderStatus: "Pending",
       shippingCost,
       subtotal,
       totalAmount,
       discount, // Product-level discounts from cart
       taxAmount,
       couponCode: appliedCouponCode,
-      couponAmount // Coupon discount amount
+      couponAmount, // Coupon discount amount
     })
 
     await clearCart(user._id)
 
     // Handle Razorpay order creation
-    if (paymentMethod === 'Razor Pay') {
+    if (paymentMethod === "Razor Pay") {
       try {
         const options = {
           amount: totalAmount * 100, // Amount in paise
-          currency: 'INR',
+          currency: "INR",
           receipt: `order_rcptid_${uuidv4().slice(0, 10)}`,
-          payment_capture: 1
+          payment_capture: 1,
         }
 
         const razorpayOrder = await razorpay.orders.create(options)
 
         // Update order with razorpay order ID
         await Order.findByIdAndUpdate(newOrder._id, {
-          razorpayOrderId: razorpayOrder.id
+          razorpayOrderId: razorpayOrder.id,
         })
 
         const orderData = {
@@ -542,22 +552,22 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
           amount: razorpayOrder.amount,
           orderId: newOrder._id,
           name: newOrder.shippingAddress.name,
-          contact: newOrder.shippingAddress.phoneNumber
+          contact: newOrder.shippingAddress.phoneNumber,
         }
 
         return res.status(200).json({ orderData })
       } catch (err) {
         console.error(err)
-        return next(new Error('Razor Pay order failed'))
+        return next(new Error("Razor Pay order failed"))
       }
     } else {
       return res.status(200).json({
         order: newOrder,
-        message: 'Order placed successfully and cart cleared!'
+        message: "Order placed successfully and cart cleared!",
       })
     }
   } catch (error) {
-    console.error('Error placing order:', error)
+    console.error("Error placing order:", error)
 
     // Rollback changes if order was created
     if (newOrder) {
@@ -568,7 +578,7 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     for (const item of updatedCart) {
       if (item.quantity > 0) {
         await Product.findByIdAndUpdate(item.productId, {
-          $inc: { productStock: item.quantity }
+          $inc: { productStock: item.quantity },
         })
       }
     }
@@ -576,12 +586,12 @@ const createRazorpayOrder = asyncHandler(async (req, res, next) => {
     // Restore original cart
     await Cart.findOneAndUpdate(
       { userId: user._id },
-      { items: originalCartItems }
+      { items: originalCartItems },
     )
 
     return res.status(500).json({
-      message: 'An error occurred while placing the order. Rollback completed.',
-      error
+      message: "An error occurred while placing the order. Rollback completed.",
+      error,
     })
   }
 })
@@ -598,37 +608,37 @@ const verifyPayment = asyncHandler(async (req, res, next) => {
     !razorpay_payment_id ||
     !razorpay_signature
   ) {
-    const error = new Error('Required Fields Missing')
+    const error = new Error("Required Fields Missing")
     error.statusCode = 400
     return next(error)
   }
   const order = await Order.findById(orderId)
-  if (order.orderStatus === 'Cancelled') {
+  if (order.orderStatus === "Cancelled") {
     //issue a refund
-    console.log('issue refundedd')
+    console.log("issue refundedd")
     const amount = order.totalAmount
     console.log(amount)
     const wallet = await Wallet.findOne({ userId: order.userId })
     wallet.balance += amount
     wallet.transactions.push({
-      type: 'refund',
+      type: "refund",
       amount,
-      description: `Refund added to wallet ${amount} for order Cancelled ${order._id}`
+      description: `Refund added to wallet ${amount} for order Cancelled ${order._id}`,
     })
     wallet.save()
   }
   const expectedSignature = crypto
-    .createHmac('sha256', process.env.RAZOR_PAY_KEY_SECRET)
+    .createHmac("sha256", process.env.RAZOR_PAY_KEY_SECRET)
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    .digest('hex')
+    .digest("hex")
 
-  console.log('Expected Signature:', expectedSignature)
-  console.log('Received Signature:', razorpay_signature)
+  console.log("Expected Signature:", expectedSignature)
+  console.log("Received Signature:", razorpay_signature)
 
   const isSignatureValid = expectedSignature === razorpay_signature
 
   if (!isSignatureValid) {
-    return res.status(400).json({ message: 'Payment verification failed' })
+    return res.status(400).json({ message: "Payment verification failed" })
   }
 
   // Update order status in your database
@@ -636,8 +646,8 @@ const verifyPayment = asyncHandler(async (req, res, next) => {
     try {
       const order = await Order.findByIdAndUpdate(
         orderId,
-        { paymentStatus: 'Paid' },
-        { new: true }
+        { paymentStatus: "Paid" },
+        { new: true },
       )
       await updateProductStock(order.items)
     } catch (error) {
@@ -646,11 +656,11 @@ const verifyPayment = asyncHandler(async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ success: true, message: 'Payment verified successfully' })
+      .json({ success: true, message: "Payment verified successfully" })
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, message: 'Failed to update order' })
+      .json({ success: false, message: "Failed to update order" })
   }
 })
 //
@@ -661,18 +671,18 @@ const retryPayment = asyncHandler(async (req, res, next) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      const error = new Error('No order has been made.')
+      const error = new Error("No order has been made.")
       error.statusCode = 400
       return next(error)
     }
 
-    if (order.paymentStatus === 'Paid') {
-      const error = new Error('Invalid or Already Paid.')
+    if (order.paymentStatus === "Paid") {
+      const error = new Error("Invalid or Already Paid.")
       error.statusCode = 400
       return next(error)
     }
-    if (order.orderStatus === 'Cancelled') {
-      const error = new Error('Order Already Cancelled')
+    if (order.orderStatus === "Cancelled") {
+      const error = new Error("Order Already Cancelled")
       error.statusCode = 400
       return next(error)
     }
@@ -681,9 +691,9 @@ const retryPayment = asyncHandler(async (req, res, next) => {
     if (!razorpayOrderId) {
       const options = {
         amount: order.totalAmount * 100,
-        currency: 'INR',
+        currency: "INR",
         receipt: `retry_rcptid_${order._id}`,
-        payment_capture: 1
+        payment_capture: 1,
       }
 
       const razorpayOrder = await razorpay.orders.create(options)
@@ -699,13 +709,13 @@ const retryPayment = asyncHandler(async (req, res, next) => {
       amount: order.totalAmount * 100,
       orderId: order._id,
       name: order.shippingAddress.name,
-      contact: order.shippingAddress.phoneNumber
+      contact: order.shippingAddress.phoneNumber,
     }
 
     res.status(200).json({ orderData })
   } catch (error) {
-    console.error('Error in retrying payment:', error)
-    return res.status(500).json({ message: 'Retry payment failed', error })
+    console.error("Error in retrying payment:", error)
+    return res.status(500).json({ message: "Retry payment failed", error })
   }
 })
 //
@@ -714,31 +724,31 @@ const cancelOrderAdmin = asyncHandler(async (req, res, next) => {
   const { orderId } = req.params
 
   if (!orderId) {
-    const error = new Error('id Required for cancelling')
+    const error = new Error("id Required for cancelling")
     error.statusCode = 400
     return next(error)
   }
   const order = await Order.findByIdAndUpdate(
     orderId,
-    { orderStatus: 'Cancelled' },
-    { new: true }
+    { orderStatus: "Cancelled" },
+    { new: true },
   )
-  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+  if (order.orderStatus === "Shipped" || order.orderStatus === "Delivered") {
     const error = new Error(
-      'Order cannot be cancelled. It has already been shipped or delivered.'
+      "Order cannot be cancelled. It has already been shipped or delivered.",
     )
     error.statusCode = 400
     return next(error)
   }
 
-  if (order.paymentStatus === 'Paid') {
+  if (order.paymentStatus === "Paid") {
     let wallet = await Wallet.findOne({ userId: order.userId })
 
     if (!wallet) {
       wallet = new Wallet({
         userId: order.userId,
         balance: 0,
-        transactions: []
+        transactions: [],
       })
     }
     const amount =
@@ -750,15 +760,15 @@ const cancelOrderAdmin = asyncHandler(async (req, res, next) => {
     console.log(amount)
     wallet.balance += amount
     wallet.transactions.push({
-      type: 'refund',
+      type: "refund",
       amount: order.totalAmount,
-      description: `Refund for order ${order._id}`
+      description: `Refund for order ${order._id}`,
     })
 
     await wallet.save()
   }
   if (order) {
-    res.status(200).json({ message: 'cancellation successfull', order })
+    res.status(200).json({ message: "cancellation successfull", order })
   }
 })
 //
@@ -767,24 +777,24 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   const { id: orderId } = req.params
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
-    return res.status(400).json({ message: 'Invalid order ID' })
+    return res.status(400).json({ message: "Invalid order ID" })
   }
 
   const order = await Order.findById(orderId)
-    .populate('items.productId')
-    .populate('userId')
+    .populate("items.productId")
+    .populate("userId")
 
   if (!order) {
-    return res.status(404).json({ message: 'Order not found' })
+    return res.status(404).json({ message: "Order not found" })
   }
 
   const pdfDoc = new PDFDocument({ margin: 50 })
 
   // Set headers for the PDF
-  res.setHeader('Content-Type', 'application/pdf')
+  res.setHeader("Content-Type", "application/pdf")
   res.setHeader(
-    'Content-Disposition',
-    `attachment; filename=invoice_${orderId}.pdf`
+    "Content-Disposition",
+    `attachment; filename=invoice_${orderId}.pdf`,
   )
 
   pdfDoc.pipe(res)
@@ -792,40 +802,40 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   // ====== Header Section ======
   pdfDoc
     .fontSize(26)
-    .fillColor('#2B5D6E')
-    .text('Frame Up', { align: 'left' })
+    .fillColor("#2B5D6E")
+    .text("Frame Up", { align: "left" })
     .fontSize(14)
-    .fillColor('black')
-    .text('1234 Main Street, Kochi, Kerala')
-    .text('Email: support@frameup.com')
+    .fillColor("black")
+    .text("1234 Main Street, Kochi, Kerala")
+    .text("Email: support@frameup.com")
     .moveDown(1)
 
   pdfDoc
     .fontSize(20)
-    .text('Order Invoice', { align: 'center', underline: true })
+    .text("Order Invoice", { align: "center", underline: true })
     .moveDown(0.5)
 
   // ====== Order Details ======
   pdfDoc
     .fontSize(12)
-    .text(`Order ID: ${orderId}`, { align: 'right' })
+    .text(`Order ID: ${orderId}`, { align: "right" })
     .text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`, {
-      align: 'right'
+      align: "right",
     })
     .moveDown(1.5)
 
   // ====== Billing Information ======
   pdfDoc
     .fontSize(14)
-    .fillColor('#007ACC')
-    .text('Billing Information:', { underline: true })
-    .fillColor('black')
+    .fillColor("#007ACC")
+    .text("Billing Information:", { underline: true })
+    .fillColor("black")
     .moveDown(0.5)
     .fontSize(12)
     .text(`Name: ${order.shippingAddress.name}`)
     .text(`Address: ${order.shippingAddress.address}`)
     .text(
-      `City: ${order.shippingAddress.city}, State: ${order.shippingAddress.state}`
+      `City: ${order.shippingAddress.city}, State: ${order.shippingAddress.state}`,
     )
     .text(`Postal Code: ${order.shippingAddress.postalCode}`)
     .text(`Phone: ${order.shippingAddress.phoneNumber}`)
@@ -834,22 +844,22 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   // ====== Order Summary Header ======
   pdfDoc
     .fontSize(14)
-    .fillColor('#007ACC')
-    .text('Order Summary:', { underline: true })
-    .fillColor('black')
+    .fillColor("#007ACC")
+    .text("Order Summary:", { underline: true })
+    .fillColor("black")
     .moveDown(0.5)
 
   // ====== Table Headers ======
   const tableTop = pdfDoc.y
   pdfDoc
     .fontSize(12)
-    .text('Item', 50, tableTop, { continued: true, underline: true })
-    .text('Quantity', 250, tableTop, { continued: true, underline: true })
-    .text('Price', 350, tableTop, { continued: true, underline: true })
-    .text('Total', 450, tableTop, { underline: true })
+    .text("Item", 50, tableTop, { continued: true, underline: true })
+    .text("Quantity", 250, tableTop, { continued: true, underline: true })
+    .text("Price", 350, tableTop, { continued: true, underline: true })
+    .text("Total", 450, tableTop, { underline: true })
 
-  const formatCurrency = amount =>
-    `Rs ${amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`
+  const formatCurrency = (amount) =>
+    `Rs ${amount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
 
   // ====== Items Loop ======
   let positionY = tableTop + 20
@@ -867,9 +877,9 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
   pdfDoc
     .moveDown(1)
     .fontSize(14)
-    .fillColor('#007ACC')
-    .text('Order Details:', { underline: true })
-    .fillColor('black')
+    .fillColor("#007ACC")
+    .text("Order Details:", { underline: true })
+    .fillColor("black")
     .fontSize(12)
     .moveDown(0.5)
     .text(`Subtotal: ${formatCurrency(order.subtotal)}`, 400)
@@ -879,16 +889,16 @@ const getInvoiceDownloadURL = asyncHandler(async (req, res) => {
     .text(`Tax: ${formatCurrency(order.taxAmount)}`, 400)
     .moveDown(0.5)
     .fontSize(16)
-    .fillColor('#007ACC')
+    .fillColor("#007ACC")
     .text(`Total Amount: ${formatCurrency(order.totalAmount)}`, 400)
   // ====== Footer Section ======
   pdfDoc
     .moveDown(2)
     .fontSize(10)
-    .fillColor('black')
+    .fillColor("black")
     .text(
-      'Thank you for your order! For any questions, please contact our support team.',
-      { align: 'center', lineGap: 6 }
+      "Thank you for your order! For any questions, please contact our support team.",
+      { align: "center", lineGap: 6 },
     )
 
   pdfDoc.end()
@@ -917,7 +927,7 @@ const calculateRefundAmount = (order, canceledItem) => {
     itemSubtotal + // Base price * quantity
       itemTaxAmount - // Proportional tax
       itemDiscount - // Item discount
-      itemCouponAmount // Proportional coupon discount
+      itemCouponAmount, // Proportional coupon discount
   )
 
   return {
@@ -926,8 +936,8 @@ const calculateRefundAmount = (order, canceledItem) => {
       itemSubtotal,
       itemDiscount,
       couponAmount: itemCouponAmount,
-      proportionalTax: itemTaxAmount
-    }
+      proportionalTax: itemTaxAmount,
+    },
   }
 }
 
@@ -935,7 +945,7 @@ const calculateRefundAmount = (order, canceledItem) => {
 const cancelOrderItem = asyncHandler(async (req, res, next) => {
   const { orderId, itemId } = req.body
   const userId = req.user._id
-  let message = ''
+  let message = ""
 
   // Input validation
   if (
@@ -944,7 +954,7 @@ const cancelOrderItem = asyncHandler(async (req, res, next) => {
     !mongoose.isValidObjectId(orderId) ||
     !mongoose.isValidObjectId(itemId)
   ) {
-    const error = new Error('No required data to cancel order.')
+    const error = new Error("No required data to cancel order.")
     error.statusCode = 400
     return next(error)
   }
@@ -954,23 +964,23 @@ const cancelOrderItem = asyncHandler(async (req, res, next) => {
   const wallet = await Wallet.findOne({ userId })
 
   if (!order) {
-    const error = new Error('Order Not Found.')
+    const error = new Error("Order Not Found.")
     error.statusCode = 400
     return next(error)
   }
 
   if (!wallet) {
-    const error = new Error('Wallet Not Found.')
+    const error = new Error("Wallet Not Found.")
     error.statusCode = 400
     return next(error)
   }
 
   // Find the item to cancel
   const itemIndex = order.items.findIndex(
-    item => item._id.toString() === itemId
+    (item) => item._id.toString() === itemId,
   )
   if (itemIndex === -1) {
-    const error = new Error('Item Not Found.')
+    const error = new Error("Item Not Found.")
     error.statusCode = 404
     return next(error)
   }
@@ -978,31 +988,31 @@ const cancelOrderItem = asyncHandler(async (req, res, next) => {
   const canceledItem = order.items[itemIndex]
 
   // Validate item can be cancelled
-  if (canceledItem.status === 'Cancelled') {
-    const error = new Error('Item is already cancelled.')
+  if (canceledItem.status === "Cancelled") {
+    const error = new Error("Item is already cancelled.")
     error.statusCode = 400
     return next(error)
   }
 
   if (
     [
-      'Return Initialized',
-      'Return Accepted',
-      'Return Rejected',
-      'Return Completed'
+      "Return Initialized",
+      "Return Accepted",
+      "Return Rejected",
+      "Return Completed",
     ].includes(canceledItem.status)
   ) {
-    const error = new Error('Cannot cancel item in return process.')
+    const error = new Error("Cannot cancel item in return process.")
     error.statusCode = 400
     return next(error)
   }
 
   // Update item status to 'Cancelled'
-  order.items[itemIndex].status = 'Cancelled'
+  order.items[itemIndex].status = "Cancelled"
   let refundAmount
   // Check if all items are canceled
   const allItemsCanceled = order.items.every(
-    item => item.status === 'Cancelled'
+    (item) => item.status === "Cancelled",
   )
   // all item calcele
   if (allItemsCanceled) {
@@ -1031,23 +1041,23 @@ const cancelOrderItem = asyncHandler(async (req, res, next) => {
   order.couponAmount = Math.max(0, order.couponAmount)
 
   if (allItemsCanceled) {
-    order.orderStatus = 'Cancelled'
+    order.orderStatus = "Cancelled"
     order.couponAmount = 0
   } else {
     // Update order status to reflect partial cancellation
-    const hasDelivered = order.items.some(item => item.status === 'Delivered')
+    const hasDelivered = order.items.some((item) => item.status === "Delivered")
     if (hasDelivered) {
-      order.orderStatus = 'Partially Returned'
+      order.orderStatus = "Partially Returned"
     }
   }
 
   // Add refund to wallet
   wallet.balance += refundAmount
   wallet.transactions.push({
-    type: 'refund',
+    type: "refund",
     amount: refundAmount,
     description: `Refund for cancelled item from order ${orderId}`,
-    orderId: order._id
+    orderId: order._id,
   })
 
   // Save changes
@@ -1060,7 +1070,7 @@ const cancelOrderItem = asyncHandler(async (req, res, next) => {
     message,
     order,
     walletBalance: wallet.balance,
-    refundAmount
+    refundAmount,
   })
 })
 
@@ -1071,7 +1081,7 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
 
   if (!orderId || !itemId) {
     const error = new Error(
-      'Order ID and Item ID are required for cancellation'
+      "Order ID and Item ID are required for cancellation",
     )
     error.statusCode = 400
     return next(error)
@@ -1079,30 +1089,30 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
 
   const order = await Order.findById(orderId)
   if (!order) {
-    const error = new Error('Order not found')
+    const error = new Error("Order not found")
     error.statusCode = 404
     return next(error)
   }
 
-  if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') {
+  if (order.orderStatus === "Shipped" || order.orderStatus === "Delivered") {
     const error = new Error(
-      'Order cannot be cancelled. It has already been shipped or delivered.'
+      "Order cannot be cancelled. It has already been shipped or delivered.",
     )
     error.statusCode = 400
     return next(error)
   }
 
   const itemIndex = order.items.findIndex(
-    item => item._id.toString() === itemId
+    (item) => item._id.toString() === itemId,
   )
   if (itemIndex === -1) {
-    const error = new Error('Item not found in order.')
+    const error = new Error("Item not found in order.")
     error.statusCode = 404
     return next(error)
   }
 
   const canceledItem = order.items[itemIndex]
-  canceledItem.status = 'Cancelled'
+  canceledItem.status = "Cancelled"
 
   let refundAmount = canceledItem.price
 
@@ -1112,10 +1122,10 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
     if (coupon) {
       const couponProportion = order.couponAmount / order.subtotal
 
-      if (coupon.discountType === 'percentage') {
+      if (coupon.discountType === "percentage") {
         const itemDiscount = canceledItem.price * couponProportion
         refundAmount = canceledItem.price - itemDiscount
-      } else if (coupon.discountType === 'fixed') {
+      } else if (coupon.discountType === "fixed") {
         const itemFixedDiscount =
           (canceledItem.price / order.subtotal) * coupon.discountAmount
         refundAmount = canceledItem.price - itemFixedDiscount
@@ -1131,37 +1141,37 @@ const cancelOrderItemAdmin = asyncHandler(async (req, res, next) => {
   }
 
   const allItemsCanceled = order.items.every(
-    item => item.status === 'Cancelled'
+    (item) => item.status === "Cancelled",
   )
   if (allItemsCanceled) {
-    order.orderStatus = 'Cancelled'
+    order.orderStatus = "Cancelled"
   }
 
   await order.save()
 
   // Process refund in wallet if payment is paid
-  if (order.paymentStatus === 'Paid') {
+  if (order.paymentStatus === "Paid") {
     let wallet = await Wallet.findOne({ userId: order.userId })
 
     if (!wallet) {
       wallet = new Wallet({
         userId: order.userId,
         balance: 0,
-        transactions: []
+        transactions: [],
       })
     }
 
     wallet.balance += refundAmount
     wallet.transactions.push({
-      type: 'refund',
+      type: "refund",
       amount: refundAmount,
-      description: `Partial refund for item ${canceledItem.productName} in order ${order._id}`
+      description: `Partial refund for item ${canceledItem.productName} in order ${order._id}`,
     })
 
     await wallet.save()
   }
 
-  res.status(200).json({ message: 'Cancellation successful', order })
+  res.status(200).json({ message: "Cancellation successful", order })
 })
 
 export {
@@ -1178,5 +1188,5 @@ export {
   getUserOrders,
   getInvoiceDownloadURL,
   cancelOrderItem,
-  cancelOrderItemAdmin
+  cancelOrderItemAdmin,
 }

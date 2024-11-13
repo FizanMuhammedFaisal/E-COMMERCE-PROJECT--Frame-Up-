@@ -1,186 +1,190 @@
-import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import apiClient from '../../../services/api/apiClient'
-import { deleteData } from '../../../redux/slices/Admin/AdminProducts/adminProductsSlice'
-import { useDispatch } from 'react-redux'
-import EditProductTab from '../../../components/layout/AdminSide/Products/EditProductTab'
-import Spinner from '../../../components/common/Animations/Spinner'
-import DetailsProductTab from '../../../components/layout/AdminSide/Products/DetailsProductTab'
-import { uploadImagesToCloudinary } from '../../../services/Cloudinary/UploadImages'
-import { validateEditProductForm } from '../../../utils/validation/FormValidation'
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import apiClient from "../../../services/api/apiClient";
+import { deleteData } from "../../../redux/slices/Admin/AdminProducts/adminProductsSlice";
+import { useDispatch } from "react-redux";
+import EditProductTab from "../../../components/layout/AdminSide/Products/EditProductTab";
+import Spinner from "../../../components/common/Animations/Spinner";
+import DetailsProductTab from "../../../components/layout/AdminSide/Products/DetailsProductTab";
+import { uploadImagesToCloudinary } from "../../../services/Cloudinary/UploadImages";
+import { validateEditProductForm } from "../../../utils/validation/FormValidation";
 export default function ProductEditPage() {
-  const { productId } = useParams()
-  const [product, setProduct] = useState(null)
+  const { productId } = useParams();
+  const [product, setProduct] = useState(null);
   const [newImages, setNewImages] = useState({
     thumbnailImage: [],
-    productImages: []
-  })
-  const [errorMessages, setErrorMessages] = useState({})
-  const [pageLoading, setPageLoading] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState('details')
-  const [error, setError] = useState(null)
-  const [formErrors, setFormErrors] = useState(null)
-  const dispatch = useDispatch()
+    productImages: [],
+  });
+
+  const [errorMessages, setErrorMessages] = useState({});
+  const [pageLoading, setPageLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
+  const [error, setError] = useState(null);
+  const [formErrors, setFormErrors] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadProduct = async () => {
-      setPageLoading(true)
-      setError(null)
+      setPageLoading(true);
+      setError(null);
       try {
-        const res = await apiClient.get(`/api/products/${productId}`)
-        console.log(res.data)
-        console.log('sdfaf')
-        setProduct(res.data.product[0])
+        const res = await apiClient.get(`/api/products/${productId}`);
+        setProduct(res.data.product[0]);
       } catch (error) {
-        setError('Failed to load product details.')
+        setError("Failed to load product details.");
       } finally {
-        setPageLoading(false)
+        setPageLoading(false);
       }
-    }
+    };
 
-    loadProduct()
-  }, [productId])
+    loadProduct();
+  }, [productId]);
 
   const handleCategoryChange = (selectedOption, type) => {
     const selectedOptionsArray = Array.isArray(selectedOption)
       ? selectedOption
-      : [selectedOption]
+      : [selectedOption];
 
     // Create an array of new categories with the specified type
-    const newCategories = selectedOptionsArray.map(option => ({
+    const newCategories = selectedOptionsArray.map((option) => ({
       _id: option.value,
       name: option.label,
-      type
-    }))
+      type,
+    }));
     // Update the product categories
-    setProduct(prevProduct => {
+    setProduct((prevProduct) => {
       // Filter out existing categories of the same type to avoid duplicates
       const updatedCategories = [
-        ...prevProduct.productCategories.filter(curr => {
-          return curr.type !== type
+        ...prevProduct.productCategories.filter((curr) => {
+          return curr.type !== type;
         }),
-        ...newCategories
-      ]
+        ...newCategories,
+      ];
 
       return {
         ...prevProduct,
-        productCategories: updatedCategories
-      }
-    })
-  }
+        productCategories: updatedCategories,
+      };
+    });
+  };
 
-  const handleInputChange = e => {
-    const { name, value, type } = e.target
-    const processedValue = type === 'number' ? e.target.valueAsNumber : value
+  const handleInputChange = (e) => {
+    const { name, value, type } = e.target;
+    const processedValue = type === "number" ? e.target.valueAsNumber : value;
 
-    setProduct(prev => ({
+    setProduct((prev) => ({
       ...prev,
-      [name]: processedValue
-    }))
+      [name]: processedValue,
+    }));
 
-    console.log(name, processedValue)
-  }
+    console.log(name, processedValue);
+  };
 
-  const handleSubmit = async e => {
-    e.preventDefault()
-    const validationErrors = validateEditProductForm(product, newImages)
-    console.log(validationErrors)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateEditProductForm(product, newImages);
+    console.log(validationErrors);
     if (Object.keys(validationErrors).length !== 0) {
-      return setFormErrors(validationErrors)
+      return setFormErrors(validationErrors);
     }
-    setFormErrors(null)
-    setIsLoading(true)
-    setError(null)
-    const isThumbnailChanged = newImages.thumbnailImage.length > 0
-    const isProductImagesChanged = newImages.productImages.length > 0
-    const updatedProduct = { ...product }
+    setFormErrors(null);
+    setIsLoading(true);
+    setError(null);
+    const isThumbnailChanged = newImages.thumbnailImage.length > 0;
+    const isProductImagesChanged = newImages.productImages.length > 0;
+    const updatedProduct = { ...product };
 
     if (isThumbnailChanged) {
-      console.log('asdfaf')
-      const url = await uploadImagesToCloudinary(newImages.thumbnailImage, true)
-      updatedProduct.thumbnailImage = [...url]
+      const url = await uploadImagesToCloudinary(
+        newImages.thumbnailImage,
+        true,
+      );
+      updatedProduct.thumbnailImage = [...url];
     }
 
     if (isProductImagesChanged) {
-      const url = await uploadImagesToCloudinary(newImages.productImages)
-      updatedProduct.productImages = [...(product?.productImages || []), ...url]
+      const url = await uploadImagesToCloudinary(newImages.productImages);
+      updatedProduct.productImages = [
+        ...(product?.productImages || []),
+        ...url,
+      ];
     }
 
     try {
       const res = await apiClient.put(
         `/api/products/${productId}`,
-        updatedProduct
-      )
+        updatedProduct,
+      );
       if (res.status === 200) {
-        setProduct(res?.data?.updatedProduct)
+        setProduct(res?.data?.updatedProduct);
         setNewImages({
           thumbnailImage: [],
-          productImages: []
-        })
-        setErrorMessages(null)
-        setError(null)
-        dispatch(deleteData())
-        setActiveTab('details')
+          productImages: [],
+        });
+        setErrorMessages(null);
+        setError(null);
+        dispatch(deleteData());
+        setActiveTab("details");
       } else {
-        throw new Error('Unexpected response status')
+        throw new Error("Unexpected response status");
       }
     } catch (error) {
-      console.error('Failed to update product:', error)
-      setError('Failed to update product. Please try again.')
+      console.error("Failed to update product:", error);
+      setError("Failed to update product. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (pageLoading) {
-    return <Spinner center={true} />
+    return <Spinner center={true} />;
   }
 
   if (error) {
-    return <div className='text-red-500 text-center'>{error}</div>
+    return <div className="text-red-500 text-center">{error}</div>;
   }
 
   if (!product) {
-    return <div className='text-center'>Product not found</div>
+    return <div className="text-center">Product not found</div>;
   }
 
   return (
     <>
-      <div className='container mx-auto p-8'>
+      <div className="container mx-auto p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h1 className='text-3xl font-bold mb-6'>Product Management</h1>
+          <h1 className="text-3xl font-bold mb-6">Product Management</h1>
 
-          <div className='space-y-4'>
-            <div className='flex space-x-2 border-b'>
+          <div className="space-y-4">
+            <div className="flex space-x-2 border-b">
               <button
                 className={`py-2 px-4 font-medium ${
-                  activeTab === 'details'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500'
+                  activeTab === "details"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
                 }`}
-                onClick={() => setActiveTab('details')}
+                onClick={() => setActiveTab("details")}
               >
                 Details
               </button>
               <button
                 className={`py-2 px-4 font-medium ${
-                  activeTab === 'edit'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500'
+                  activeTab === "edit"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
                 }`}
-                onClick={() => setActiveTab('edit')}
+                onClick={() => setActiveTab("edit")}
               >
                 Edit
               </button>
             </div>
 
-            <AnimatePresence mode='wait'>
+            <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, y: 20 }}
@@ -188,11 +192,11 @@ export default function ProductEditPage() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                {activeTab === 'details' && (
+                {activeTab === "details" && (
                   <DetailsProductTab product={product} />
                 )}
 
-                {activeTab === 'edit' && (
+                {activeTab === "edit" && (
                   <EditProductTab
                     formErrors={formErrors}
                     product={product}
@@ -212,5 +216,5 @@ export default function ProductEditPage() {
         </motion.div>
       </div>
     </>
-  )
+  );
 }

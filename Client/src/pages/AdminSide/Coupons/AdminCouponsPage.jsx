@@ -8,6 +8,7 @@ import AlertDialog from '../../../components/common/AlertDialog'
 
 import Spinner from '../../../components/common/Animations/Spinner'
 import { toast } from 'sonner'
+import {FaEdit} from "react-icons/fa";
 
 const AdminCouponsPage = () => {
   const [coupons, setCoupons] = useState([])
@@ -84,7 +85,9 @@ const AdminCouponsPage = () => {
       )
     )
   }
-
+const handleEditCoupon=(currentCouponId)=>{
+    navigate(`/dashboard/coupon/${currentCouponId}`)
+}
   const onConfirmStatusChange = async () => {
     setStatusLoading(true)
     try {
@@ -92,7 +95,7 @@ const AdminCouponsPage = () => {
       toast.success('Coupon status updated successfully!')
       updateStateStatus()
       setIsOpen(false)
-      queryClient.invalidateQueries(['coupons'])
+     await  queryClient.invalidateQueries(['coupons'])
     } catch (error) {
       toast.error('Failed to update coupon status')
       console.error('Failed to update coupon status:', error)
@@ -111,6 +114,7 @@ const AdminCouponsPage = () => {
       { label: 'Max Discount Amount', field: 'maxDiscountAmount' },
       { label: 'Expiration Date', field: 'expirationDate' },
       { label: 'Status', field: 'status' },
+      { label: 'Edit', field: 'edit' },
       { label: 'Action', field: 'action' }
     ],
     []
@@ -140,6 +144,15 @@ const AdminCouponsPage = () => {
           <option value='Active'>Active</option>
           <option value='Blocked'>Blocked</option>
         </select>
+      ),
+      edit:(
+          <div>
+            <FaEdit
+                onClick={() => {
+               handleEditCoupon(coupon._id)
+                }}
+            />
+          </div>
       ),
       action: (
         <button

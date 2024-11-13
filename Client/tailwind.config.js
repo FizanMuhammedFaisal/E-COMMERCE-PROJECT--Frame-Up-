@@ -31,7 +31,6 @@ export default {
         customP2Primary: '#8A91B7',
         customP2BackgroundW: '#F8F8FF',
         customP2BackgroundW_500: '#D9DCFF',
-        customP2Button: '#FF6B6B',
         customP2BackgroundW_700: '#B6BAF6',
         customP2BackgroundW_600: '#CACEFE',
         customP2BackgroundW_400: '#E5E7FF',

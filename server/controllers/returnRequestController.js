@@ -1,13 +1,13 @@
-import asyncHandler from 'express-async-handler'
-import Return from '../models/returnModel.js'
-import Order from '../models/orderModel.js'
-import Wallet from '../models/walletModel.js'
-import Product from '../models/productModel.js'
+import asyncHandler from "express-async-handler"
+import Return from "../models/returnModel.js"
+import Order from "../models/orderModel.js"
+import Wallet from "../models/walletModel.js"
+import Product from "../models/productModel.js"
 
 const createReturnRequest = asyncHandler(async (req, res, next) => {
   const { orderId, reason } = req.body
   if (!orderId || !reason) {
-    const error = new Error('Order ID and reason are required')
+    const error = new Error("Order ID and reason are required")
     error.statusCode = 400
     return next(error)
   }
@@ -15,7 +15,7 @@ const createReturnRequest = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(orderId)
 
   if (!order) {
-    const error = new Error('Order not found')
+    const error = new Error("Order not found")
     error.statusCode = 404
     return next(error)
   }
@@ -25,13 +25,13 @@ const createReturnRequest = asyncHandler(async (req, res, next) => {
     orderId,
     userId: req.user.id,
     reason,
-    requestedAt: Date.now()
+    requestedAt: Date.now(),
   })
 
   res.status(201).json({
-    message: 'Return request submitted successfully',
+    message: "Return request submitted successfully",
     returnRequest,
-    order
+    order,
   })
 })
 const calculateRefundAmount = (order, item) => {
@@ -54,7 +54,7 @@ const calculateRefundAmount = (order, item) => {
     itemSubtotal + // Base price * quantity
       itemTaxAmount - // Proportional tax
       itemDiscount - // Item discount
-      itemCouponAmount // Proportional coupon discount
+      itemCouponAmount, // Proportional coupon discount
   )
 
   return {
@@ -63,8 +63,8 @@ const calculateRefundAmount = (order, item) => {
       itemSubtotal,
       itemDiscount,
       couponAmount: itemCouponAmount,
-      proportionalTax: itemTaxAmount
-    }
+      proportionalTax: itemTaxAmount,
+    },
   }
 }
 
@@ -73,7 +73,7 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
   const user = req.user._id
 
   if (!requestId || !user || !newStatus) {
-    const error = new Error('Cannot update Request')
+    const error = new Error("Cannot update Request")
     error.statusCode = 400
     return next(error)
   }
@@ -81,12 +81,12 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
   try {
     const returnRequest = await Return.findById(requestId)
     if (!returnRequest) {
-      return res.status(404).json({ message: 'Return request not found' })
+      return res.status(404).json({ message: "Return request not found" })
     }
 
     const order = await Order.findById(returnRequest.orderId)
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' })
+      return res.status(404).json({ message: "Order not found" })
     }
 
     let wallet = await Wallet.findOne({ userId: order.userId })
@@ -94,90 +94,90 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
       wallet = new Wallet({
         userId: order.userId,
         balance: 0,
-        transactions: []
+        transactions: [],
       })
     }
 
-    if (['Return Accepted', 'Return Rejected'].includes(order.orderStatus)) {
-      const error = new Error('Return Request Already Settled')
+    if (["Return Accepted", "Return Rejected"].includes(order.orderStatus)) {
+      const error = new Error("Return Request Already Settled")
       error.statusCode = 400
       return next(error)
     }
     let refundAmount
-    if (newStatus === 'Accept') {
-      returnRequest.status = 'Approved'
+    if (newStatus === "Accept") {
+      returnRequest.status = "Approved"
 
       if (returnRequest.productId) {
         const itemIndex = order.items.findIndex(
-          item => item._id.toString() === returnRequest.productId.toString()
+          (item) => item._id.toString() === returnRequest.productId.toString(),
         )
 
         if (itemIndex === -1) {
-          const error = new Error('Product not found in the order')
+          const error = new Error("Product not found in the order")
           error.statusCode = 404
           return next(error)
         }
 
         const item = order.items[itemIndex]
-        item.status = 'Return Accepted'
+        item.status = "Return Accepted"
 
         const { total, breakdown } = calculateRefundAmount(order, item)
         refundAmount = total
         order.cancelledAmount = refundAmount
         wallet.balance += refundAmount
         wallet.transactions.push({
-          type: 'refund',
+          type: "refund",
           amount: refundAmount,
-          description: `Partial refund for product  in order ${order._id}`
+          description: `Partial refund for product  in order ${order._id}`,
         })
 
         await Product.updateOne(
           { _id: returnRequest.productId },
-          { $inc: { productStock: 1 } }
+          { $inc: { productStock: 1 } },
         )
       } else {
         // Handle full order return
-        order.orderStatus = 'Return Accepted'
+        order.orderStatus = "Return Accepted"
         const totalRefund =
           order.subtotal + order.taxAmount - order.couponAmount - order.discount
         order.cancelledAmount = totalRefund
         wallet.balance += totalRefund
         wallet.transactions.push({
-          type: 'refund',
+          type: "refund",
           amount: totalRefund,
-          description: `Full refund for order ${order._id}`
+          description: `Full refund for order ${order._id}`,
         })
 
-        const productIds = order.items.map(item => item.productId)
+        const productIds = order.items.map((item) => item.productId)
         await Product.updateMany(
           { _id: { $in: productIds } },
-          { $inc: { productStock: 1 } }
+          { $inc: { productStock: 1 } },
         )
       }
 
       await wallet.save()
-    } else if (newStatus === 'Reject') {
-      returnRequest.status = 'Rejected'
+    } else if (newStatus === "Reject") {
+      returnRequest.status = "Rejected"
 
       if (returnRequest.productId) {
         // Handle item-level return rejection
         const itemIndex = order.items.findIndex(
-          item => item._id.toString() === returnRequest.productId.toString()
+          (item) => item._id.toString() === returnRequest.productId.toString(),
         )
 
         if (itemIndex === -1) {
-          const error = new Error('Product not found in the order')
+          const error = new Error("Product not found in the order")
           error.statusCode = 404
           return next(error)
         }
 
-        order.items[itemIndex].status = 'Return Rejected'
+        order.items[itemIndex].status = "Return Rejected"
       } else {
         // Handle full order return rejection
-        order.orderStatus = 'Return Rejected'
+        order.orderStatus = "Return Rejected"
       }
     } else {
-      const error = new Error('Invalid status for return request')
+      const error = new Error("Invalid status for return request")
       error.statusCode = 400
       return next(error)
     }
@@ -187,13 +187,13 @@ const updateReturnRequest = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
       message: `Return request ${newStatus}`,
-      newStatus: updatedReturnRequest.status
+      newStatus: updatedReturnRequest.status,
     })
   } catch (error) {
     console.error(error)
     res.status(500).json({
-      message: 'Error processing the return request',
-      error: error.message
+      message: "Error processing the return request",
+      error: error.message,
     })
   }
 })
@@ -222,10 +222,10 @@ const getReturnRequests = asyncHandler(async (req, res) => {
       currentPage: page,
       totalPages,
       totalOrders,
-      hasMore
+      hasMore,
     })
   } catch {
-    const error = new Error('Cannot get Data.')
+    const error = new Error("Cannot get Data.")
     error.statusCode = 400
     return next(error)
   }
@@ -234,38 +234,38 @@ const getReturnRequests = asyncHandler(async (req, res) => {
 const createSingleReturnRequest = asyncHandler(async (req, res) => {
   const { orderId, reason, itemId } = req.body
   if (!orderId || !reason || !itemId) {
-    const error = new Error('Order ID and reason are required')
+    const error = new Error("Order ID and reason are required")
     error.statusCode = 400
     return next(error)
   }
 
   const order = await Order.findById(orderId)
   if (!order) {
-    const error = new Error('Order not found')
+    const error = new Error("Order not found")
     error.statusCode = 404
     return next(error)
   }
   const itemIndex = order.items.findIndex(
-    item => item._id.toString() === itemId
+    (item) => item._id.toString() === itemId,
   )
-  order.items[itemIndex].status = 'Return Initialized'
+  order.items[itemIndex].status = "Return Initialized"
 
-  const allItemsReturning = order.items.every(item =>
-    ['Return Initialized', 'Return Accepted', 'Return Rejected'].includes(
-      item.status
-    )
-  )
-
-  const anyItemsReturned = order.items.some(item =>
-    ['Return Accepted', 'Return Completed'].includes(item.status)
+  const allItemsReturning = order.items.every((item) =>
+    ["Return Initialized", "Return Accepted", "Return Rejected"].includes(
+      item.status,
+    ),
   )
 
-  if (order.items.every(item => item.status === 'Return Completed')) {
-    order.orderStatus = 'Return Completed'
+  const anyItemsReturned = order.items.some((item) =>
+    ["Return Accepted", "Return Completed"].includes(item.status),
+  )
+
+  if (order.items.every((item) => item.status === "Return Completed")) {
+    order.orderStatus = "Return Completed"
   } else if (allItemsReturning) {
-    order.orderStatus = 'Return Processing'
+    order.orderStatus = "Return Processing"
   } else if (anyItemsReturned) {
-    order.orderStatus = 'Partially Returned'
+    order.orderStatus = "Partially Returned"
   }
 
   await order.save()
@@ -276,18 +276,18 @@ const createSingleReturnRequest = asyncHandler(async (req, res) => {
     productId: itemId,
     userId: order.userId,
     reason,
-    requestedAt: Date.now()
+    requestedAt: Date.now(),
   })
 
   res.status(201).json({
-    message: 'Return request submitted successfully',
+    message: "Return request submitted successfully",
     returnRequest,
-    order
+    order,
   })
 })
 export {
   createReturnRequest,
   updateReturnRequest,
   getReturnRequests,
-  createSingleReturnRequest
+  createSingleReturnRequest,
 }

@@ -7,9 +7,9 @@ export const validateLoginForm = inputLogin => {
   if (!emailRegex.test(inputLogin.email))
     newError.email = 'Invalid email format'
   if (!inputLogin.email) newError.email = 'Email is required*'
-  if (!inputLogin.password) newError.password = 'Password is required*'
-  if (!passwordRegex.test(inputLogin.password))
-    newError.password = 'Incorrect Password'
+  // if (!inputLogin.password) newError.password = 'Password is required*'
+  // if (!passwordRegex.test(inputLogin.password))
+  //   newError.password = 'Incorrect Password'
   // for development purpose
   return newError
 }

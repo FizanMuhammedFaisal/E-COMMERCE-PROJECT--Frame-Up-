@@ -12,7 +12,6 @@ export default function CategoryEdit() {
   const navigate = useNavigate()
   const fetchCategory = async () => {
     const res = await apiClient.get(`/api/admin/category/${categoryId}`)
-    console.log(res)
     return res.data.category
   }
 

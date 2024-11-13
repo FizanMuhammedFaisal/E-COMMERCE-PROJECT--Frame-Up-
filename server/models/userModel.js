@@ -1,37 +1,37 @@
-import mongoose from 'mongoose'
-import bcrypt from 'bcryptjs'
+import mongoose from "mongoose"
+import bcrypt from "bcryptjs"
 const userSchema = mongoose.Schema({
   username: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
-    default: null
+    default: null,
   },
   phoneNumber: {
     type: Number,
-    default: null
+    default: null,
   },
   profile: {
-    type: String
+    type: String,
   },
   status: {
     type: String,
-    enum: ['Active', 'Blocked', 'Pending'],
-    default: 'Blocked'
+    enum: ["Active", "Blocked", "Pending"],
+    default: "Blocked",
   },
   firebaseUid: { type: String, default: null },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+  role: { type: String, enum: ["user", "admin"], default: "user" },
 })
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
     next()
   }
   const salt = await bcrypt.genSalt(10)
@@ -40,5 +40,5 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password)
 }
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model("User", userSchema)
 export default User

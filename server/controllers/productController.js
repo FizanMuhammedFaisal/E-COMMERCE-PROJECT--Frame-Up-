@@ -1,9 +1,9 @@
-import mongoose from 'mongoose'
-import Category from '../models/categoryModel.js'
-import Product from '../models/productModel.js'
-import asyncHandler from 'express-async-handler'
-import { validationResult } from 'express-validator'
-import { getDiscountedProducts } from '../utils/helperUtils.js'
+import mongoose from "mongoose"
+import Category from "../models/categoryModel.js"
+import Product from "../models/productModel.js"
+import asyncHandler from "express-async-handler"
+import { validationResult } from "express-validator"
+import { getDiscountedProducts } from "../utils/helperUtils.js"
 
 const addProducts = asyncHandler(async (req, res) => {
   const {
@@ -19,20 +19,22 @@ const addProducts = asyncHandler(async (req, res) => {
     productStock,
     productInformation,
     artistName,
-    discountPrice
+    discountPrice,
   } = req.body
 
   try {
     const processedProductCategory = {
-      themes: productCategory.themes.map(theme => theme.value),
-      styles: productCategory.styles.map(style => style.value),
-      techniques: productCategory.techniques.map(technique => technique.value)
+      themes: productCategory.themes.map((theme) => theme.value),
+      styles: productCategory.styles.map((style) => style.value),
+      techniques: productCategory.techniques.map(
+        (technique) => technique.value,
+      ),
     }
     // Combine all category IDs into a single array
     const productCategories = [
       ...processedProductCategory.themes,
       ...processedProductCategory.styles,
-      ...processedProductCategory.techniques
+      ...processedProductCategory.techniques,
     ]
 
     // Create the product using the extracted IDs
@@ -49,7 +51,7 @@ const addProducts = asyncHandler(async (req, res) => {
       productCategories,
       productYear,
       productStock,
-      productInformation
+      productInformation,
     })
 
     // Send success response with the created product
@@ -59,7 +61,7 @@ const addProducts = asyncHandler(async (req, res) => {
     console.error(error.message)
     res
       .status(500)
-      .json({ message: 'Error adding product', error: error.message })
+      .json({ message: "Error adding product", error: error.message })
   }
 })
 
@@ -77,22 +79,22 @@ const getProducts = asyncHandler(async (req, res, next) => {
     priceRange,
     aA_zZ,
     zZ_aA,
-    includeCategories
+    includeCategories,
   } = req.query
 
-  const filter = { status: 'Active' }
-  const priceFilter = { status: 'Active' }
+  const filter = { status: "Active" }
+  const priceFilter = { status: "Active" }
 
   // Category filters
   const categoryNames = [
-    ...(themes ? themes.split(',') : []),
-    ...(styles ? styles.split(',') : []),
-    ...(techniques ? techniques.split(',') : [])
+    ...(themes ? themes.split(",") : []),
+    ...(styles ? styles.split(",") : []),
+    ...(techniques ? techniques.split(",") : []),
   ]
 
   if (categoryNames.length) {
     const categories = await Category.find({ name: { $in: categoryNames } })
-    const categoryIds = categories.map(cat => cat._id)
+    const categoryIds = categories.map((cat) => cat._id)
     if (categoryIds.length) {
       filter.productCategories = { $in: categoryIds }
     }
@@ -100,29 +102,29 @@ const getProducts = asyncHandler(async (req, res, next) => {
 
   // Filtering by price range
   if (priceRange) {
-    const [minPrice, maxPrice] = priceRange.split(',').map(Number)
+    const [minPrice, maxPrice] = priceRange.split(",").map(Number)
     filter.productPrice = { $gte: minPrice, $lte: maxPrice }
     priceFilter.productPrice = { $gte: minPrice, $lte: maxPrice }
   }
 
   // Search functionality
   if (searchData) {
-    const searchRegex = new RegExp(searchData, 'i')
+    const searchRegex = new RegExp(searchData, "i")
     filter.$or = [
       { productName: { $regex: searchRegex } },
-      { productDescription: { $regex: searchRegex } }
+      { productDescription: { $regex: searchRegex } },
     ]
   }
 
   let sortOption = {}
-  if (sortBy === 'priceLowToHigh') {
+  if (sortBy === "priceLowToHigh") {
     sortOption.productPrice = 1
-  } else if (sortBy === 'priceHighToLow') {
+  } else if (sortBy === "priceHighToLow") {
     sortOption.productPrice = -1
   }
-  if (aA_zZ === 'true') {
+  if (aA_zZ === "true") {
     sortOption.productName = 1
-  } else if (zZ_aA === 'true') {
+  } else if (zZ_aA === "true") {
     sortOption.productName = -1
   }
   if (Object.keys(sortOption).length === 0) {
@@ -295,41 +297,41 @@ const getProducts = asyncHandler(async (req, res, next) => {
       { $match: filter },
       {
         $lookup: {
-          from: 'discounts',
-          let: { productId: '$_id', categoryIds: '$productCategories' },
+          from: "discounts",
+          let: { productId: "$_id", categoryIds: "$productCategories" },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $or: [
-                    { $eq: ['$targetId', '$$productId'] },
-                    { $in: ['$targetId', '$$categoryIds'] }
-                  ]
-                }
-              }
+                    { $eq: ["$targetId", "$$productId"] },
+                    { $in: ["$targetId", "$$categoryIds"] },
+                  ],
+                },
+              },
             },
             {
               $match: {
                 $and: [
-                  { status: 'Active' },
+                  { status: "Active" },
                   {
                     $or: [
                       {
                         startDate: { $lte: new Date() },
-                        endDate: { $gte: new Date() }
+                        endDate: { $gte: new Date() },
                       },
                       {
                         startDate: { $exists: false },
-                        endDate: { $exists: false }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
+                        endDate: { $exists: false },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
           ],
-          as: 'allDiscounts'
-        }
+          as: "allDiscounts",
+        },
       },
       {
         $addFields: {
@@ -337,203 +339,203 @@ const getProducts = asyncHandler(async (req, res, next) => {
             $map: {
               input: {
                 $filter: {
-                  input: '$allDiscounts',
-                  as: 'discount',
+                  input: "$allDiscounts",
+                  as: "discount",
                   cond: {
                     $and: [
                       {
                         $cond: [
-                          { $eq: ['$$discount.discountType', 'percentage'] },
+                          { $eq: ["$$discount.discountType", "percentage"] },
                           {
                             $and: [
-                              { $lte: ['$$discount.discountValue', 100] },
+                              { $lte: ["$$discount.discountValue", 100] },
                               {
                                 $lt: [
                                   {
                                     $multiply: [
-                                      '$productPrice',
+                                      "$productPrice",
                                       {
                                         $divide: [
-                                          '$$discount.discountValue',
-                                          100
-                                        ]
-                                      }
-                                    ]
+                                          "$$discount.discountValue",
+                                          100,
+                                        ],
+                                      },
+                                    ],
                                   },
-                                  '$productPrice'
-                                ]
-                              }
-                            ]
+                                  "$productPrice",
+                                ],
+                              },
+                            ],
                           },
                           {
                             $and: [
                               {
                                 $lt: [
-                                  '$$discount.discountValue',
-                                  '$productPrice'
-                                ]
+                                  "$$discount.discountValue",
+                                  "$productPrice",
+                                ],
                               },
                               {
                                 $gte: [
-                                  '$productPrice',
-                                  { $ifNull: ['$$discount.minValue', 0] }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
+                                  "$productPrice",
+                                  { $ifNull: ["$$discount.minValue", 0] },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
               },
-              as: 'discount',
+              as: "discount",
               in: {
                 $mergeObjects: [
-                  '$$discount',
+                  "$$discount",
                   {
                     calculatedAmount: {
                       $cond: [
-                        { $eq: ['$$discount.discountType', 'percentage'] },
+                        { $eq: ["$$discount.discountType", "percentage"] },
                         {
                           $multiply: [
-                            '$productPrice',
-                            { $divide: ['$$discount.discountValue', 100] }
-                          ]
+                            "$productPrice",
+                            { $divide: ["$$discount.discountValue", 100] },
+                          ],
                         },
-                        '$$discount.discountValue'
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        }
+                        "$$discount.discountValue",
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
       },
       {
         $addFields: {
           validDiscounts: {
             $sortArray: {
-              input: '$validDiscountsWithAmount',
-              sortBy: { calculatedAmount: -1 }
-            }
-          }
-        }
+              input: "$validDiscountsWithAmount",
+              sortBy: { calculatedAmount: -1 },
+            },
+          },
+        },
       },
       {
         $addFields: {
-          activeDiscount: { $arrayElemAt: ['$validDiscounts', 0] }
-        }
+          activeDiscount: { $arrayElemAt: ["$validDiscounts", 0] },
+        },
       },
       {
         $addFields: {
           maxDiscount: {
             $cond: [
-              { $ne: ['$activeDiscount', null] },
-              '$activeDiscount.calculatedAmount',
-              0
-            ]
-          }
-        }
+              { $ne: ["$activeDiscount", null] },
+              "$activeDiscount.calculatedAmount",
+              0,
+            ],
+          },
+        },
       },
       {
         $addFields: {
           discountPrice: {
             $cond: [
-              { $gt: ['$maxDiscount', 0] },
-              { $subtract: ['$productPrice', '$maxDiscount'] },
-              '$productPrice'
-            ]
+              { $gt: ["$maxDiscount", 0] },
+              { $subtract: ["$productPrice", "$maxDiscount"] },
+              "$productPrice",
+            ],
           },
           appliedDiscount: {
-            $cond: [{ $gt: ['$maxDiscount', 0] }, '$activeDiscount', null]
-          }
-        }
+            $cond: [{ $gt: ["$maxDiscount", 0] }, "$activeDiscount", null],
+          },
+        },
       },
       {
         $group: {
-          _id: '$_id',
-          mergedProduct: { $mergeObjects: '$$ROOT' },
-          maxDiscount: { $first: '$maxDiscount' },
-          appliedDiscount: { $first: '$appliedDiscount' }
-        }
+          _id: "$_id",
+          mergedProduct: { $mergeObjects: "$$ROOT" },
+          maxDiscount: { $first: "$maxDiscount" },
+          appliedDiscount: { $first: "$appliedDiscount" },
+        },
       },
       {
         $replaceRoot: {
           newRoot: {
             $mergeObjects: [
-              '$mergedProduct',
+              "$mergedProduct",
               {
-                discountPrice: '$discountPrice'
-              }
-            ]
-          }
-        }
+                discountPrice: "$discountPrice",
+              },
+            ],
+          },
+        },
       },
       { $sort: sortOption },
       { $skip: skip },
       { $limit: limit },
       {
         $lookup: {
-          from: 'categories',
-          localField: 'productCategories',
-          foreignField: '_id',
-          as: 'productCategories'
-        }
+          from: "categories",
+          localField: "productCategories",
+          foreignField: "_id",
+          as: "productCategories",
+        },
       },
       {
         $lookup: {
-          from: 'artists',
-          localField: 'artist',
-          foreignField: '_id',
-          as: 'artist'
-        }
+          from: "artists",
+          localField: "artist",
+          foreignField: "_id",
+          as: "artist",
+        },
       },
       {
         $unwind: {
-          path: '$artist',
-          preserveNullAndEmptyArrays: true
-        }
-      }
-    ]).collation({ locale: 'en', strength: 2 })
+          path: "$artist",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]).collation({ locale: "en", strength: 2 })
     // Total number of items after applying filters (for pagination purposes)
     const countQuery = Product.countDocuments(filter)
 
     let categoriesQuery = null
-    if (includeCategories === 'true') {
+    if (includeCategories === "true") {
       categoriesQuery = Product.aggregate([
         { $match: priceFilter },
-        { $unwind: '$productCategories' },
+        { $unwind: "$productCategories" },
         {
           $lookup: {
-            from: 'categories',
-            localField: 'productCategories',
-            foreignField: '_id',
-            as: 'categoryDetails'
-          }
+            from: "categories",
+            localField: "productCategories",
+            foreignField: "_id",
+            as: "categoryDetails",
+          },
         },
-        { $unwind: '$categoryDetails' },
+        { $unwind: "$categoryDetails" },
         {
           $group: {
             _id: {
-              categoryId: '$categoryDetails._id',
-              categoryName: '$categoryDetails.name',
-              categoryType: '$categoryDetails.type'
+              categoryId: "$categoryDetails._id",
+              categoryName: "$categoryDetails.name",
+              categoryType: "$categoryDetails.type",
             },
-            count: { $sum: 1 }
-          }
+            count: { $sum: 1 },
+          },
         },
         {
           $project: {
-            categoryId: '$_id.categoryId',
-            categoryName: '$_id.categoryName',
-            categoryType: '$_id.categoryType',
+            categoryId: "$_id.categoryId",
+            categoryName: "$_id.categoryName",
+            categoryType: "$_id.categoryType",
             count: 1,
-            _id: 0
-          }
+            _id: 0,
+          },
         },
-        { $sort: { categoryType: 1, categoryName: 1 } }
+        { $sort: { categoryType: 1, categoryName: 1 } },
       ])
     }
 
@@ -541,23 +543,23 @@ const getProducts = asyncHandler(async (req, res, next) => {
     const [products, totalItems, categoryCounts] = await Promise.all([
       productsQuery,
       countQuery,
-      categoriesQuery
+      categoriesQuery,
     ])
     // console.log(products)
     const availableCategories = {
       Themes: [],
       Styles: [],
-      Techniques: []
+      Techniques: [],
     }
 
     if (categoryCounts) {
-      categoryCounts.forEach(category => {
+      categoryCounts.forEach((category) => {
         const { categoryType } = category
-        if (categoryType === 'Theme') {
+        if (categoryType === "Theme") {
           availableCategories.Themes.push(category)
-        } else if (categoryType === 'Style') {
+        } else if (categoryType === "Style") {
           availableCategories.Styles.push(category)
-        } else if (categoryType === 'Technique') {
+        } else if (categoryType === "Technique") {
           availableCategories.Techniques.push(category)
         }
       })
@@ -568,11 +570,11 @@ const getProducts = asyncHandler(async (req, res, next) => {
       totalItems,
       availableCategories,
       currentPage: page,
-      totalPages: Math.ceil(totalItems / limit)
+      totalPages: Math.ceil(totalItems / limit),
     })
   } catch (error) {
-    console.error('Error fetching products:', error)
-    res.status(500).json({ message: 'Error fetching products' })
+    console.error("Error fetching products:", error)
+    res.status(500).json({ message: "Error fetching products" })
   }
 })
 
@@ -583,18 +585,18 @@ const getProductById = asyncHandler(async (req, res) => {
     console.log(id)
     const ObjectId = mongoose.Types.ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid product ID' })
+      return res.status(400).json({ message: "Invalid product ID" })
     }
     const product = await getDiscountedProducts({ _id: new ObjectId(id) })
     console.log(product)
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' })
+      return res.status(404).json({ message: "Product not found" })
     }
 
     res.json({ product })
   } catch (error) {
-    console.error('Error fetching product:', error)
-    res.status(500).json({ message: 'Server error' })
+    console.error("Error fetching product:", error)
+    res.status(500).json({ message: "Server error" })
   }
 })
 //
@@ -611,18 +613,18 @@ const updateProduct = async (req, res) => {
     productStock,
     thumbnailImage,
     productImages,
-    artist
+    artist,
   } = req.body
   console.log(req.body)
-  const getCategoryIds = categories => {
-    return categories.map(category => category._id)
+  const getCategoryIds = (categories) => {
+    return categories.map((category) => category._id)
   }
 
   try {
     const product = await Product.findById(id)
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' })
+      return res.status(404).json({ message: "Product not found" })
     }
     const categoriesIds = productCategories
       ? getCategoryIds(productCategories)
@@ -630,7 +632,7 @@ const updateProduct = async (req, res) => {
     // for cheking if there is alredy this present(needed this for upating images on admin side)
     const addNewURLs = (existingUrls, newUrls) => {
       const updatedUrls = [...existingUrls]
-      newUrls.forEach(url => {
+      newUrls.forEach((url) => {
         if (!existingUrls.includes(url)) {
           updatedUrls.push(url)
         }
@@ -660,12 +662,12 @@ const updateProduct = async (req, res) => {
         productStock,
         artist,
         thumbnailImage: updatedThumbnailImage,
-        productImages: updatedProductImages
+        productImages: updatedProductImages,
       },
-      { new: true }
+      { new: true },
     )
-      .populate('productCategories')
-      .populate('artist')
+      .populate("productCategories")
+      .populate("artist")
       .exec()
     console.log(updatedProduct)
     console.log(updatedProduct)
@@ -679,10 +681,10 @@ const updateProduct = async (req, res) => {
     console.log(updatedProduct)
     res.status(200).json({ updatedProduct })
   } catch (error) {
-    console.error('Error updating product:', error)
+    console.error("Error updating product:", error)
     res
       .status(500)
-      .json({ message: 'Failed to update product. Please try again.' })
+      .json({ message: "Failed to update product. Please try again." })
   }
 }
 
@@ -695,15 +697,15 @@ const updateProductStatus = asyncHandler(async (req, res) => {
   const user = await Product.findByIdAndUpdate(
     { _id: productId },
     { status },
-    { new: true }
+    { new: true },
   )
   if (!user) {
-    return res.status(400).json({ message: 'product not found' })
+    return res.status(400).json({ message: "product not found" })
   }
 
   return res
     .status(200)
-    .json({ message: 'status updated sucessfully', success: true })
+    .json({ message: "status updated sucessfully", success: true })
 })
 //
 
@@ -715,19 +717,19 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
   const includeCategories = req.query.includeCategories
   console.log(search)
   function getProducts(products = []) {
-    return products.map(product => {
+    return products.map((product) => {
       return { productName: product.productName, _id: product._id }
     })
   }
   if (includeCategories) {
     if (search) {
-      console.log('inside serach')
-      const regex = new RegExp(search, 'i')
+      console.log("inside serach")
+      const regex = new RegExp(search, "i")
       const Ufproducts = await Product.find({ productName: { $regex: regex } })
         .skip(skip)
         .limit(limit)
       const totalCount = await Product.countDocuments({
-        name: { $regex: search, $options: 'i' }
+        name: { $regex: search, $options: "i" },
       })
       const totalPages = Math.ceil(totalCount / limit)
 
@@ -737,10 +739,10 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
           products,
           hasNextPage: page < totalPages,
           currentPage: Number(page),
-          totalPages
+          totalPages,
         })
       } else {
-        const error = new Error('error finding user')
+        const error = new Error("error finding user")
         error.statusCode = 400
         return next(error)
       }
@@ -755,11 +757,11 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
             products,
             hasNextPage: page < totalPages,
             currentPage: Number(page),
-            totalPages
+            totalPages,
           })
         }
       } catch (error) {
-        res.status(500).json({ message: 'Error fetching products' })
+        res.status(500).json({ message: "Error fetching products" })
       }
     }
   } else {
@@ -767,11 +769,11 @@ const getProductsAdmin = asyncHandler(async (req, res) => {
       const products = await Product.find({})
         .skip(skip)
         .limit(limit)
-        .populate('productCategories')
+        .populate("productCategories")
       const totalItems = await Product.countDocuments()
       res.json({ products, totalItems })
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching products' })
+      res.status(500).json({ message: "Error fetching products" })
     }
   }
 })
@@ -783,37 +785,37 @@ const getSearched = asyncHandler(async (req, res) => {
   const query = req.query.q
   try {
     if (!query) {
-      return res.status(400).json({ message: 'No search query provided.' })
+      return res.status(400).json({ message: "No search query provided." })
     }
-    const regex = new RegExp(query, 'i')
+    const regex = new RegExp(query, "i")
     const [products, categories] = await Promise.all([
       Product.find(
         {
           $or: [
             { productName: { $regex: regex } },
-            { description: { $regex: regex } }
-          ]
+            { description: { $regex: regex } },
+          ],
         },
-        { productName: 1, thumbnailImage: 1, productPrice: 1, _id: 1 }
+        { productName: 1, thumbnailImage: 1, productPrice: 1, _id: 1 },
       ).limit(5),
       Category.find(
         { name: { $regex: regex } },
-        { name: 1, _id: 1, type: 1 }
-      ).limit(5)
+        { name: 1, _id: 1, type: 1 },
+      ).limit(5),
     ])
     console.log(products, categories)
     return res.json({ products, categories })
   } catch (error) {
-    console.error('Error searching for products:', error)
+    console.error("Error searching for products:", error)
     return res
       .status(500)
-      .json({ message: 'Server error. Please try again later.' })
+      .json({ message: "Server error. Please try again later." })
   }
 })
 //
 const getProductCards = asyncHandler(async (req, res, next) => {
   const products = await Product.find({})
-    .populate('artist')
+    .populate("artist")
     .sort({ productStock: 1 })
     .limit(9)
 
@@ -824,10 +826,10 @@ const getProductCards = asyncHandler(async (req, res, next) => {
       price: product.productPrice,
       id: product._id,
       artist: product.artist,
-      description: product.productDescription
+      description: product.productDescription,
     }
   })
-  res.status(200).json({ message: 'fetched Products', Products })
+  res.status(200).json({ message: "fetched Products", Products })
 })
 //
 const getRelatedProducts = asyncHandler(async (req, res, next) => {
@@ -836,7 +838,7 @@ const getRelatedProducts = asyncHandler(async (req, res, next) => {
   const productId = new mongoose.Types.ObjectId(id)
   const product = await Product.findById(id)
   if (!product) {
-    const error = new Error('Cannot find product.')
+    const error = new Error("Cannot find product.")
     error.statusCode = 400
     return next(error)
   }
@@ -845,9 +847,9 @@ const getRelatedProducts = asyncHandler(async (req, res, next) => {
   const products = await getDiscountedProducts(
     {
       _id: { $ne: productId },
-      $or: [{ productCategories: categoriesIds }, { artist: artist }]
+      $or: [{ productCategories: categoriesIds }, { artist: artist }],
     },
-    10
+    10,
   )
   console.log(products)
   if (products) {
@@ -856,7 +858,7 @@ const getRelatedProducts = asyncHandler(async (req, res, next) => {
 })
 const getNewArt = asyncHandler(async (req, res, next) => {
   const products = await Product.find({})
-    .populate('artist')
+    .populate("artist")
     .sort({ createdAt: -1 })
     .limit(6)
 
@@ -867,10 +869,10 @@ const getNewArt = asyncHandler(async (req, res, next) => {
       price: product.productPrice,
       id: product._id,
       artist: product.artist,
-      description: product.productDescription
+      description: product.productDescription,
     }
   })
-  res.status(200).json({ message: 'fetched Products', Products })
+  res.status(200).json({ message: "fetched Products", Products })
 })
 export {
   addProducts,
@@ -882,5 +884,5 @@ export {
   getSearched,
   getProductCards,
   getRelatedProducts,
-  getNewArt
+  getNewArt,
 }

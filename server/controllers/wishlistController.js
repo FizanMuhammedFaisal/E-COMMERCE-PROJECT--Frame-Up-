@@ -1,6 +1,6 @@
-import asyncHandler from 'express-async-handler'
-import Wishlist from '../models/wishlistModel.js'
-import mongoose from 'mongoose'
+import asyncHandler from "express-async-handler"
+import Wishlist from "../models/wishlistModel.js"
+import mongoose from "mongoose"
 
 const addToWishlist = asyncHandler(async (req, res, next) => {
   const user = req.user
@@ -11,7 +11,7 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
   if (!wishlist) {
     wishlist = await Wishlist.create({
       userId: user._id,
-      items: [productId]
+      items: [productId],
     })
   } else {
     if (!wishlist.items.includes(productId)) {
@@ -20,13 +20,13 @@ const addToWishlist = asyncHandler(async (req, res, next) => {
     } else {
       return res
         .status(400)
-        .json({ message: 'Product is already in the wishlist.' })
+        .json({ message: "Product is already in the wishlist." })
     }
   }
 
   res
     .status(201)
-    .json({ message: 'Product added to wishlist successfully.', wishlist })
+    .json({ message: "Product added to wishlist successfully.", wishlist })
 })
 //
 const removeFromWishlist = asyncHandler(async (req, res) => {
@@ -34,31 +34,31 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
   const { productId } = req.body
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return res.status(400).json({ message: 'Invalid product ID.' })
+    return res.status(400).json({ message: "Invalid product ID." })
   }
 
   let wishlist = await Wishlist.findOneAndUpdate(
     { userId: user._id },
     { $pull: { items: productId } },
-    { new: true }
-  ).populate('items')
+    { new: true },
+  ).populate("items")
 
   if (!wishlist) {
-    const error = new Error('no wishlist found')
+    const error = new Error("no wishlist found")
     error.statusCode = 404
     return next(error)
   }
   console.log(wishlist)
-  res.status(200).json({ message: 'Product removed from wishlist.', wishlist })
+  res.status(200).json({ message: "Product removed from wishlist.", wishlist })
 })
 const getWishlist = asyncHandler(async (req, res, next) => {
   const user = req.user
 
   let wishlist = await Wishlist.findOne({ userId: user._id }).populate({
-    path: 'items',
+    path: "items",
     populate: {
-      path: 'artist'
-    }
+      path: "artist",
+    },
   })
 
   if (!wishlist) {
@@ -68,7 +68,7 @@ const getWishlist = asyncHandler(async (req, res, next) => {
   if (wishlist) {
     return res.status(200).json({ wishlist })
   }
-  const error = new Error('server error')
+  const error = new Error("server error")
   error.statusCode = 500
   return next(error)
 })

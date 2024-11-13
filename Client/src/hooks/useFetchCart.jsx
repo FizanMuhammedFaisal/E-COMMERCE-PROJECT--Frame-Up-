@@ -24,6 +24,7 @@ const useFetchCart = () => {
           setLoading(false)
         }
       }
+
     }
 
     fetchCart()

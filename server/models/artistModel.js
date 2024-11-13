@@ -1,16 +1,16 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 const artistSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   description: {
-    type: String
+    type: String,
   },
   image: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
-const Artist = mongoose.model('Artist', artistSchema)
+const Artist = mongoose.model("Artist", artistSchema)
 export default Artist

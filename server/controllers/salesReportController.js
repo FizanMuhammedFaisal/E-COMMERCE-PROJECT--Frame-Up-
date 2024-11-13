@@ -6,30 +6,30 @@ import {
   startOfDay,
   startOfMonth,
   startOfWeek,
-  startOfYear
-} from 'date-fns'
-import asyncHandler from 'express-async-handler'
-import Order from '../models/orderModel.js'
-import ExcelJS from 'exceljs'
-import PDFDocument from 'pdfkit'
+  startOfYear,
+} from "date-fns"
+import asyncHandler from "express-async-handler"
+import Order from "../models/orderModel.js"
+import ExcelJS from "exceljs"
+import PDFDocument from "pdfkit"
 
 const generateSalesReport = async (startDate, endDate, period) => {
   let start, end
 
   switch (period) {
-    case 'Daily':
+    case "Daily":
       start = startOfDay(new Date())
       end = endOfDay(new Date())
       break
-    case 'Weekly':
+    case "Weekly":
       start = startOfWeek(new Date())
       end = endOfWeek(new Date())
       break
-    case 'Monthly':
+    case "Monthly":
       start = startOfMonth(new Date())
       end = endOfMonth(new Date())
       break
-    case 'Yearly':
+    case "Yearly":
       start = startOfYear(new Date())
       end = endOfYear(new Date())
       break
@@ -39,7 +39,7 @@ const generateSalesReport = async (startDate, endDate, period) => {
         start = new Date(startDate)
         end = new Date(endDate)
       } else {
-        throw new Error('Invalid date range')
+        throw new Error("Invalid date range")
       }
   }
   const SD = new Date(start)
@@ -47,8 +47,8 @@ const generateSalesReport = async (startDate, endDate, period) => {
 
   // try {
   const order = await Order.find({
-    createdAt: { $gte: SD, $lte: ED }
-  }).populate('userId', 'username')
+    createdAt: { $gte: SD, $lte: ED },
+  }).populate("userId", "username")
   // } catch (error) {
   //   throw new Error("could't find orders")
   // }
@@ -58,16 +58,16 @@ const generateSalesReport = async (startDate, endDate, period) => {
     totalOrderAmount: 0,
     totalDiscount: 0,
     totalCouponDiscount: 0,
-    totalShippingCharges: 0
+    totalShippingCharges: 0,
   }
   const sales = order.map((order, i) => {
-    if (order.orderStatus === 'Delivered') {
+    if (order.orderStatus === "Delivered") {
       summary.totalDelivered += 1
-    } else if (order.orderStatus === 'Cancelled') {
+    } else if (order.orderStatus === "Cancelled") {
       summary.totalCancelled += 1
     } else if (
-      order.orderStatus === 'Delivered' &&
-      order.paymentStatus === 'Paid'
+      order.orderStatus === "Delivered" &&
+      order.paymentStatus === "Paid"
     ) {
       summary.totalOrderAmount += order.subtotal || 0
     }
@@ -82,7 +82,7 @@ const generateSalesReport = async (startDate, endDate, period) => {
       discount: order.discount,
       shippingCharge: order.shippingCost,
       netTotal: order.totalAmount,
-      couponDiscount: order.couponAmount
+      couponDiscount: order.couponAmount,
     }
   })
   return { sales, summary }
@@ -96,7 +96,7 @@ const getSalesReport = asyncHandler(async (req, res, next) => {
     (startDate && !endDate) ||
     (!startDate && endDate)
   ) {
-    const error = new Error('Data for generation required')
+    const error = new Error("Data for generation required")
     error.statusCode = 400
     return next(error)
   }
@@ -118,18 +118,18 @@ const getDownloadURL = asyncHandler(async (req, res) => {
     (!startDate && endDate) ||
     !format
   ) {
-    const error = new Error('Data for generation required')
+    const error = new Error("Data for generation required")
     error.statusCode = 400
     return next(error)
   }
   const data = await generateSalesReport(startDate, endDate, period)
-  if (format === 'pdf') {
+  if (format === "pdf") {
     console.log(data)
     generatePDFReport(req, res, data, startDate, endDate)
-  } else if (format === 'xlsx') {
+  } else if (format === "xlsx") {
     generateExcelReport(req, res, data)
   } else {
-    const error = new Error('invalid Format')
+    const error = new Error("invalid Format")
     error.statusCode = 400
     return next(error)
   }
@@ -138,28 +138,28 @@ const getDownloadURL = asyncHandler(async (req, res) => {
 const generateExcelReport = async (req, res, data) => {
   try {
     const workbook = new ExcelJS.Workbook()
-    const worksheet = workbook.addWorksheet('Sales Report')
+    const worksheet = workbook.addWorksheet("Sales Report")
 
     worksheet.columns = [
-      { header: 'Serial No', key: 'serialno', width: 10 },
-      { header: 'Order Date', key: 'orderDate', width: 15 },
-      { header: 'Order Id', key: 'orderId', width: 15 },
-      { header: 'Customer', key: 'customer', width: 20 },
-      { header: 'Total Order Amount ', key: 'totalOrderAmount', width: 20 },
-      { header: 'Offer Discount ', key: 'offerDiscount', width: 15 },
-      { header: 'Coupon Discount ', key: 'couponDiscount', width: 15 },
-      { header: 'Shipping Charge ', key: 'shippingCharge', width: 15 },
-      { header: 'Net Total (₹)', key: 'netTotal', width: 20 }
+      { header: "Serial No", key: "serialno", width: 10 },
+      { header: "Order Date", key: "orderDate", width: 15 },
+      { header: "Order Id", key: "orderId", width: 15 },
+      { header: "Customer", key: "customer", width: 20 },
+      { header: "Total Order Amount ", key: "totalOrderAmount", width: 20 },
+      { header: "Offer Discount ", key: "offerDiscount", width: 15 },
+      { header: "Coupon Discount ", key: "couponDiscount", width: 15 },
+      { header: "Shipping Charge ", key: "shippingCharge", width: 15 },
+      { header: "Net Total (₹)", key: "netTotal", width: 20 },
     ]
 
     // adding rows
     data.sales.map((order, index) => {
       worksheet.addRow({
         serialno: index + 1,
-        orderDate: new Date(order.orderDate).toLocaleDateString('en-GB', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
+        orderDate: new Date(order.orderDate).toLocaleDateString("en-GB", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
         }),
         orderId: order.orderNumber,
         customer: order.customer,
@@ -167,50 +167,50 @@ const generateExcelReport = async (req, res, data) => {
         offerDiscount: order.offerDiscount,
         couponDiscount: order.couponDiscount,
         shippingCharge: order.shippingCharge,
-        netTotal: order.netTotal
+        netTotal: order.netTotal,
       })
     })
 
     // Set response headers for downloading the Excel file
     res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     res.setHeader(
-      'Content-Disposition',
-      'attachment; filename="sales_report.xlsx"'
+      "Content-Disposition",
+      'attachment; filename="sales_report.xlsx"',
     )
 
     await workbook.xlsx.write(res)
     res.end()
   } catch (error) {
-    res.status(500).send('Error generating Excel report')
+    res.status(500).send("Error generating Excel report")
     console.error(error)
   }
 }
 const generatePDFReport = async (req, res, data) => {
   try {
-    const doc = new PDFDocument({ size: 'A4', margin: 50 })
+    const doc = new PDFDocument({ size: "A4", margin: 50 })
 
-    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader("Content-Type", "application/pdf")
     res.setHeader(
-      'Content-Disposition',
-      'attachment; filename="sales_report.pdf"'
+      "Content-Disposition",
+      'attachment; filename="sales_report.pdf"',
     )
 
     doc.pipe(res)
 
     // Title
-    doc.fontSize(20).text('Sales Report', { align: 'center' })
+    doc.fontSize(20).text("Sales Report", { align: "center" })
     doc.moveDown(1.5)
 
     const summary = data.summary
 
     // Print summary
-    doc.fontSize(14).font('Helvetica-Bold').text('Summary:', { align: 'left' })
+    doc.fontSize(14).font("Helvetica-Bold").text("Summary:", { align: "left" })
     doc.moveDown(0.5)
 
-    doc.fontSize(12).font('Helvetica')
+    doc.fontSize(12).font("Helvetica")
     doc.text(`Total Delivered Orders: ${summary.totalDelivered}`)
     doc.text(`Total Cancelled Orders: ${summary.totalCancelled}`)
     doc.text(`Total Order Amount: ₹${summary.totalOrderAmount}`)
@@ -229,26 +229,26 @@ const generatePDFReport = async (req, res, data) => {
       offerDiscount: 80,
       couponDiscount: 80,
       shippingCharge: 80,
-      netTotal: 80
+      netTotal: 80,
     }
 
     const totalTableWidth = Object.values(columnWidths).reduce(
       (a, b) => a + b,
-      0
+      0,
     )
 
     // Draw table headers
-    doc.fontSize(12).font('Helvetica-Bold')
+    doc.fontSize(12).font("Helvetica-Bold")
     drawTableRow(doc, tableTop, columnWidths, [
-      'Serial No',
-      'Order Date',
-      'Order Id',
-      'Customer',
-      'Total Order Amount',
-      'Offer Discount',
-      'Coupon Discount',
-      'Shipping Charge',
-      'Net Total (₹)'
+      "Serial No",
+      "Order Date",
+      "Order Id",
+      "Customer",
+      "Total Order Amount",
+      "Offer Discount",
+      "Coupon Discount",
+      "Shipping Charge",
+      "Net Total (₹)",
     ])
 
     doc
@@ -257,11 +257,11 @@ const generatePDFReport = async (req, res, data) => {
       .stroke()
 
     let rowTop = tableTop + 30
-    doc.font('Helvetica').fontSize(10)
+    doc.font("Helvetica").fontSize(10)
 
     data.sales.forEach((order, index) => {
       const isEvenRow = index % 2 === 0
-      const rowColor = isEvenRow ? '#f2f2f2' : '#ffffff'
+      const rowColor = isEvenRow ? "#f2f2f2" : "#ffffff"
       drawTableBackground(doc, rowTop, totalTableWidth, 20, rowColor)
 
       drawTableRow(doc, rowTop, columnWidths, [
@@ -273,7 +273,7 @@ const generatePDFReport = async (req, res, data) => {
         order.discount,
         order.couponDiscount,
         order.shippingCharge,
-        order.netTotal
+        order.netTotal,
       ])
 
       rowTop += 20
@@ -287,7 +287,7 @@ const generatePDFReport = async (req, res, data) => {
 
     doc.end()
   } catch (error) {
-    res.status(500).send('Error generating PDF report')
+    res.status(500).send("Error generating PDF report")
     console.error(error)
   }
 }
@@ -304,8 +304,8 @@ function drawTableRow(doc, y, columnWidths, rowData) {
 
     doc.text(data, x, textY, {
       width: columnWidth,
-      align: 'center',
-      ellipsis: true
+      align: "center",
+      ellipsis: true,
     })
 
     x += columnWidth
@@ -313,7 +313,7 @@ function drawTableRow(doc, y, columnWidths, rowData) {
 }
 
 function drawTableBackground(doc, y, width, height, color) {
-  doc.rect(50, y, width, height).fill(color).fillColor('#000')
+  doc.rect(50, y, width, height).fill(color).fillColor("#000")
 }
 
 const getSalesTrendsData = asyncHandler(async (req, res) => {
@@ -323,81 +323,81 @@ const getSalesTrendsData = asyncHandler(async (req, res) => {
   const monthlySalesData = await Order.aggregate([
     {
       $addFields: {
-        year: { $year: '$createdAt' },
-        month: { $month: '$createdAt' }
-      }
+        year: { $year: "$createdAt" },
+        month: { $month: "$createdAt" },
+      },
     },
     {
       $match: {
         year: year,
-        month: { $lte: currentMonth }
-      }
+        month: { $lte: currentMonth },
+      },
     },
     {
       $group: {
-        _id: { month: '$month' },
-        totalSales: { $sum: '$subtotal' }
-      }
+        _id: { month: "$month" },
+        totalSales: { $sum: "$subtotal" },
+      },
     },
     {
       $project: {
         _id: 0,
-        month: '$_id.month',
-        totalSales: 1
-      }
+        month: "$_id.month",
+        totalSales: 1,
+      },
     },
     {
-      $sort: { month: 1 }
-    }
+      $sort: { month: 1 },
+    },
   ])
 
   const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ]
   ///data upto curent month
   const monthlySales = Array.from({ length: currentMonth }, (_, i) => {
     const month = i + 1
-    const salesData = monthlySalesData.find(data => data.month === month)
+    const salesData = monthlySalesData.find((data) => data.month === month)
     return {
       month: monthNames[i],
-      sales: salesData ? salesData.totalSales : 0
+      sales: salesData ? salesData.totalSales : 0,
     }
   })
   if (monthlySales) {
     return res.json({ succees: true, data: monthlySales })
   }
-  const error = new Error('Cannot get Data.')
+  const error = new Error("Cannot get Data.")
   error.statusCode = 400
   return next(error)
 })
 //
 const getTopProductsData = asyncHandler(async (req, res, next) => {
   const productData = await Order.aggregate([
-    { $unwind: '$items' },
+    { $unwind: "$items" },
     {
       $group: {
-        _id: '$items.productId',
-        name: { $first: '$items.productName' },
-        totalSold: { $sum: '$items.quantity' },
-        sales: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
-      }
+        _id: "$items.productId",
+        name: { $first: "$items.productName" },
+        totalSold: { $sum: "$items.quantity" },
+        sales: { $sum: { $multiply: ["$items.quantity", "$items.price"] } },
+      },
     },
     {
-      $sort: { sales: -1 }
+      $sort: { sales: -1 },
     },
     {
-      $limit: 5
+      $limit: 5,
     },
 
     {
@@ -405,14 +405,14 @@ const getTopProductsData = asyncHandler(async (req, res, next) => {
         // totalSold: 1,
         name: 1,
         sales: 1,
-        _id: 0
-      }
-    }
+        _id: 0,
+      },
+    },
   ])
   if (productData) {
     return res.status(200).json({ success: true, data: productData })
   }
-  const error = new Error('Cannot get Data.')
+  const error = new Error("Cannot get Data.")
   error.statusCode = 400
   return next(error)
 })
@@ -420,53 +420,53 @@ const getTopProductsData = asyncHandler(async (req, res, next) => {
 //
 const getSalesDistributionData = asyncHandler(async (req, res, next) => {
   const categoryData = await Order.aggregate([
-    { $unwind: '$items' },
+    { $unwind: "$items" },
     {
       $lookup: {
-        from: 'products',
-        localField: 'items.productId',
-        foreignField: '_id',
-        as: 'productDetails'
-      }
+        from: "products",
+        localField: "items.productId",
+        foreignField: "_id",
+        as: "productDetails",
+      },
     },
-    { $unwind: '$productDetails' },
-    { $unwind: '$productDetails.productCategories' },
+    { $unwind: "$productDetails" },
+    { $unwind: "$productDetails.productCategories" },
     {
       $lookup: {
-        from: 'categories',
-        localField: 'productDetails.productCategories',
-        foreignField: '_id',
-        as: 'categoryDetails'
-      }
+        from: "categories",
+        localField: "productDetails.productCategories",
+        foreignField: "_id",
+        as: "categoryDetails",
+      },
     },
-    { $unwind: '$categoryDetails' },
+    { $unwind: "$categoryDetails" },
     {
       $group: {
-        _id: '$categoryDetails._id',
-        name: { $first: '$categoryDetails.name' },
-        totalSold: { $sum: '$items.quantity' },
-        value: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
-      }
+        _id: "$categoryDetails._id",
+        name: { $first: "$categoryDetails.name" },
+        totalSold: { $sum: "$items.quantity" },
+        value: { $sum: { $multiply: ["$items.quantity", "$items.price"] } },
+      },
     },
     {
-      $sort: { sales: -1 }
+      $sort: { sales: -1 },
     },
     {
-      $limit: 5
+      $limit: 5,
     },
     {
       $project: {
         _id: 0,
         name: 1,
-        value: 1
-      }
-    }
+        value: 1,
+      },
+    },
   ])
 
   if (categoryData) {
     return res.status(200).json({ success: true, data: categoryData })
   }
-  const error = new Error('Cannot get Data.')
+  const error = new Error("Cannot get Data.")
   error.statusCode = 400
   return next(error)
 })
@@ -476,23 +476,23 @@ const getOrderStatusData = asyncHandler(async (req, res) => {
   const orderData = await Order.aggregate([
     {
       $group: {
-        _id: '$orderStatus', // Group by `orderStatus` to get the unique status values
-        count: { $sum: 1 } // Count each occurrence of each status
-      }
+        _id: "$orderStatus", // Group by `orderStatus` to get the unique status values
+        count: { $sum: 1 }, // Count each occurrence of each status
+      },
     },
     {
       $project: {
         _id: 0, // Exclude `_id` in the final output
-        name: '$_id', // Rename `_id` to `name` for readability
-        value: '$count' // Assign `count` to `value` for clarity in the output
-      }
-    }
+        name: "$_id", // Rename `_id` to `name` for readability
+        value: "$count", // Assign `count` to `value` for clarity in the output
+      },
+    },
   ])
 
   if (orderData) {
     return res.status(200).json({ success: true, data: orderData })
   }
-  const error = new Error('Cannot get Data.')
+  const error = new Error("Cannot get Data.")
   error.statusCode = 400
   return next(error)
 })
@@ -504,38 +504,38 @@ const getOverview = asyncHandler(async (req, res) => {
     const startOfCurrentMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      1
+      1,
     )
     const startOfPreviousMonth = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth() - 1,
-      1
+      1,
     )
 
     const result = await Order.aggregate([
       { $match: { createdAt: { $gte: startOfPreviousMonth } } },
       {
         $group: {
-          _id: { $month: '$createdAt' },
-          totalRevenue: { $sum: '$totalAmount' },
-          totalOrders: { $sum: 1 }
-        }
+          _id: { $month: "$createdAt" },
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+        },
       },
       {
         $project: {
-          month: '$_id',
+          month: "$_id",
           totalRevenue: 1,
           totalOrders: 1,
           avgOrderValue: {
             $cond: {
-              if: { $eq: ['$totalOrders', 0] },
+              if: { $eq: ["$totalOrders", 0] },
               then: 0,
-              else: { $divide: ['$totalRevenue', '$totalOrders'] }
-            }
-          }
-        }
+              else: { $divide: ["$totalRevenue", "$totalOrders"] },
+            },
+          },
+        },
       },
-      { $sort: { month: -1 } }
+      { $sort: { month: -1 } },
     ])
 
     const [currentMonthData, previousMonthData] = result
@@ -558,13 +558,13 @@ const getOverview = asyncHandler(async (req, res) => {
         ? ((currentMonthData.avgOrderValue - previousMonthData.avgOrderValue) /
             previousMonthData.avgOrderValue) *
           100
-        : 100
+        : 100,
     }
 
     res.json({ data: metrics, success: true })
   } catch (error) {
-    console.error('Error fetching dashboard metrics:', error)
-    res.status(500).json({ message: 'Server Error' })
+    console.error("Error fetching dashboard metrics:", error)
+    res.status(500).json({ message: "Server Error" })
   }
 })
 
@@ -575,5 +575,5 @@ export {
   getTopProductsData,
   getSalesDistributionData,
   getOrderStatusData,
-  getOverview
+  getOverview,
 }

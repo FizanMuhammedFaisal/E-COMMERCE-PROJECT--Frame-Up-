@@ -22,6 +22,7 @@ import AdminCouponsPage from '../pages/AdminSide/Coupons/AdminCouponsPage'
 import AddCouponsPage from '../pages/AdminSide/Coupons/AddCouponsPage'
 import ReturnRequestPage from '../pages/AdminSide/Orders/ReturnRequestPage'
 import CategoryEdit from '../pages/AdminSide/Categories/CategoryEdit'
+import EditCouponPage from "../pages/AdminSide/Coupons/EditCouponPage.jsx";
 
 const AdminRoutes = [
   {
@@ -114,6 +115,9 @@ const AdminRoutes = [
           {
             path: 'coupons/add-coupons',
             element: <AddCouponsPage />
+          },{
+            path: 'coupons/edit/:couponId',
+            element: <EditCouponPage />
           },
 
           {

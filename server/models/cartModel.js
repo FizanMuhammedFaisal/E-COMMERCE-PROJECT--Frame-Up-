@@ -1,27 +1,27 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 const Schema = mongoose.Schema
 //cart item sub schema
 const cartItemSchema = new Schema(
   {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true
+      ref: "Product",
+      required: true,
     },
     quantity: {
       type: Number,
       required: true,
-      min: 1
-    }
+      min: 1,
+    },
   },
-  { _id: false }
+  { _id: false },
 )
 
 const cartSchema = new Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
   items: [cartItemSchema],
   // subtotal: {
@@ -36,23 +36,23 @@ const cartSchema = new Schema({
   // },
   discount: {
     type: Number,
-    default: 0.0
+    default: 0.0,
   },
   status: {
     type: String,
-    enum: ['active', 'completed', 'abandoned'],
-    default: 'active'
+    enum: ["active", "completed", "abandoned"],
+    default: "active",
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 })
 
-const Cart = mongoose.model('Cart', cartSchema)
+const Cart = mongoose.model("Cart", cartSchema)
 
 export default Cart

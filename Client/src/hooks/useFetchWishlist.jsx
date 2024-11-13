@@ -7,6 +7,8 @@ import {
   addToWishlist
 } from '../redux/slices/Users/Wishlist/wishlistSlice'
 
+
+
 const useFetchWishlist = () => {
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false)
@@ -15,7 +17,7 @@ const useFetchWishlist = () => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated)
 
   useEffect(() => {
-    const fetchCart = async () => {
+    const fetchWishlist = async () => {
       if (isAuthenticated) {
         setLoading(true)
         try {
@@ -31,7 +33,7 @@ const useFetchWishlist = () => {
       }
     }
 
-    fetchCart()
+    fetchWishlist()
   }, [isAuthenticated])
   return { loading, error, data }
 }

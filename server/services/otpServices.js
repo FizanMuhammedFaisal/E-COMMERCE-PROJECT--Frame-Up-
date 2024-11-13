@@ -1,16 +1,16 @@
-import nodemailer from 'nodemailer'
-import crypto from 'crypto'
-import TempUser from '../models/tempUserModel.js'
-import dotenv from 'dotenv'
+import nodemailer from "nodemailer"
+import crypto from "crypto"
+import TempUser from "../models/tempUserModel.js"
+import dotenv from "dotenv"
 
 dotenv.config()
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', /// setting gmail for mailing
+  service: "Gmail", /// setting gmail for mailing
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 })
 
 export const generateOTP = () => {
@@ -23,15 +23,15 @@ export const sendOTPEmail = async (email, otp) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: 'Your OTP Code',
-    text: `Your OTP code is ${otp}. It expires in 2 minutes.`
+    subject: "Your OTP Code",
+    text: `Your OTP code is ${otp}. It expires in 2 minutes.`,
   }
 
   try {
     console.log(email, otp)
     await transporter.sendMail(mailOptions)
   } catch (error) {
-    throw new Error('Failed to send OTP email')
+    throw new Error("Failed to send OTP email")
   }
 }
 

@@ -1,55 +1,55 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 
 const itemsSchema = {
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true
+    ref: "Product",
+    required: true,
   },
   productName: {
     type: String,
-    required: true
+    required: true,
   },
   quantity: {
     type: Number,
     required: true,
-    min: 1
+    min: 1,
   },
   price: {
     type: Number,
-    required: true
+    required: true,
   },
   thumbnailImage: {
     type: [String],
-    required: false
+    required: false,
   },
   discount: {
     type: Number,
-    default: 0
+    default: 0,
   },
   status: {
     type: String,
     enum: [
-      'Pending',
-      'Processing',
-      'Shipped',
-      'Delivered',
-      'Cancelled',
-      'Return Initialized',
-      'Return Accepted',
-      'Return Rejected',
-      'Return Completed'
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+      "Return Initialized",
+      "Return Accepted",
+      "Return Rejected",
+      "Return Completed",
     ],
-    default: 'Pending'
-  }
+    default: "Pending",
+  },
 }
 
 const orderSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
+      ref: "User",
+      required: true,
     },
 
     items: [itemsSchema],
@@ -63,83 +63,83 @@ const orderSchema = new mongoose.Schema(
       city: { type: String, required: true },
       phoneNumber: { type: String, required: true },
       state: { type: String, required: true },
-      postalCode: { type: String, required: true }
+      postalCode: { type: String, required: true },
     },
 
     paymentMethod: {
       type: String,
-      enum: ['Wallet', 'Razor Pay', 'Cash on Delivery'],
-      required: true
+      enum: ["Wallet", "Razor Pay", "Cash on Delivery"],
+      required: true,
     },
     paymentStatus: {
       type: String,
-      enum: ['Pending', 'Paid', 'Failed'],
-      default: 'Pending',
-      required: true
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+      required: true,
     },
 
     orderStatus: {
       type: String,
       enum: [
-        'Pending',
-        'Processing',
-        'Shipped',
-        'Delivered',
-        'Cancelled',
-        'Return Initialized',
-        'Return Accepted',
-        'Return Rejected',
-        'Return Processing',
-        'Partially Returned',
-        'Return Completed'
+        "Pending",
+        "Processing",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+        "Return Initialized",
+        "Return Accepted",
+        "Return Rejected",
+        "Return Processing",
+        "Partially Returned",
+        "Return Completed",
       ],
-      default: 'Pending',
-      required: true
+      default: "Pending",
+      required: true,
     },
 
     subtotal: {
       type: Number,
-      required: true
+      required: true,
     },
     totalAmount: {
       type: Number,
-      required: true
+      required: true,
     },
     shippingCost: {
       type: Number,
-      required: true
+      required: true,
     },
     discount: {
       type: Number,
-      default: 0
+      default: 0,
     },
     taxAmount: {
       type: Number,
-      default: 0
+      default: 0,
     },
     cancelledAmount: {
       type: Number,
-      default: 0
+      default: 0,
     },
     couponCode: {
-      type: String
+      type: String,
     },
     couponAmount: {
       type: Number,
-      default: 0
+      default: 0,
     },
 
     razorpayOrderId: {
-      type: String
+      type: String,
     },
     transactionId: {
-      type: String
-    }
+      type: String,
+    },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 )
 
-const Order = mongoose.model('Order', orderSchema)
+const Order = mongoose.model("Order", orderSchema)
 export default Order

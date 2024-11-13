@@ -55,7 +55,6 @@ export default function CartPage() {
       severity: 'success'
     })
   }
-
   const handleCheckout = async () => {
     const outOfStockItems = items.filter(item => item.quantity === 0)
     if (outOfStockItems.length > 0) {

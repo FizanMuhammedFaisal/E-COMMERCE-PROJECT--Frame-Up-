@@ -1,18 +1,18 @@
-import asyncHandler from 'express-async-handler'
-import Artist from '../models/artistModel.js'
-import Product from '../models/productModel.js'
-import mongoose from 'mongoose'
+import asyncHandler from "express-async-handler"
+import Artist from "../models/artistModel.js"
+import Product from "../models/productModel.js"
+import mongoose from "mongoose"
 
 const addArtist = asyncHandler(async (req, res, next) => {
   const { name, description, image } = req.body.data
   if (!name || !description || !image) {
-    const error = new Error('Not valid files')
+    const error = new Error("Not valid files")
     error.statusCode = 400
     return next(error)
   }
   const artistExists = await Artist.findOne({ name })
   if (artistExists) {
-    const error = new Error('Artist Already Exists')
+    const error = new Error("Artist Already Exists")
     error.statusCode = 400
     return next(error)
   }
@@ -24,7 +24,7 @@ const addArtist = asyncHandler(async (req, res, next) => {
     return next(error)
   }
   if (artist) {
-    res.status(200).json({ message: 'artist created' })
+    res.status(200).json({ message: "artist created" })
   }
 })
 //
@@ -32,19 +32,19 @@ const checkArtist = asyncHandler(async (req, res, next) => {
   const { name } = req.body
 
   if (!name) {
-    const error = new Error('No Name Present')
+    const error = new Error("No Name Present")
     error.statusCode = 400
     return next(error)
   }
   const artistExist = await Artist.findOne({
-    name: { $regex: new RegExp(`^${name}$`, 'i') }
+    name: { $regex: new RegExp(`^${name}$`, "i") },
   })
   if (artistExist) {
-    const error = new Error('This Name Already Exist')
+    const error = new Error("This Name Already Exist")
     error.statusCode = 400
     return next(error)
   } else {
-    res.status(200).json({ message: 'verified' })
+    res.status(200).json({ message: "verified" })
   }
 })
 //@ discp   to fetch artists
@@ -58,12 +58,12 @@ const getArtistsAdmin = asyncHandler(async (req, res, next) => {
   let artists
 
   if (search) {
-    const regex = new RegExp(search, 'i')
+    const regex = new RegExp(search, "i")
     artists = await Artist.find({ name: { $regex: regex } })
       .skip(skip)
       .limit(limit)
     const totalCount = await Artist.countDocuments({
-      name: { $regex: search, $options: 'i' }
+      name: { $regex: search, $options: "i" },
     })
     const totalPages = Math.ceil(totalCount / limit)
     if (artists) {
@@ -71,10 +71,10 @@ const getArtistsAdmin = asyncHandler(async (req, res, next) => {
         artists,
         hasNextPage: page < totalPages,
         currentPage: Number(page),
-        totalPages
+        totalPages,
       })
     } else {
-      const error = new Error('error finding user')
+      const error = new Error("error finding user")
       error.statusCode = 400
       return next(error)
     }
@@ -84,10 +84,10 @@ const getArtistsAdmin = asyncHandler(async (req, res, next) => {
 
   if (artists) {
     res.json({
-      artists
+      artists,
     })
   } else {
-    const error = new Error('error finding user')
+    const error = new Error("error finding user")
     error.statusCode = 400
     return next(error)
   }
@@ -112,7 +112,7 @@ const getArtist = asyncHandler(async (req, res) => {
         artists,
         hasNextPage: page < totalPages,
         currentPage: Number(page),
-        totalPages
+        totalPages,
       })
     }, 1000)
   }
@@ -123,7 +123,7 @@ const getArtist = asyncHandler(async (req, res) => {
 const getArtistDetails = asyncHandler(async (req, res) => {
   const { id } = req.params
   if (!id || !mongoose.isValidObjectId(id)) {
-    const error = new Error('Error finding artist.')
+    const error = new Error("Error finding artist.")
     error.statusCode = 400
     return next(error)
   }
@@ -149,5 +149,5 @@ export {
   getArtistsAdmin,
   getArtist,
   getArtistDetails,
-  getArtistArt
+  getArtistArt,
 }

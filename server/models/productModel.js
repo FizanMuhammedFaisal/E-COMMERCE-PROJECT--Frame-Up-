@@ -1,68 +1,68 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 
 const productSchema = new mongoose.Schema(
   {
     productName: {
       type: String,
-      required: true
+      required: true,
     },
     productPrice: {
       type: Number,
-      required: true
+      required: true,
     },
 
     discountPrice: {
-      type: Number
+      type: Number,
     },
     productCategories: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
-        required: true
-      }
+        ref: "Category",
+        required: true,
+      },
     ],
     productDescription: {
       type: String,
-      required: true
+      required: true,
     },
     artist: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Artist',
-      required: true
+      ref: "Artist",
+      required: true,
     },
     productImages: {
       type: [String], // Array of image URLs or paths
-      required: true
+      required: true,
     },
     thumbnailImage: {
-      type: [String]
+      type: [String],
     },
     weight: {
-      type: Number //in kg
+      type: Number, //in kg
     },
     dimensions: {
-      type: String
+      type: String,
     },
     productYear: {
-      type: Number
+      type: Number,
     },
     productInformation: {
-      type: String
+      type: String,
     },
     productStock: {
-      type: Number
+      type: Number,
     },
     status: {
       type: String,
-      enum: ['Active', 'Blocked'],
-      default: 'Active'
-    }
+      enum: ["Active", "Blocked"],
+      default: "Active",
+    },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 )
-productSchema.index({ productName: 'text', productDescription: 'text' })
-const Product = mongoose.model('Product', productSchema)
+productSchema.index({ productName: "text", productDescription: "text" })
+const Product = mongoose.model("Product", productSchema)
 
 export default Product
