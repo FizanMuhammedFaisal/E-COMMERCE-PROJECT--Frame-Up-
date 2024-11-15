@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import apiClient from '../../../../services/api/apiClient'
-import { useEffect } from 'react'
-import { CircularProgress } from '@mui/material'
-import { Link, useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import apiClient from "../../../../services/api/apiClient";
+import { useEffect } from "react";
+import { CircularProgress } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   Calendar,
@@ -17,249 +17,249 @@ import {
   PencilIcon,
   PlusIcon,
   TrashIcon,
-  XCircleIcon
-} from 'lucide-react'
-import AlertDialog from '../../../common/AlertDialog'
+  XCircleIcon,
+} from "lucide-react";
+import AlertDialog from "../../../common/AlertDialog";
 
-import AddressModal from '../../../modals/AddressModal'
-import { uploadImagesToCloudinary } from '../../../../services/Cloudinary/UploadImages'
-import Spinner from '../../../common/Animations/Spinner'
+import AddressModal from "../../../modals/AddressModal";
+import { uploadImagesToCloudinary } from "../../../../services/Cloudinary/UploadImages";
+import Spinner from "../../../common/Animations/Spinner";
 const EditProfile = () => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [userData, setUserData] = useState({})
-  const [editedUser, setEditedUser] = useState()
-  const [errorMessages, seterrorMessages] = useState({})
-  const [error, seterror] = useState('')
-  const [loading, setloading] = useState(false)
-  const handleInputChange = e => {
-    setEditedUser({ ...editedUser, [e.target.name]: e.target.value })
-  }
+  const [isEditing, setIsEditing] = useState(false);
+  const [userData, setUserData] = useState({});
+  const [editedUser, setEditedUser] = useState();
+  const [errorMessages, seterrorMessages] = useState({});
+  const [error, seterror] = useState("");
+  const [loading, setloading] = useState(false);
+  const handleInputChange = (e) => {
+    setEditedUser({ ...editedUser, [e.target.name]: e.target.value });
+  };
 
   const validateFields = () => {
-    let tempErrors = {}
+    let tempErrors = {};
     if (!editedUser.name) {
-      tempErrors.name = 'Name is required'
+      tempErrors.name = "Name is required";
     }
     if (!editedUser.email) {
-      tempErrors.email = 'Email is required'
+      tempErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(editedUser.email)) {
-      tempErrors.email = 'Email is not valid'
+      tempErrors.email = "Email is not valid";
     }
-    return tempErrors
-  }
+    return tempErrors;
+  };
 
   const handleSaveProfile = async () => {
-    seterror('')
-    const errors = validateFields(editedUser)
+    seterror("");
+    const errors = validateFields(editedUser);
     if (Object.keys(errors).length > 0) {
-      return seterrorMessages(errors)
+      return seterrorMessages(errors);
     }
-    seterrorMessages({})
-    const updatedUser = { ...editedUser }
+    seterrorMessages({});
+    const updatedUser = { ...editedUser };
     try {
-      setloading(true)
-      const res = await apiClient.post('/api/users/update-profile', {
-        updatedUser
-      })
+      setloading(true);
+      const res = await apiClient.post("/api/users/update-profile", {
+        updatedUser,
+      });
       if (res.status === 200) {
-        setUserData(updatedUser)
+        setUserData(updatedUser);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
 
       if (error?.response?.data?.message) {
-        seterror(error?.response?.data?.message)
+        seterror(error?.response?.data?.message);
       } else {
-        seterror("Couldn't update user. Please try again.")
+        seterror("Couldn't update user. Please try again.");
       }
     }
-    setloading(false)
-    setIsEditing(false)
-  }
+    setloading(false);
+    setIsEditing(false);
+  };
   const fetchUser = async () => {
-    const res = await apiClient.get('/api/users/get-user')
+    const res = await apiClient.get("/api/users/get-user");
 
-    return res.data
-  }
+    return res.data;
+  };
   const { data, isLoading } = useQuery({
     queryFn: () => fetchUser(),
-    queryKey: ['user'],
+    queryKey: ["user"],
     staleTime: Infinity,
-    cacheTime: 1000 * 60 * 10
-  })
+    cacheTime: 1000 * 60 * 10,
+  });
   useEffect(() => {
     if (data?.userData) {
-      console.log(data)
-      setUserData(data.userData)
-      setEditedUser(data.userData)
+      console.log(data);
+      setUserData(data.userData);
+      setEditedUser(data.userData);
     }
-  }, [data])
-  const handleImageUpload = async e => {
-    const { id, value, files } = e.target
-    setloading(true)
-    const image = Array.from(files)
+  }, [data]);
+  const handleImageUpload = async (e) => {
+    const { id, value, files } = e.target;
+    setloading(true);
+    const image = Array.from(files);
     try {
       //maybe incoperate this i one api for now wring anothe noe
-      const url = await uploadImagesToCloudinary(image)
-      const res = await apiClient.post('/api/users/upload-profile', { url })
+      const url = await uploadImagesToCloudinary(image);
+      const res = await apiClient.post("/api/users/upload-profile", { url });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-    setloading(false)
-  }
+    setloading(false);
+  };
   return (
-    <div className='space-y-6'>
-      <h2 className='text-2xl font-semibold text-gray-900'>Edit Profile</h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold text-gray-900">Edit Profile</h2>
       <div>
-        {error && <p className='text-red-500 hover:text-red-300'>{error}</p>}
+        {error && <p className="text-red-500 hover:text-red-300">{error}</p>}
       </div>
       {isEditing ? (
         <form
-          onSubmit={e => {
-            e.preventDefault()
-            handleSaveProfile()
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSaveProfile();
           }}
         >
-          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <label
-                htmlFor='name'
-                className='block text-sm pb-1 font-medium text-gray-700'
+                htmlFor="name"
+                className="block text-sm pb-1 font-medium text-gray-700"
               >
                 Name
               </label>
               <input
-                type='text'
-                name='name'
-                id='name'
-                value={editedUser?.name || ''}
+                type="text"
+                name="name"
+                id="name"
+                value={editedUser?.name || ""}
                 onChange={handleInputChange}
-                className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
+                className="w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75"
               />
               {errorMessages && (
-                <p className='text-red-500 hover:text-red-300'>
+                <p className="text-red-500 hover:text-red-300">
                   {errorMessages.name}
                 </p>
               )}
             </div>
             <div>
               <label
-                htmlFor='email'
-                className='block text-sm pb-1 font-medium text-gray-700'
+                htmlFor="email"
+                className="block text-sm pb-1 font-medium text-gray-700"
               >
                 Email
               </label>
               <input
-                type='text'
-                name='email'
-                id='email'
-                value={editedUser?.email || ''}
+                type="text"
+                name="email"
+                id="email"
+                value={editedUser?.email || ""}
                 onChange={handleInputChange}
-                className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
+                className="w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75"
               />
               {errorMessages && (
-                <p className='text-red-500 hover:text-red-300'>
+                <p className="text-red-500 hover:text-red-300">
                   {errorMessages.email}
                 </p>
               )}
             </div>
             <div>
               <label
-                htmlFor='phone'
-                className='block text-sm pb-1 font-medium text-gray-700'
+                htmlFor="phone"
+                className="block text-sm pb-1 font-medium text-gray-700"
               >
                 Phone
               </label>
               <input
-                type='tel'
-                name='phone'
-                id='phone'
-                value={editedUser?.phone || ''}
+                type="tel"
+                name="phone"
+                id="phone"
+                value={editedUser?.phone || ""}
                 onChange={handleInputChange}
-                className='w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75'
+                className="w-full p-2  border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75"
               />
               {errorMessages && (
-                <p className='text-red-500 hover:text-red-300'>
+                <p className="text-red-500 hover:text-red-300">
                   {errorMessages.phone}
                 </p>
               )}
             </div>
-          </div>{' '}
-          <div className='m-4'>
+          </div>{" "}
+          <div className="m-4">
             <button
-              type='button'
-              onClick={e => document.getElementById('profile').click()}
-              className='p-3 bg-customColorTertiary rounded-md flex-nowrap  w-32 hover:bg-customColorTertiaryLight text-white'
+              type="button"
+              onClick={(e) => document.getElementById("profile").click()}
+              className="p-3 bg-customColorTertiary rounded-md flex-nowrap  w-32 hover:bg-customColorTertiaryLight text-white"
             >
               {loading ? (
                 <Spinner size={-1} speed={2} />
               ) : (
-                <p className='whitespace-nowrap'> Update Profile</p>
+                <p className="whitespace-nowrap"> Update Profile</p>
               )}
             </button>
             <input
-              type='file'
-              accept='image/jpeg, image/png,image/webp'
-              id='profile'
-              className='hidden'
+              type="file"
+              accept="image/jpeg, image/png,image/webp"
+              id="profile"
+              className="hidden"
               onChange={handleImageUpload}
             />
           </div>
-          <div className='mt-6 flex justify-end space-x-3'>
+          <div className="mt-6 flex justify-end space-x-3">
             <button
-              type='button'
+              type="button"
               onClick={() => {
-                setIsEditing(false)
-                setEditedUser(userData)
+                setIsEditing(false);
+                setEditedUser(userData);
               }}
-              className='bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop'
+              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop"
             >
               Cancel
             </button>
 
             <button
-              type='submit'
-              className='bg-customColorTertiary border min-w-20 border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop'
+              type="submit"
+              className="bg-customColorTertiary border min-w-20 border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop"
             >
               {loading ? (
-                <CircularProgress color='inherit' size={20} />
+                <CircularProgress color="inherit" size={20} />
               ) : (
-                'Save Changes'
+                "Save Changes"
               )}
             </button>
           </div>
         </form>
       ) : (
-        <div className='bg-white shadow overflow-hidden sm:rounded-lg'>
-          <div className='px-4 py-5 sm:px-6'>
-            <h3 className='text-lg leading-6 font-medium text-gray-900'>
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
               User Information
             </h3>
-            <p className='mt-1 max-w-2xl text-sm text-gray-500'>
+            <p className="mt-1 max-w-2xl text-sm text-gray-500">
               Personal details and application.
             </p>
           </div>
           {userData.profile ? (
-            <div className='ml-5 m-6'>
+            <div className="ml-5 m-6">
               <img
                 src={userData.profile}
-                className='w-20 rounded-full'
-                alt=''
+                className="w-20 rounded-full"
+                alt=""
               />
             </div>
           ) : (
-            <div className='ml-5 m-4'>
+            <div className="ml-5 m-4">
               <button
-                onClick={e => document.getElementById('profile').click()}
-                className='p-3 bg-customColorTertiary rounded-md flex-nowrap  w-32 hover:bg-customColorTertiaryLight text-white'
+                onClick={(e) => document.getElementById("profile").click()}
+                className="p-3 bg-customColorTertiary rounded-md flex-nowrap  w-32 hover:bg-customColorTertiaryLight text-white"
               >
-                {loading ? <Spinner size={-1} speed={2} /> : 'Upload Profile'}
+                {loading ? <Spinner size={-1} speed={2} /> : "Upload Profile"}
               </button>
               <input
-                type='file'
-                accept='image/jpeg, image/png,image/webp'
-                id='profile'
-                className='hidden'
+                type="file"
+                accept="image/jpeg, image/png,image/webp"
+                id="profile"
+                className="hidden"
                 onChange={handleImageUpload}
               />
             </div>
@@ -267,29 +267,29 @@ const EditProfile = () => {
           {isLoading ? (
             <div>Loading...</div>
           ) : (
-            <div className='border-t border-gray-200 px-4 py-5 sm:p-0'>
-              <dl className='sm:divide-y sm:divide-gray-200'>
-                <div className='py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6'>
-                  <dt className='text-sm font-medium text-gray-500'>
+            <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+              <dl className="sm:divide-y sm:divide-gray-200">
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">
                     Full name
                   </dt>
-                  <dd className='mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2'>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                     {userData.name}
                   </dd>
                 </div>
-                <div className='py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6'>
-                  <dt className='text-sm font-medium text-gray-500'>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">
                     Email address
                   </dt>
-                  <dd className='mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2'>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                     {userData.email}
                   </dd>
                 </div>
-                <div className='py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6'>
-                  <dt className='text-sm font-medium text-gray-500'>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">
                     Phone number
                   </dt>
-                  <dd className='mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2'>
+                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                     {userData.phone}
                   </dd>
                 </div>
@@ -301,148 +301,156 @@ const EditProfile = () => {
       {!isEditing && (
         <button
           onClick={() => setIsEditing(true)}
-          className='mt-4 bg-customColorTertiary border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white duration-300 hover:bg-customColorTertiaryLight/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop'
+          className="mt-4 bg-customColorTertiary border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white duration-300 hover:bg-customColorTertiaryLight/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop"
         >
           Edit Profile
         </button>
       )}
     </div>
-  )
-}
+  );
+};
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  })
-  const [errors, setErrors] = useState({})
-  const [successMessage, setSuccessMessage] = useState('')
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
   const [showPasswords, setShowPasswords] = useState({
     currentPassword: false,
     newPassword: false,
-    confirmPassword: false
-  })
+    confirmPassword: false,
+  });
 
-  const handleInputChange = e => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors({ ...errors, [name]: '' })
+      setErrors({ ...errors, [name]: "" });
     }
-  }
+  };
 
   const validateForm = () => {
-    const validationErrors = {}
+    const validationErrors = {};
 
     if (!formData.currentPassword) {
-      validationErrors.currentPassword = 'Current password is required'
+      validationErrors.currentPassword = "Current password is required";
     }
 
     if (!formData.newPassword) {
-      validationErrors.newPassword = 'New password is required'
+      validationErrors.newPassword = "New password is required";
     } else if (formData.newPassword.length < 8) {
-      validationErrors.newPassword = 'Password must be at least 8 characters'
+      validationErrors.newPassword = "Password must be at least 8 characters";
     }
 
     if (!formData.confirmPassword) {
-      validationErrors.confirmPassword = 'Please confirm your new password'
+      validationErrors.confirmPassword = "Please confirm your new password";
     } else if (formData.newPassword !== formData.confirmPassword) {
-      validationErrors.confirmPassword = 'Passwords do not match'
+      validationErrors.confirmPassword = "Passwords do not match";
     }
 
-    return validationErrors
-  }
+    return validationErrors;
+  };
 
-  const handleSubmit = async e => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const validationErrors = validateForm()
-    setErrors({})
-    setSuccessMessage('')
+    const validationErrors = validateForm();
+    setErrors({});
+    setSuccessMessage("");
 
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors)
-      return
+      setErrors(validationErrors);
+      return;
     }
 
     try {
-      const res = await apiClient.post('/api/users/update-password', formData)
+      const res = await apiClient.post("/api/users/update-password", formData);
       if (res.status === 200) {
-        setSuccessMessage('Password updated successfully')
+        setSuccessMessage("Password updated successfully");
         setFormData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        })
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
       setErrors({
         form:
           error?.response?.data?.message ||
-          'Error updating password. Please try again.'
-      })
+          "Error updating password. Please try again.",
+      });
     }
-  }
+  };
 
-  const togglePasswordVisibility = field => {
-    setShowPasswords({ ...showPasswords, [field]: !showPasswords[field] })
-  }
-
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords({ ...showPasswords, [field]: !showPasswords[field] });
+  };
+  const fetchData = async () => {
+    const res = await apiClient.get(`/api/users/get-user`);
+    console.log(res.data);
+    return res.data.UserData;
+  };
+  const { data } = useQuery({
+    queryKey: ["userData"],
+    queryFn: fetchData,
+  });
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className='space-y-6 bg-white p-6 rounded-xl shadow-sm'
+      className="space-y-6 bg-white p-6 rounded-xl shadow-sm"
     >
-      <div className='flex justify-between items-center'>
-        <h2 className='text-2xl font-semibold text-gray-900'>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-900">
           Change Password
         </h2>
         <Link
-          to='/login/forgot-password'
-          className='text-sm font-medium text-customColorTertiarypop hover:text-customColorTertiary transition-colors duration-150 ease-in-out'
+          to="/login/forgot-password"
+          className="text-sm font-medium text-customColorTertiarypop hover:text-customColorTertiary transition-colors duration-150 ease-in-out"
         >
           Forgot password?
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className='space-y-6'>
-        {['currentPassword', 'newPassword', 'confirmPassword'].map(field => (
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {["currentPassword", "newPassword", "confirmPassword"].map((field) => (
           <div key={field}>
             <label
               htmlFor={field}
-              className='block text-sm font-medium text-gray-700 mb-1'
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              {field === 'currentPassword'
-                ? 'Current Password'
-                : field === 'newPassword'
-                  ? 'New Password'
-                  : 'Confirm New Password'}
+              {field === "currentPassword"
+                ? "Current Password"
+                : field === "newPassword"
+                  ? "New Password"
+                  : "Confirm New Password"}
             </label>
-            <div className='relative'>
+            <div className="relative">
               <input
-                type={showPasswords[field] ? 'text' : 'password'}
+                type={showPasswords[field] ? "text" : "password"}
                 id={field}
                 name={field}
                 value={formData[field]}
                 onChange={handleInputChange}
                 className={`block w-full px-3 py-2  ${
-                  errors[field] ? 'border-red-300' : 'border-gray-300'
+                  errors[field] ? "border-red-300" : "border-gray-300"
                 }   border border-customBorder  text-gray-900  focus:outline-none focus:ring-2 focus:ring-customColorTertiarypop focus:border-customColorSecondary transition ease-in-out duration-300  placeholder-opacity-75`}
               />
               <button
-                type='button'
+                type="button"
                 onClick={() => togglePasswordVisibility(field)}
-                className='absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500'
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
               >
                 {showPasswords[field] ? (
-                  <EyeOffIcon className='h-5 w-5' />
+                  <EyeOffIcon className="h-5 w-5" />
                 ) : (
-                  <EyeIcon className='h-5 w-5' />
+                  <EyeIcon className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -450,7 +458,7 @@ const ChangePassword = () => {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className='mt-2 text-sm text-red-600'
+                className="mt-2 text-sm text-red-600"
               >
                 {errors[field]}
               </motion.p>
@@ -462,23 +470,23 @@ const ChangePassword = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className='rounded-md bg-red-50 p-4'
+            className="rounded-md bg-red-50 p-4"
           >
-            <div className='flex'>
+            <div className="flex">
               <XCircleIcon
-                className='h-5 w-5 text-red-400'
-                aria-hidden='true'
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
               />
-              <p className='ml-3 text-sm text-red-700'>{errors.form}</p>
+              <p className="ml-3 text-sm text-red-700">{errors.form}</p>
             </div>
           </motion.div>
         )}
 
         <motion.button
-          type='submit'
+          type="submit"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-customtext-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop transition-colors duration-150 ease-in-out'
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop transition-colors duration-150 ease-in-out"
         >
           Update Password
         </motion.button>
@@ -488,158 +496,158 @@ const ChangePassword = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className='rounded-md bg-green-50 p-4'
+          className="rounded-md bg-green-50 p-4"
         >
-          <div className='flex'>
+          <div className="flex">
             <CheckCircleIcon
-              className='h-5 w-5 text-green-400'
-              aria-hidden='true'
+              className="h-5 w-5 text-green-400"
+              aria-hidden="true"
             />
-            <p className='ml-3 text-sm font-medium text-green-800'>
+            <p className="ml-3 text-sm font-medium text-green-800">
               {successMessage}
             </p>
           </div>
         </motion.div>
       )}
     </motion.div>
-  )
-}
+  );
+};
 
-export default ChangePassword
+export default ChangePassword;
 //
 //
 
 const AddressCard = ({ address, onEdit, onDelete }) => (
-  <div className='bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden'>
+  <div className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden">
     {address.isDefault && (
-      <div className='absolute top-0 right-0 '>
-        <span className='bg-green-500 text-white text-xs  font-bold px-3 py-1 rounded-bl-lg'>
+      <div className="absolute top-0 right-0 ">
+        <span className="bg-green-500 text-white text-xs  font-bold px-3 py-1 rounded-bl-lg">
           Default
         </span>
       </div>
     )}
-    <div className='flex flex-col space-y-2 mt-1'>
-      <div className='flex justify-between items-start'>
-        <h3 className='text-xl font-semibold text-gray-800'>{address.name}</h3>
-        <span className='text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded'>
+    <div className="flex flex-col space-y-2 mt-1">
+      <div className="flex justify-between items-start">
+        <h3 className="text-xl font-semibold text-gray-800">{address.name}</h3>
+        <span className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
           {address.addressName}
         </span>
       </div>
-      <p className='text-gray-600'>{address.address}</p>
-      <p className='text-gray-600'>{`${address.city}, ${address.state} ${address.postalCode}`}</p>
-      <p className='text-gray-600'>{address.phoneNumber}</p>
+      <p className="text-gray-600">{address.address}</p>
+      <p className="text-gray-600">{`${address.city}, ${address.state} ${address.postalCode}`}</p>
+      <p className="text-gray-600">{address.phoneNumber}</p>
     </div>
-    <div className='mt-4 flex justify-end space-x-2'>
+    <div className="mt-4 flex justify-end space-x-2">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onEdit(address)}
-        className='flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors duration-150'
+        className="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors duration-150"
       >
-        <PencilIcon className='h-4 w-4 mr-1' />
+        <PencilIcon className="h-4 w-4 mr-1" />
         Edit
       </motion.button>
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => onDelete(address._id)}
-        className='flex items-center px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors duration-150'
+        className="flex items-center px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors duration-150"
       >
-        <TrashIcon className='h-4 w-4 mr-1' />
+        <TrashIcon className="h-4 w-4 mr-1" />
         Delete
       </motion.button>
     </div>
   </div>
-)
+);
 
 function ManageAddress() {
-  const queryClient = useQueryClient()
-  const [alertModal, setAlertModal] = useState(false)
-  const [addressId, setAddressId] = useState('')
-  const [address, setAddress] = useState({})
-  const [addressModal, setAddressModal] = useState(false)
-  const [mode, setMode] = useState(false) // false mode is normal true is edit mode
+  const queryClient = useQueryClient();
+  const [alertModal, setAlertModal] = useState(false);
+  const [addressId, setAddressId] = useState("");
+  const [address, setAddress] = useState({});
+  const [addressModal, setAddressModal] = useState(false);
+  const [mode, setMode] = useState(false); // false mode is normal true is edit mode
   //
   const {
     data: addresses,
     isLoading,
-    isError
+    isError,
   } = useQuery({
-    queryKey: ['addresses'],
+    queryKey: ["addresses"],
     queryFn: async () => {
-      const response = await apiClient.get('/api/users/get-address')
-      return response.data.address
+      const response = await apiClient.get("/api/users/get-address");
+      return response.data.address;
     },
-    staleTime: Infinity
-  })
+    staleTime: Infinity,
+  });
 
   const deleteAddressMutation = useMutation({
-    mutationFn: addressId =>
+    mutationFn: (addressId) =>
       apiClient.delete(`/api/users/delete-address/${addressId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['addresses'] })
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    },
+  });
 
   const handleDeleteAddress = () => {
-    deleteAddressMutation.mutate(addressId)
-    setAlertModal(false)
-  }
-  const handleTriggerDelete = addressId => {
-    setAlertModal(true)
-    setAddressId(addressId)
-  }
+    deleteAddressMutation.mutate(addressId);
+    setAlertModal(false);
+  };
+  const handleTriggerDelete = (addressId) => {
+    setAlertModal(true);
+    setAddressId(addressId);
+  };
 
   const handleAddAddress = () => {
-    setAddressModal(true)
-    console.log('Add address triggered')
-  }
+    setAddressModal(true);
+    console.log("Add address triggered");
+  };
   const handleClose = () => {
-    setAddressModal(false)
-    setMode(false)
-    queryClient.invalidateQueries('addresses')
-  }
-  const handleEditAddress = address => {
-    setMode(true)
-    setAddress(address)
-    setAddressModal(true)
+    setAddressModal(false);
+    setMode(false);
+    queryClient.invalidateQueries("addresses");
+  };
+  const handleEditAddress = (address) => {
+    setMode(true);
+    setAddress(address);
+    setAddressModal(true);
 
     // Trigger your existing address editing model/modal here
-    console.log('Edit address triggered', address)
-  }
+    console.log("Edit address triggered", address);
+  };
 
   if (isLoading) {
-    return <div className='text-center'>Loading addresses...</div>
+    return <div className="text-center">Loading addresses...</div>;
   }
 
   if (isError) {
     return (
-      <div className='text-center text-red-600'>
+      <div className="text-center text-red-600">
         Error loading addresses. Please try again.
       </div>
-    )
+    );
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='flex justify-between items-center'>
-        <h2 className='text-2xl font-semibold text-gray-900'>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-900">
           Manage Addresses
         </h2>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleAddAddress}
-          className='inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-customtext-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop'
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-customtext-customColorTertiary hover:bg-customColorTertiaryLight focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-customColorTertiarypop"
         >
-          <PlusIcon className='h-5 w-5 mr-2' />
+          <PlusIcon className="h-5 w-5 mr-2" />
           Add New Address
         </motion.button>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <AnimatePresence>
-          {addresses.map(address => (
+          {addresses.map((address) => (
             <AddressCard
               key={address._id}
               address={address}
@@ -651,14 +659,14 @@ function ManageAddress() {
       </div>
 
       {addresses.length === 0 && (
-        <div className='text-center text-gray-500 mt-8'>
+        <div className="text-center text-gray-500 mt-8">
           You haven't added any addresses yet. Click the "Add New Address"
           button to Add.
         </div>
       )}
       <AlertDialog
         onCancel={() => {
-          setAlertModal(false)
+          setAlertModal(false);
         }}
         onConfirm={handleDeleteAddress}
         isOpen={alertModal}
@@ -670,16 +678,16 @@ function ManageAddress() {
         onAddAddress={handleEditAddress}
       />
     </div>
-  )
+  );
 }
 //
 
 //
 const AccountSettings = () => {
   return (
-    <div className='space-y-6'>
-      <h2 className='text-2xl font-semibold text-gray-900'>Account Settings</h2>
-      <div className='space-y-4'>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold text-gray-900">Account Settings</h2>
+      <div className="space-y-4">
         {/* <div>
           <h3 className='text-lg font-medium text-gray-900'>Notifications</h3>
           <div className='mt-2 space-y-2'>
@@ -708,18 +716,18 @@ const AccountSettings = () => {
         </select>
         </div> */}
         <div>
-          <h3 className='text-lg font-medium text-gray-900'>Delete Account</h3>
-          <p className='mt-1 text-sm text-gray-500'>
+          <h3 className="text-lg font-medium text-gray-900">Delete Account</h3>
+          <p className="mt-1 text-sm text-gray-500">
             Once you delete your account, there is no going back. Please be
             certain.
           </p>
-          <button className='mt-2 bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'>
+          <button className="mt-2 bg-red-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             Delete Account
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export { EditProfile, ChangePassword, ManageAddress, AccountSettings }
+export { EditProfile, ChangePassword, ManageAddress, AccountSettings };

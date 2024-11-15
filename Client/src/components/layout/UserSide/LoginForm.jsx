@@ -32,7 +32,7 @@ function LoginForm() {
       if (res.data.newUser) {
         dispatch(setSignUpStatus(true));
         navigate("/set-up", { replace: true });
-        setTimeout(() => dispatch(setUser(data)), 100);
+        setTimeout(() => dispatch(setUser(data)), 50);
       } else {
         toast.success("Login Successfull");
         dispatch(setUser(data));
