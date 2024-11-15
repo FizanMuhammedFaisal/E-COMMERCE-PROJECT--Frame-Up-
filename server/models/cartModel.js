@@ -1,5 +1,6 @@
-import mongoose from "mongoose"
-const Schema = mongoose.Schema
+import mongoose from "mongoose";
+
+const Schema = mongoose.Schema;
 //cart item sub schema
 const cartItemSchema = new Schema(
   {
@@ -15,7 +16,7 @@ const cartItemSchema = new Schema(
     },
   },
   { _id: false },
-)
+);
 
 const cartSchema = new Schema({
   userId: {
@@ -34,10 +35,10 @@ const cartSchema = new Schema({
   //   required: true,
   //   default: 0.0
   // },
-  discount: {
-    type: Number,
-    default: 0.0,
-  },
+  // discount: {
+  //   type: Number,
+  //   default: 0.0,
+  // },
   status: {
     type: String,
     enum: ["active", "completed", "abandoned"],
@@ -51,8 +52,8 @@ const cartSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-})
+});
 
-const Cart = mongoose.model("Cart", cartSchema)
+const Cart = mongoose.model("Cart", cartSchema);
 
-export default Cart
+export default Cart;

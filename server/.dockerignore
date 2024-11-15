@@ -1,0 +1,11 @@
+.env
+node_modules
+.DS_Store
+
+dist
+tmp
+build
+coverage
+.git
+.gitignore
+Frame Up Service Account.json
