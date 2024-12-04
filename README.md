@@ -1,6 +1,6 @@
 # 🎨 **FrameUp**
 
-A **luxury e-commerce platform** designed to sell exquisite paintings, blending artistry with technology. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, FrameUp offers a seamless and elegant shopping experience for art enthusiasts.
+A **Sample e-commerce platform** designed to sell exquisite paintings. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, FrameUp offers a seamless and elegant shopping experience for art enthusiasts.
 
 ---
 
