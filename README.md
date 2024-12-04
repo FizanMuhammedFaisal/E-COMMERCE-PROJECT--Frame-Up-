@@ -7,18 +7,6 @@ A **luxury e-commerce platform** designed to sell exquisite paintings, blending 
 ## 🌐 **Live Preview**  
 🔗 [frameup.fizanfaisal.tech](https://frameup.fizanfaisal.tech)  
 
----
-
-## 📖 **Table of Contents**  
-1. [About the Project](#about-the-project)  
-2. [Features](#features)  
-   - [User Side](#user-side)  
-   - [Admin Side](#admin-side)  
-3. [Tech Stack](#tech-stack)  
-4. [Folder Structure](#folder-structure)  
-5. [Future Enhancements](#future-enhancements)  
-6. [License](#license)  
-7. [Contributions](#contributions)  
 
 ---
 
